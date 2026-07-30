@@ -261,16 +261,50 @@
 }
 
 .completion-track {
+  position: relative;
   height: 4px;
-  margin: 14px 0 18px;
-  overflow: hidden;
+  margin: 14px 0 24px;
   background: rgb(169 175 200 / 12%);
 }
 
-.completion-track span {
+.completion-fill {
   display: block;
   height: 100%;
   background: var(--lime);
+}
+
+.completion-threshold {
+  position: absolute;
+  width: 1px;
+  height: 12px;
+  left: 80%;
+  top: -4px;
+  background: rgb(246 242 255 / 52%);
+}
+
+.completion-threshold small {
+  position: absolute;
+  top: 13px;
+  left: 50%;
+  color: var(--muted);
+  font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
+  font-size: 0.55rem;
+  font-weight: 800;
+  transform: translateX(-50%);
+}
+
+.finish-ready-badge {
+  display: inline-block;
+  margin-top: 6px;
+  color: var(--lime);
+  font-size: 0.56rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+}
+
+.stencil-panel.is-finish-ready {
+  border-color: rgb(181 245 90 / 30%);
+  box-shadow: inset 0 0 0 1px rgb(181 245 90 / 5%);
 }
 
 .stencil-frame {
@@ -364,6 +398,26 @@
   padding: 16px 20px;
 }
 
+.controls-card-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.help-button {
+  padding: 5px 8px;
+  border: 1px solid rgb(66 232 224 / 28%);
+  border-radius: 5px;
+  color: var(--cyan);
+  background: rgb(66 232 224 / 5%);
+  cursor: pointer;
+  font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
+  font-size: 0.6rem;
+  font-weight: 900;
+  letter-spacing: 0.07em;
+}
+
 .controls-card dl {
   display: grid;
   margin: 12px 0 0;
@@ -446,6 +500,87 @@
   padding-inline: 32px;
 }
 
+.help-overlay {
+  position: fixed;
+  z-index: 30;
+  display: grid;
+  inset: 0;
+  padding: 24px;
+  place-items: center;
+  background: rgb(7 9 17 / 92%);
+  backdrop-filter: blur(8px);
+}
+
+.help-dialog {
+  width: min(760px, 100%);
+  max-height: calc(100vh - 48px);
+  padding: 32px;
+  overflow-y: auto;
+  border: 1px solid rgb(66 232 224 / 34%);
+  border-radius: 12px;
+  background: #121525;
+  box-shadow:
+    12px 12px 0 rgb(66 232 224 / 7%),
+    0 24px 70px rgb(0 0 0 / 42%);
+}
+
+.help-dialog > h2 {
+  margin: 0;
+  font-size: 2rem;
+  letter-spacing: -0.04em;
+}
+
+.help-intro {
+  max-width: 650px;
+  margin: 12px 0 24px;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.help-columns {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 32px;
+}
+
+.help-section h3 {
+  margin: 0 0 14px;
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.help-controls {
+  display: grid;
+  margin: 0;
+  gap: 9px;
+}
+
+.help-controls > div {
+  display: grid;
+  min-height: 24px;
+  grid-template-columns: minmax(100px, 0.8fr) minmax(0, 1.2fr);
+  align-items: center;
+  gap: 12px;
+}
+
+.help-keys {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.help-controls dd {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.73rem;
+  line-height: 1.35;
+}
+
+.help-resume {
+  margin-top: 26px;
+}
+
 .sr-only {
   position: absolute;
   width: 1px;
@@ -473,5 +608,17 @@
 
   .controls-card {
     padding-block: 12px;
+  }
+
+  .help-dialog {
+    padding: 24px;
+  }
+
+  .help-intro {
+    margin-bottom: 18px;
+  }
+
+  .help-resume {
+    margin-top: 18px;
   }
 }

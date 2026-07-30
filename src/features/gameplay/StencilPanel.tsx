@@ -24,7 +24,10 @@ export function StencilPanel({
     canLockIntoStencil(state.stencil, state.stencilPiece);
 
   return (
-    <section className="stencil-panel" aria-labelledby="stencil-title">
+    <section
+      className={state.canFinish ? "stencil-panel is-finish-ready" : "stencil-panel"}
+      aria-labelledby="stencil-title"
+    >
       <div className="stencil-heading">
         <div>
           <p className="panel-kicker">02 / BUILD YOUR NAME</p>
@@ -35,6 +38,9 @@ export function StencilPanel({
                 ? `PLACE THE ${state.stencilPiece?.type ?? "PIECE"}`
                 : "NAME STENCIL"}
           </h2>
+          {state.canFinish && state.phase !== "won" && (
+            <span className="finish-ready-badge">◆ FINISH UNLOCKED</span>
+          )}
         </div>
         <strong className="completion-value">{completion.displayPercent}%</strong>
       </div>
@@ -46,8 +52,15 @@ export function StencilPanel({
         aria-valuemin={0}
         aria-valuemax={100}
         aria-valuenow={completion.displayPercent}
+        aria-valuetext={`${completion.displayPercent}% complete. Finish unlocks at 80%.`}
       >
-        <span style={{ width: `${completion.displayPercent}%` }} />
+        <span
+          className="completion-fill"
+          style={{ width: `${completion.displayPercent}%` }}
+        />
+        <span className="completion-threshold" aria-hidden="true">
+          <small>80%</small>
+        </span>
       </div>
 
       <StencilGrid
@@ -78,8 +91,8 @@ export function StencilPanel({
       ) : (
         <div className="stencil-actions">
           <p>
-            Route a piece while it is in the spawn zone. Each cleared row earns one
-            transfer.
+            Route a spawn-zone piece with one transfer. Finish unlocks at 80%; 100%
+            earns a perfect result.
           </p>
           <div>
             {state.canFinish && state.phase === "playing" && (
@@ -88,7 +101,7 @@ export function StencilPanel({
                 className="secondary-button finish-button"
                 onClick={onFinish}
               >
-                FINISH AT {completion.displayPercent}%
+                FINISH NAME · {completion.displayPercent}%
               </button>
             )}
             {state.phase === "playing" && (

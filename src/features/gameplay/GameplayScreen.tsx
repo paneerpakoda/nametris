@@ -18,6 +18,7 @@ import {
   type RunResult,
 } from "../../game/engine/result";
 import { BoardGrid, PiecePreview } from "./BoardGrid";
+import { GameHelpDialog } from "./GameHelpDialog";
 import { GameSidebar } from "./GameSidebar";
 import { RunGuidance } from "./RunGuidance";
 import "../../styles/gameplay.css";
@@ -73,6 +74,7 @@ export function GameplayScreen({
     phase: "playing" as BoardSession["phase"],
   });
   const [announcement, setAnnouncement] = useState("");
+  const [helpOpen, setHelpOpen] = useState(false);
   const ghostPiece = getGhostPiece(state.board, state.activePiece);
 
   useEffect(() => {
@@ -189,6 +191,17 @@ export function GameplayScreen({
     dispatch(action);
   }
 
+  function openHelp() {
+    dispatch({ type: "pause", reason: "player" });
+    setHelpOpen(true);
+  }
+
+  function closeHelp() {
+    setHelpOpen(false);
+    dispatch({ type: "resume" });
+    window.requestAnimationFrame(() => gameRef.current?.focus());
+  }
+
   return (
     <main className="game-shell">
       <header className="game-header">
@@ -247,9 +260,12 @@ export function GameplayScreen({
           onStencilLock={() => dispatch({ type: "stencil-lock" })}
           onStencilCancel={() => dispatch({ type: "stencil-cancel" })}
           onFinish={() => dispatch({ type: "finish-run" })}
+          onHelp={openHelp}
         />
 
-        {state.phase === "paused" && (
+        {helpOpen && <GameHelpDialog onClose={closeHelp} />}
+
+        {state.phase === "paused" && !helpOpen && (
           <div className="game-overlay" role="dialog" aria-modal="true">
             <p className="eyebrow">TAKE A BREATH</p>
             <h2>Game paused</h2>

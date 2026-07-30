@@ -9,6 +9,7 @@ interface GameSidebarProps {
   readonly onStencilLock: () => void;
   readonly onStencilCancel: () => void;
   readonly onFinish: () => void;
+  readonly onHelp: () => void;
 }
 
 export function GameSidebar({
@@ -17,6 +18,7 @@ export function GameSidebar({
   onStencilLock,
   onStencilCancel,
   onFinish,
+  onHelp,
 }: GameSidebarProps) {
   return (
     <aside className="game-sidebar">
@@ -46,7 +48,17 @@ export function GameSidebar({
       />
 
       <section className="controls-card" aria-labelledby="controls-title">
-        <h2 id="controls-title">CONTROLS</h2>
+        <div className="controls-card-heading">
+          <h2 id="controls-title">CONTROLS</h2>
+          <button
+            type="button"
+            className="help-button"
+            aria-label="Open controls help"
+            onClick={onHelp}
+          >
+            ? HELP
+          </button>
+        </div>
         <dl>
           <div>
             <dt>Move</dt>

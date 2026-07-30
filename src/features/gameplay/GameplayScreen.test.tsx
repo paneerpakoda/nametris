@@ -66,6 +66,29 @@ describe("GameplayScreen", () => {
     expect(screen.queryByText("Game paused")).not.toBeInTheDocument();
   });
 
+  it("pauses for controls help and resumes the exact placement mode", async () => {
+    const user = userEvent.setup();
+    const initialSession = {
+      ...createBoardSession(["O", "I", "T", "J"]),
+      transferCount: 1,
+    };
+
+    render(<GameplayScreen initialSession={initialSession} />);
+    const game = screen.getByRole("application", { name: "Nametris game" });
+    fireEvent.keyDown(game, { key: "n" });
+
+    await user.click(screen.getByRole("button", { name: "Open controls help" }));
+    expect(
+      screen.getByRole("dialog", { name: "How to play Nametris" }),
+    ).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Resume game" }));
+    expect(
+      screen.queryByRole("dialog", { name: "How to play Nametris" }),
+    ).not.toBeInTheDocument();
+    expect(screen.getByText("PLACE THE O")).toBeInTheDocument();
+  });
+
   it("routes with N, shows stencil controls, and locks with Enter", () => {
     const initialSession = {
       ...createBoardSession(["O", "I", "T", "J"]),
@@ -155,7 +178,10 @@ describe("GameplayScreen", () => {
 
     render(<GameplayScreen initialSession={initialSession} onWon={onWon} />);
     const game = screen.getByRole("application", { name: "Nametris game" });
-    const finish = screen.getByRole("button", { name: "FINISH AT 80%" });
+    const finish = screen.getByRole("button", { name: "FINISH NAME · 80%" });
+    expect(
+      screen.getByRole("progressbar", { name: "Name completion" }),
+    ).toHaveAttribute("aria-valuetext", "80% complete. Finish unlocks at 80%.");
 
     fireEvent.keyDown(game, { key: " " });
     expect(Number(screen.getByTestId("score").textContent)).toBeGreaterThan(0);
