@@ -1,7 +1,10 @@
 import { useMemo, type CSSProperties } from "react";
 
 import { stencilCellKey } from "../../game/glyphs/alphabet";
-import { canLockIntoStencil, type StencilState } from "../../game/engine/stencil";
+import {
+  getStencilPieceProjection,
+  type StencilState,
+} from "../../game/engine/stencil";
 import { getPieceCells } from "../../game/engine/pieces";
 import type { ActivePiece } from "../../game/model/types";
 
@@ -21,8 +24,13 @@ export function StencilGrid({ name, stencil, activePiece }: StencilGridProps) {
       ),
     [activePiece],
   );
-  const previewIsValid =
-    activePiece !== null && canLockIntoStencil(stencil, activePiece);
+  const keptCellKeys = useMemo(
+    () =>
+      activePiece === null
+        ? new Set<string>()
+        : getStencilPieceProjection(stencil, activePiece).keptCellKeys,
+    [activePiece, stencil],
+  );
   const style = {
     "--stencil-columns": stencil.columns,
   } as CSSProperties;
@@ -47,9 +55,9 @@ export function StencilGrid({ name, stencil, activePiece }: StencilGridProps) {
           const status = lockedPiece
             ? "filled"
             : isPreview
-              ? previewIsValid
+              ? keptCellKeys.has(key)
                 ? "preview-valid"
-                : "preview-invalid"
+                : "preview-trimmed"
               : isMaskCell
                 ? "open"
                 : "void";

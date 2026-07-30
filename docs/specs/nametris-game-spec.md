@@ -14,7 +14,7 @@ The product intent is confirmed. The product owner approved the following implem
 4. Render both boards as semantic DOM/CSS grids rather than `<canvas>`.
 5. Use the modern seven-bag piece generator and a practical subset of Super Rotation System wall kicks.
 6. Award one transfer per cleared line, so a two-, three-, or four-line clear earns two, three, or four transfers.
-7. Let the player route a spawned piece while it remains in the board's spawn zone. Pressing the route control pauses gravity and enters stencil-placement mode.
+7. Let the player route a piece while any part remains above a visible deadline after the top seven board rows. Pressing the route control pauses gravity and enters stencil-placement mode.
 8. Use free four-direction grid movement without gravity in the stencil.
 9. Automatically finish the run at 100%.
 10. Do not include piece hold, audio, a leaderboard, or saved game restoration in the first release.
@@ -200,13 +200,14 @@ Scoring constants must live in one configuration module and be easy to tune afte
 - A successful stencil lock spends exactly one transfer.
 - Canceling returns the same piece type to its normal spawn state and spends nothing.
 - The board does not advance to the next piece until the routed piece is locked into the stencil.
-- If no legal stencil placement exists, make cancel prominent; never consume the transfer automatically.
+- A lock is available whenever at least one piece cell overlaps an open stencil cell. Cells outside the mask or over filled cells are trimmed.
+- A lock that would add no new stencil cells is rejected and spends nothing.
 
-### Proposed routing window
+### Routing window
 
-The route control remains available while the active piece overlaps the spawn zone. Once it leaves that zone, it is committed to the normal board. This provides a meaningful decision without pausing every spawn.
+Shade the top seven visible board rows and draw a labeled route-deadline line beneath them. The route control remains available while any part of the active piece is above that line. Once the whole piece crosses it, the piece is committed to the normal board.
 
-This rule must be usability-tested. If players consistently miss the decision, revise the window before changing the transfer economy.
+This gives the player several visible gravity steps to make the decision and makes the remaining window spatially predictable at every level.
 
 ## Stencil Rules
 
@@ -238,11 +239,11 @@ Visual legibility and tileability are both acceptance requirements.
 - Stencil pieces have no gravity.
 - Allow movement up, down, left, and right.
 - Allow clockwise and counter-clockwise rotation.
-- A legal lock requires all four piece cells to:
-  - lie inside fillable stencil cells, and
-  - avoid already filled stencil cells.
-- Show a valid/invalid preview before lock.
-- Ignore or visibly reject an invalid lock; do not spend a transfer.
+- Keep piece cells that overlap open fillable stencil cells.
+- Trim piece cells that lie outside the mask or overlap already-filled cells.
+- Show kept and trimmed cells as distinct previews and state both counts before lock.
+- Enable lock when at least one new stencil cell will be filled.
+- Reject a zero-progress lock and do not spend a transfer.
 - Canceling is always available before lock.
 - Once locked, a stencil piece cannot be removed in version one.
 
@@ -728,10 +729,10 @@ Use Playwright with deterministic test hooks/seeds for:
 ### Transfers and stencil
 
 - Every cleared row awards one transfer.
-- An eligible spawned piece can be routed into the stencil.
+- A piece can be routed while any part is above the visible seven-row deadline.
 - Normal-board gravity pauses during stencil placement.
-- Legal stencil locks use the exact piece and spend one transfer.
-- Invalid locks spend nothing.
+- Stencil locks keep open-mask cells, trim the rest, and spend one transfer.
+- Zero-progress locks spend nothing.
 - Cancel returns the same piece to the board and spends nothing.
 - Every valid 2–10-letter name is capable of reaching 100%.
 

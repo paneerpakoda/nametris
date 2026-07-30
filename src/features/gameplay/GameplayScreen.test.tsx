@@ -112,6 +112,27 @@ describe("GameplayScreen", () => {
     expect(screen.getByTestId("transfers")).toHaveTextContent("0");
   });
 
+  it("locks the usable part of a piece and explains what will be trimmed", () => {
+    const initialSession = {
+      ...createBoardSession(["O", "I", "T", "J"]),
+      transferCount: 1,
+      stencil: createStencilState(new Set(["0:0"]), 2, 2),
+    };
+
+    render(<GameplayScreen initialSession={initialSession} />);
+    const game = screen.getByRole("application", { name: "Nametris game" });
+
+    fireEvent.keyDown(game, { key: "n" });
+
+    expect(screen.getByText("1 CELL KEPT · 3 TRIMMED")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "LOCK & TRIM · ENTER" })).toBeEnabled();
+
+    fireEvent.keyDown(game, { key: "Enter" });
+
+    expect(screen.getByText("NAME COMPLETE")).toBeInTheDocument();
+    expect(screen.getByTestId("transfers")).toHaveTextContent("0");
+  });
+
   it("reports one frozen success result when a run is won", async () => {
     const onWon = vi.fn();
     const initialSession = {

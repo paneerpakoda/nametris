@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import type { ActivePiece } from "../model/types";
+import { getPieceCells } from "./pieces";
 import {
   canLockIntoStencil,
   createStencilState,
@@ -35,13 +36,27 @@ describe("stencil placement", () => {
     });
   });
 
-  it("rejects a piece extending outside the mask", () => {
+  it("clips cells outside the mask and locks the part that fits", () => {
     const state = createStencilState(squareMask, 2, 2);
-    const invalid = { ...squarePiece, column: 0 };
-    const result = lockIntoStencil(state, invalid);
+    const partial = { ...squarePiece, column: 0 };
+    const result = lockIntoStencil(state, partial);
 
-    expect(canLockIntoStencil(state, invalid)).toBe(false);
-    expect(result).toEqual({ state, locked: false });
+    expect(canLockIntoStencil(state, partial)).toBe(true);
+    expect(result.locked).toBe(true);
+    expect([...result.state.filledCells.keys()].sort()).toEqual(["0:1", "1:1"]);
+  });
+
+  it("trims overlap and adds any remaining open stencil cells", () => {
+    const state = {
+      ...createStencilState(squareMask, 2, 2),
+      filledCells: new Map([["0:0", "T" as const]]),
+    };
+    const result = lockIntoStencil(state, squarePiece);
+
+    expect(canLockIntoStencil(state, squarePiece)).toBe(true);
+    expect(result.locked).toBe(true);
+    expect(result.state.filledCells.size).toBe(4);
+    expect(result.state.filledCells.get("0:0")).toBe("T");
   });
 
   it("rejects overlap without changing the filled cells", () => {
@@ -92,7 +107,7 @@ describe("stencil placement", () => {
     });
   });
 
-  it("finds a legal rotation and placement for an exact piece type", () => {
+  it("finds the placement with the largest usable overlap", () => {
     const lineState = createStencilState(new Set(["0:0", "0:1", "0:2", "0:3"]), 1, 4);
 
     expect(findFirstLegalStencilPlacement(lineState, "I")).toEqual({
@@ -101,10 +116,15 @@ describe("stencil placement", () => {
       row: -1,
       column: 0,
     });
-    expect(findFirstLegalStencilPlacement(lineState, "O")).toBeNull();
+    expect(findFirstLegalStencilPlacement(lineState, "O")).toEqual({
+      type: "O",
+      rotation: 0,
+      row: -1,
+      column: -1,
+    });
   });
 
-  it("keeps movement and rotation inside the stencil canvas", () => {
+  it("keeps at least one cell visible while allowing clipped overhang", () => {
     const state = createStencilState(
       new Set(
         Array.from(
@@ -119,8 +139,11 @@ describe("stencil placement", () => {
     const moved = moveStencilPiece(state, active, 99, 99);
     const rotated = rotateStencilPiece(state, moved, "counterclockwise");
 
-    expect(moved.row).toBeLessThanOrEqual(2);
-    expect(moved.column).toBeLessThanOrEqual(1);
+    expect(
+      getPieceCells(moved).some(
+        ({ row, column }) => row >= 0 && row < 4 && column >= 0 && column < 4,
+      ),
+    ).toBe(true);
     expect(rotated.rotation).toBe(3);
   });
 });

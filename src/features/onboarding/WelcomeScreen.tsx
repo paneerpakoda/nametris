@@ -45,7 +45,7 @@ export function WelcomeScreen({ onStart }: WelcomeScreenProps) {
             </li>
             <li>
               <strong>Route</strong>
-              <span>Send an eligible spawned piece into your stencil.</span>
+              <span>Press N before a piece crosses the visible route line.</span>
             </li>
             <li>
               <strong>Risk</strong>
@@ -90,8 +90,8 @@ export function WelcomeScreen({ onStart }: WelcomeScreenProps) {
           <details className="controls-summary">
             <summary>View keyboard controls</summary>
             <p>
-              Arrow keys move. Space hard-drops. X and Z rotate. N routes an eligible
-              piece to your name.
+              Arrow keys move. Space hard-drops. X and Z rotate. N routes before the
+              cyan deadline; excess stencil cells are trimmed.
             </p>
           </details>
         </form>

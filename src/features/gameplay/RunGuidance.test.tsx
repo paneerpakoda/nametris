@@ -26,7 +26,7 @@ describe("RunGuidance", () => {
         }}
       />,
     );
-    expect(screen.getByText("STENCIL MODE → PLACE, LOCK, OR CANCEL")).toBeVisible();
+    expect(screen.getByText("STENCIL MODE → PLACE, TRIM, OR CANCEL")).toBeVisible();
 
     await user.click(screen.getByRole("button", { name: "Dismiss guidance" }));
     expect(screen.queryByText(/STENCIL MODE/)).not.toBeInTheDocument();

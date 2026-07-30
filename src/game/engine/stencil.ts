@@ -21,6 +21,11 @@ export interface StencilLockResult {
   readonly locked: boolean;
 }
 
+export interface StencilPieceProjection {
+  readonly keptCellKeys: ReadonlySet<string>;
+  readonly trimmedCellKeys: ReadonlySet<string>;
+}
+
 export function createStencilState(
   mask: ReadonlySet<string>,
   rows: number,
@@ -34,11 +39,27 @@ export function createStencilState(
   };
 }
 
-export function canLockIntoStencil(state: StencilState, piece: ActivePiece): boolean {
-  return getPieceCells(piece).every((cell) => {
+export function getStencilPieceProjection(
+  state: StencilState,
+  piece: ActivePiece,
+): StencilPieceProjection {
+  const keptCellKeys = new Set<string>();
+  const trimmedCellKeys = new Set<string>();
+
+  getPieceCells(piece).forEach((cell) => {
     const key = stencilCellKey(cell);
-    return state.mask.has(key) && !state.filledCells.has(key);
+    if (state.mask.has(key) && !state.filledCells.has(key)) {
+      keptCellKeys.add(key);
+    } else {
+      trimmedCellKeys.add(key);
+    }
   });
+
+  return { keptCellKeys, trimmedCellKeys };
+}
+
+export function canLockIntoStencil(state: StencilState, piece: ActivePiece): boolean {
+  return getStencilPieceProjection(state, piece).keptCellKeys.size > 0;
 }
 
 export function lockIntoStencil(
@@ -50,8 +71,8 @@ export function lockIntoStencil(
   }
 
   const filledCells = new Map(state.filledCells);
-  getPieceCells(piece).forEach((cell) => {
-    filledCells.set(stencilCellKey(cell), piece.type);
+  getStencilPieceProjection(state, piece).keptCellKeys.forEach((key) => {
+    filledCells.set(key, piece.type);
   });
 
   return {
@@ -84,10 +105,10 @@ function getOriginBounds(
   const maximumColumn = Math.max(...cells.map(({ column }) => column));
 
   return {
-    minimumRow: minimumRow === 0 ? 0 : -minimumRow,
-    maximumRow: state.rows - 1 - maximumRow,
-    minimumColumn: minimumColumn === 0 ? 0 : -minimumColumn,
-    maximumColumn: state.columns - 1 - maximumColumn,
+    minimumRow: -maximumRow,
+    maximumRow: state.rows - 1 - minimumRow,
+    minimumColumn: -maximumColumn,
+    maximumColumn: state.columns - 1 - minimumColumn,
   };
 }
 
@@ -95,6 +116,9 @@ export function findFirstLegalStencilPlacement(
   state: StencilState,
   type: PieceType,
 ): ActivePiece | null {
+  let bestPlacement: ActivePiece | null = null;
+  let bestKeptCellCount = 0;
+
   for (const rotation of rotations) {
     const bounds = getOriginBounds(state, { type, rotation });
 
@@ -105,20 +129,34 @@ export function findFirstLegalStencilPlacement(
         column += 1
       ) {
         const candidate = { type, rotation, row, column };
-        if (canLockIntoStencil(state, candidate)) {
+        const keptCellCount = getStencilPieceProjection(state, candidate).keptCellKeys
+          .size;
+
+        if (keptCellCount > bestKeptCellCount) {
+          bestPlacement = candidate;
+          bestKeptCellCount = keptCellCount;
+        }
+
+        if (keptCellCount === 4) {
           return candidate;
         }
       }
     }
   }
 
-  return null;
+  return bestPlacement;
+}
+
+function pieceTouchesStencilCanvas(state: StencilState, piece: ActivePiece): boolean {
+  return getPieceCells(piece).some(
+    ({ row, column }) =>
+      row >= 0 && row < state.rows && column >= 0 && column < state.columns,
+  );
 }
 
 function clampPieceToStencil(state: StencilState, piece: ActivePiece): ActivePiece {
   const bounds = getOriginBounds(state, piece);
-
-  return {
+  const clampedPiece = {
     ...piece,
     row:
       bounds.maximumRow < bounds.minimumRow
@@ -129,6 +167,35 @@ function clampPieceToStencil(state: StencilState, piece: ActivePiece): ActivePie
         ? bounds.minimumColumn
         : Math.min(bounds.maximumColumn, Math.max(bounds.minimumColumn, piece.column)),
   };
+
+  if (pieceTouchesStencilCanvas(state, clampedPiece)) {
+    return clampedPiece;
+  }
+
+  let nearestVisiblePiece = clampedPiece;
+  let nearestDistance = Number.POSITIVE_INFINITY;
+
+  for (let row = bounds.minimumRow; row <= bounds.maximumRow; row += 1) {
+    for (
+      let column = bounds.minimumColumn;
+      column <= bounds.maximumColumn;
+      column += 1
+    ) {
+      const candidate = { ...piece, row, column };
+      if (!pieceTouchesStencilCanvas(state, candidate)) {
+        continue;
+      }
+
+      const distance =
+        Math.abs(piece.row - candidate.row) + Math.abs(piece.column - candidate.column);
+      if (distance < nearestDistance) {
+        nearestVisiblePiece = candidate;
+        nearestDistance = distance;
+      }
+    }
+  }
+
+  return nearestVisiblePiece;
 }
 
 export function createStencilPlacementPiece(

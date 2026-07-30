@@ -1,4 +1,7 @@
-import { canLockIntoStencil, getStencilCompletion } from "../../game/engine/stencil";
+import {
+  getStencilCompletion,
+  getStencilPieceProjection,
+} from "../../game/engine/stencil";
 import { canRouteActivePiece, type BoardSession } from "../../game/engine/session";
 import { StencilGrid } from "./StencilGrid";
 
@@ -19,9 +22,14 @@ export function StencilPanel({
 }: StencilPanelProps) {
   const completion = getStencilCompletion(state.stencil);
   const isPlacing = state.phase === "placing-stencil";
-  const canLock =
-    state.stencilPiece !== null &&
-    canLockIntoStencil(state.stencil, state.stencilPiece);
+  const projection =
+    state.stencilPiece === null
+      ? null
+      : getStencilPieceProjection(state.stencil, state.stencilPiece);
+  const keptCellCount = projection?.keptCellKeys.size ?? 0;
+  const trimmedCellCount = projection?.trimmedCellKeys.size ?? 0;
+  const canLock = keptCellCount > 0;
+  const canRoute = canRouteActivePiece(state);
 
   return (
     <section
@@ -71,10 +79,13 @@ export function StencilPanel({
 
       {isPlacing ? (
         <div className="stencil-actions">
-          <p>
-            Move in four directions. Rotate with X/Z. A transfer is spent only on lock.
-          </p>
-          <div>
+          <div className="placement-guidance" aria-live="polite">
+            <p>{`${keptCellCount} ${
+              keptCellCount === 1 ? "CELL" : "CELLS"
+            } KEPT · ${trimmedCellCount} TRIMMED`}</p>
+            <small>Outside or occupied cells disappear when you lock.</small>
+          </div>
+          <div className="stencil-action-buttons">
             <button type="button" className="secondary-button" onClick={onCancel}>
               CANCEL · ESC
             </button>
@@ -84,17 +95,17 @@ export function StencilPanel({
               onClick={onLock}
               disabled={!canLock}
             >
-              LOCK · ENTER
+              {trimmedCellCount > 0 ? "LOCK & TRIM · ENTER" : "LOCK · ENTER"}
             </button>
           </div>
         </div>
       ) : (
         <div className="stencil-actions">
           <p>
-            Route a spawn-zone piece with one transfer. Finish unlocks at 80%; 100%
-            earns a perfect result.
+            Spend one transfer while any part of the piece is above the board’s route
+            deadline. Finish unlocks at 80%.
           </p>
-          <div>
+          <div className="stencil-action-buttons">
             {state.canFinish && state.phase === "playing" && (
               <button
                 type="button"
@@ -110,9 +121,13 @@ export function StencilPanel({
                 className="route-button"
                 aria-label={`Route ${state.activePiece.type} to stencil`}
                 onClick={onRoute}
-                disabled={!canRouteActivePiece(state)}
+                disabled={!canRoute}
               >
-                ROUTE {state.activePiece.type} · N
+                {state.transferCount === 0
+                  ? "EARN A TRANSFER"
+                  : canRoute
+                    ? `ROUTE ${state.activePiece.type} · N`
+                    : "ROUTE WINDOW PASSED"}
               </button>
             )}
           </div>

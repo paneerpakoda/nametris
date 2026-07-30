@@ -1,5 +1,6 @@
-import { useMemo } from "react";
+import { useMemo, type CSSProperties } from "react";
 
+import { routeZoneVisibleRows } from "../../game/config/gameplay";
 import { HIDDEN_BOARD_ROWS, VISIBLE_BOARD_HEIGHT } from "../../game/engine/board";
 import { getPieceCells } from "../../game/engine/pieces";
 import type { ActivePiece, Board, PieceType } from "../../game/model/types";
@@ -27,16 +28,26 @@ export function BoardGrid({ board, activePiece, ghostPiece }: BoardGridProps) {
       new Set(getPieceCells(ghostPiece).map(({ row, column }) => cellKey(row, column))),
     [ghostPiece],
   );
+  const boardStyle = {
+    "--route-zone-end": `${(routeZoneVisibleRows / VISIBLE_BOARD_HEIGHT) * 100}%`,
+  } as CSSProperties;
 
   return (
     <div className="board-frame">
       <div
         className="board-grid"
+        style={boardStyle}
         role="grid"
         aria-label="Normal Tetris board"
         aria-rowcount={VISIBLE_BOARD_HEIGHT}
         aria-colcount={10}
       >
+        <span className="transfer-route-zone" aria-hidden="true">
+          ROUTE ZONE · TOP {routeZoneVisibleRows} ROWS
+        </span>
+        <span className="transfer-route-deadline" aria-hidden="true">
+          <small>ROUTE DEADLINE</small>
+        </span>
         {board.slice(HIDDEN_BOARD_ROWS).map((row, visibleRow) =>
           row.map((lockedPiece, column) => {
             const boardRow = visibleRow + HIDDEN_BOARD_ROWS;

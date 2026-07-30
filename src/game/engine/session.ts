@@ -2,6 +2,7 @@ import {
   getGravityMilliseconds,
   lockDelayMilliseconds,
   lockResetLimit,
+  routeZoneVisibleRows,
   spawnColumn,
   spawnRow,
 } from "../config/gameplay";
@@ -264,10 +265,12 @@ function tickPlayingSession(
 }
 
 export function canRouteActivePiece(state: BoardSession): boolean {
+  const routeDeadlineRow = HIDDEN_BOARD_ROWS + routeZoneVisibleRows;
+
   return (
     state.phase === "playing" &&
     state.transferCount > 0 &&
-    getPieceCells(state.activePiece).some(({ row }) => row < HIDDEN_BOARD_ROWS)
+    getPieceCells(state.activePiece).some(({ row }) => row < routeDeadlineRow)
   );
 }
 

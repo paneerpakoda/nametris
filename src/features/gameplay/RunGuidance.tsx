@@ -18,11 +18,11 @@ const guidanceCopy: Readonly<
   },
   transfer: {
     title: "TRANSFER READY → ROUTE WITH N",
-    detail: "Route while the active piece is still in the spawn zone.",
+    detail: "Press N before the active piece crosses the cyan route deadline.",
   },
   stencil: {
-    title: "STENCIL MODE → PLACE, LOCK, OR CANCEL",
-    detail: "Arrows/WASD move, X/Z rotate, Enter locks, Escape cancels.",
+    title: "STENCIL MODE → PLACE, TRIM, OR CANCEL",
+    detail: "Move and rotate freely. Outside cells are trimmed when you lock.",
   },
 };
 

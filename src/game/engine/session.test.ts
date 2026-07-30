@@ -2,7 +2,12 @@ import { describe, expect, it } from "vitest";
 
 import type { PieceType } from "../model/types";
 import { BOARD_HEIGHT } from "./board";
-import { createBoardSession, getGhostPiece, reduceBoardSession } from "./session";
+import {
+  canRouteActivePiece,
+  createBoardSession,
+  getGhostPiece,
+  reduceBoardSession,
+} from "./session";
 import { createStencilState, getStencilCompletion } from "./stencil";
 
 const queue: readonly PieceType[] = ["T", "I", "O", "J", "L", "S", "Z"];
@@ -313,17 +318,18 @@ describe("piece routing", () => {
     expect(locked.phase).toBe("won");
   });
 
-  it("ignores an invalid stencil lock without spending a transfer", () => {
+  it("locks a clipped piece and spends one transfer when any cell fits", () => {
     const state = {
       ...createBoardSession(["O", "I", "T"]),
       transferCount: 1,
       stencil: createStencilState(new Set(["0:0", "0:1", "0:2", "0:3"]), 1, 4),
     };
     const placing = reduceBoardSession(state, { type: "route-to-stencil" });
-    const invalid = reduceBoardSession(placing, { type: "stencil-lock" });
+    const locked = reduceBoardSession(placing, { type: "stencil-lock" });
 
-    expect(invalid).toBe(placing);
-    expect(invalid.transferCount).toBe(1);
+    expect(locked).not.toBe(placing);
+    expect(locked.transferCount).toBe(0);
+    expect(locked.stencil.filledCells.size).toBe(2);
   });
 
   it("keeps gameplay active when a legal lock reaches exact 80%", () => {
@@ -407,22 +413,28 @@ describe("piece routing", () => {
     expect(timed.activeMilliseconds).toBe(200);
   });
 
-  it("does not route without a transfer or after leaving the spawn zone", () => {
+  it("routes through the top seven visible rows and expires at the marked line", () => {
     const state = createBoardSession(queue);
     const noTransfer = reduceBoardSession(state, {
       type: "route-to-stencil",
     });
-    const tooLate = reduceBoardSession(
-      {
-        ...state,
-        transferCount: 1,
-        activePiece: { ...state.activePiece, row: 3 },
-      },
-      { type: "route-to-stencil" },
-    );
+    const transferReady = { ...state, transferCount: 1 };
+    const atLastEligibleRow = {
+      ...transferReady,
+      activePiece: { ...state.activePiece, row: 8 },
+    };
+    const tooLate = {
+      ...transferReady,
+      activePiece: { ...state.activePiece, row: 9 },
+    };
 
     expect(noTransfer).toBe(state);
-    expect(tooLate.phase).toBe("playing");
+    expect(canRouteActivePiece(atLastEligibleRow)).toBe(true);
+    expect(canRouteActivePiece(tooLate)).toBe(false);
+    expect(
+      reduceBoardSession(atLastEligibleRow, { type: "route-to-stencil" }).phase,
+    ).toBe("placing-stencil");
+    expect(reduceBoardSession(tooLate, { type: "route-to-stencil" })).toBe(tooLate);
   });
 
   it("fails safe if stencil mode has no active stencil piece", () => {
