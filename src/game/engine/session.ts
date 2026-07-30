@@ -7,7 +7,12 @@ import {
 } from "../config/gameplay";
 import { composeNameMask } from "../glyphs/alphabet";
 import type { ActivePiece, Board, PieceType } from "../model/types";
-import { HIDDEN_BOARD_ROWS, createEmptyBoard, lockAndClearPiece } from "./board";
+import {
+  HIDDEN_BOARD_ROWS,
+  createEmptyBoard,
+  getBoardStackHeight,
+  lockAndClearPiece,
+} from "./board";
 import { canPlacePiece, movePiece } from "./collision";
 import { getPieceCells } from "./pieces";
 import { rotatePiece, type RotationDirection } from "./rotation";
@@ -39,6 +44,8 @@ export interface BoardSession {
   readonly score: number;
   readonly linesCleared: number;
   readonly level: number;
+  readonly fourLineClears: number;
+  readonly maximumBoardStackHeight: number;
   readonly transferCount: number;
   readonly stencil: StencilState;
   readonly stencilPiece: ActivePiece | null;
@@ -112,6 +119,8 @@ export function createGameSession(
     score: 0,
     linesCleared: 0,
     level: 1,
+    fourLineClears: 0,
+    maximumBoardStackHeight: 0,
     transferCount: 0,
     stencil: createStencilState(mask.cells, mask.rows, mask.columns),
     stencilPiece: null,
@@ -184,6 +193,11 @@ function lockActivePiece(state: BoardSession, extraScore = 0): BoardSession {
     score: state.score + extraScore + lockResult.scoreEarned,
     linesCleared,
     level: getLevel(linesCleared),
+    fourLineClears: state.fourLineClears + (lockResult.linesCleared === 4 ? 1 : 0),
+    maximumBoardStackHeight: Math.max(
+      state.maximumBoardStackHeight,
+      getBoardStackHeight(lockResult.board),
+    ),
     transferCount: state.transferCount + lockResult.transfersEarned,
     gravityAccumulatorMilliseconds: 0,
     lockAccumulatorMilliseconds: 0,

@@ -13,6 +13,14 @@ export function createEmptyBoard(): Board {
   );
 }
 
+export function getBoardStackHeight(board: Board): number {
+  const highestOccupiedRow = board.findIndex((row) =>
+    row.some((cell) => cell !== null),
+  );
+
+  return highestOccupiedRow === -1 ? 0 : BOARD_HEIGHT - highestOccupiedRow;
+}
+
 export interface LockResult {
   readonly board: Board;
   readonly linesCleared: number;

@@ -43,6 +43,31 @@ describe("normal-board session", () => {
         .slice(0, BOARD_HEIGHT)
         .some((row) => row.some((cell) => cell === "T")),
     ).toBe(true);
+    expect(dropped.maximumBoardStackHeight).toBeGreaterThan(0);
+  });
+
+  it("captures a four-line clear for final performance metrics", () => {
+    const state = createBoardSession(["I", "O", "T"]);
+    const board = state.board.map((row, rowIndex) =>
+      row.map((cell, columnIndex) =>
+        rowIndex >= BOARD_HEIGHT - 4 && columnIndex !== 4 ? "J" : cell,
+      ),
+    );
+    const cleared = reduceBoardSession(
+      {
+        ...state,
+        board,
+        activePiece: {
+          type: "I" as const,
+          rotation: 1 as const,
+          row: BOARD_HEIGHT - 4,
+          column: 2,
+        },
+      },
+      { type: "hard-drop" },
+    );
+
+    expect(cleared.fourLineClears).toBe(1);
   });
 
   it("shows the active piece at its landing position as the ghost", () => {

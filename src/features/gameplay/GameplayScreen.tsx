@@ -8,6 +8,12 @@ import {
   type BoardSession,
 } from "../../game/engine/session";
 import { getGameAction } from "../../game/runtime/input";
+import {
+  createLossResult,
+  createRunResult,
+  type LossResult,
+  type RunResult,
+} from "../../game/engine/result";
 import { BoardGrid, PiecePreview } from "./BoardGrid";
 import { GameSidebar } from "./GameSidebar";
 import "../../styles/gameplay.css";
@@ -16,6 +22,8 @@ interface GameplayScreenProps {
   readonly seed?: number;
   readonly name?: string;
   readonly initialSession?: BoardSession;
+  readonly onWon?: (result: RunResult) => void;
+  readonly onLost?: (result: LossResult) => void;
 }
 
 const clockResolutionMilliseconds = 50;
@@ -24,6 +32,8 @@ export function GameplayScreen({
   seed = 20_260_730,
   name = "HARSH",
   initialSession,
+  onWon,
+  onLost,
 }: GameplayScreenProps) {
   const queue = useMemo(() => createPieceQueue(createSeededRandom(seed), 100), [seed]);
   const startingSession = useMemo(
@@ -32,11 +42,23 @@ export function GameplayScreen({
   );
   const [state, dispatch] = useReducer(reduceBoardSession, startingSession);
   const gameRef = useRef<HTMLDivElement>(null);
+  const reportedOutcomeRef = useRef<"won" | "lost" | null>(null);
   const ghostPiece = getGhostPiece(state.board, state.activePiece);
 
   useEffect(() => {
     gameRef.current?.focus();
   }, []);
+
+  useEffect(() => {
+    if (state.phase === "won" && reportedOutcomeRef.current !== "won") {
+      reportedOutcomeRef.current = "won";
+      onWon?.(createRunResult(state));
+    }
+    if (state.phase === "lost" && reportedOutcomeRef.current !== "lost") {
+      reportedOutcomeRef.current = "lost";
+      onLost?.(createLossResult(state));
+    }
+  }, [onLost, onWon, state]);
 
   useEffect(() => {
     if (state.phase !== "playing" && state.phase !== "placing-stencil") {

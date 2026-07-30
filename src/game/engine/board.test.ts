@@ -6,6 +6,7 @@ import {
   BOARD_WIDTH,
   HIDDEN_BOARD_ROWS,
   createEmptyBoard,
+  getBoardStackHeight,
   lockAndClearPiece,
 } from "./board";
 import {
@@ -35,6 +36,18 @@ function bottomVerticalI(): ActivePiece {
 }
 
 describe("board locking and clearing", () => {
+  it("measures stack height from the highest occupied row", () => {
+    const empty = createEmptyBoard();
+    const board = empty.map((row, rowIndex) =>
+      row.map((cell, columnIndex) =>
+        rowIndex === BOARD_HEIGHT - 3 && columnIndex === 4 ? "T" : cell,
+      ),
+    );
+
+    expect(getBoardStackHeight(empty)).toBe(0);
+    expect(getBoardStackHeight(board)).toBe(3);
+  });
+
   it.each([
     [1, 100],
     [2, 300],

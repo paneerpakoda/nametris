@@ -1,6 +1,6 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { createBoardSession } from "../../game/engine/session";
 import { createStencilState } from "../../game/engine/stencil";
@@ -48,6 +48,40 @@ describe("GameplayScreen", () => {
 
     expect(screen.getByText("NAME COMPLETE")).toBeInTheDocument();
     expect(screen.getByTestId("transfers")).toHaveTextContent("0");
+  });
+
+  it("reports one frozen success result when a run is won", async () => {
+    const onWon = vi.fn();
+    const initialSession = {
+      ...createBoardSession(["O", "I", "T", "J"]),
+      transferCount: 1,
+      stencil: createStencilState(new Set(["0:0", "0:1", "1:0", "1:1"]), 2, 2),
+    };
+
+    render(<GameplayScreen initialSession={initialSession} onWon={onWon} />);
+    const game = screen.getByRole("application", { name: "Nametris game" });
+    fireEvent.keyDown(game, { key: "n" });
+    fireEvent.keyDown(game, { key: "Enter" });
+
+    await waitFor(() => expect(onWon).toHaveBeenCalledOnce());
+    expect(onWon.mock.calls[0]?.[0]).toMatchObject({
+      outcome: "won",
+      name: "HARSH",
+      displayPercent: 100,
+    });
+  });
+
+  it("reports loss without creating a success title", async () => {
+    const onLost = vi.fn();
+    const initialSession = {
+      ...createBoardSession(["O", "I"]),
+      phase: "lost" as const,
+    };
+
+    render(<GameplayScreen initialSession={initialSession} onLost={onLost} />);
+
+    await waitFor(() => expect(onLost).toHaveBeenCalledOnce());
+    expect(onLost.mock.calls[0]?.[0]).not.toHaveProperty("title");
   });
 
   it("offers a real route button only when the piece is eligible", async () => {
