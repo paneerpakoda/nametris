@@ -1,8 +1,10 @@
 import { useMemo, type CSSProperties } from "react";
 
 import { stencilCellKey } from "../../game/glyphs/alphabet";
-import { canLockIntoStencil, type StencilState } from "../../game/engine/stencil";
-import { getPieceCells } from "../../game/engine/pieces";
+import {
+  getStencilContributionCells,
+  type StencilState,
+} from "../../game/engine/stencil";
 import type { ActivePiece } from "../../game/model/types";
 
 interface StencilGridProps {
@@ -12,17 +14,17 @@ interface StencilGridProps {
 }
 
 export function StencilGrid({ name, stencil, activePiece }: StencilGridProps) {
-  const activeCells = useMemo(
+  const contributionCells = useMemo(
     () =>
       new Set(
         activePiece === null
           ? []
-          : getPieceCells(activePiece).map((cell) => stencilCellKey(cell)),
+          : getStencilContributionCells(stencil, activePiece).map((cell) =>
+              stencilCellKey(cell),
+            ),
       ),
-    [activePiece],
+    [activePiece, stencil],
   );
-  const previewIsValid =
-    activePiece !== null && canLockIntoStencil(stencil, activePiece);
   const style = {
     "--stencil-columns": stencil.columns,
   } as CSSProperties;
@@ -43,13 +45,11 @@ export function StencilGrid({ name, stencil, activePiece }: StencilGridProps) {
           const key = stencilCellKey({ row, column });
           const isMaskCell = stencil.mask.has(key);
           const lockedPiece = stencil.filledCells.get(key);
-          const isPreview = activeCells.has(key);
+          const isPreview = contributionCells.has(key);
           const status = lockedPiece
             ? "filled"
             : isPreview
-              ? previewIsValid
-                ? "preview-valid"
-                : "preview-invalid"
+              ? "preview-valid"
               : isMaskCell
                 ? "open"
                 : "void";

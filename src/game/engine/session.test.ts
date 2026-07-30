@@ -6,6 +6,7 @@ import { createBoardSession, getGhostPiece, reduceBoardSession } from "./session
 import { createStencilState, getStencilCompletion } from "./stencil";
 
 const queue: readonly PieceType[] = ["T", "I", "O", "J", "L", "S", "Z"];
+const squareMask = new Set(["0:0", "0:1", "1:0", "1:1"]);
 
 describe("normal-board session", () => {
   it("requires at least two queued pieces", () => {
@@ -313,11 +314,14 @@ describe("piece routing", () => {
     expect(locked.phase).toBe("won");
   });
 
-  it("ignores an invalid stencil lock without spending a transfer", () => {
+  it("ignores a zero-contribution stencil lock without spending a credit", () => {
     const state = {
       ...createBoardSession(["O", "I", "T"]),
       transferCount: 1,
-      stencil: createStencilState(new Set(["0:0", "0:1", "0:2", "0:3"]), 1, 4),
+      stencil: {
+        ...createStencilState(squareMask, 2, 2),
+        filledCells: new Map([...squareMask].map((key) => [key, "T" as const])),
+      },
     };
     const placing = reduceBoardSession(state, { type: "route-to-stencil" });
     const invalid = reduceBoardSession(placing, { type: "stencil-lock" });

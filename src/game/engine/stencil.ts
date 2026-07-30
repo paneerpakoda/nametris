@@ -1,4 +1,4 @@
-import type { ActivePiece, PieceType, Rotation } from "../model/types";
+import type { ActivePiece, Cell, PieceType, Rotation } from "../model/types";
 import { getPieceCells } from "./pieces";
 import { stencilCellKey } from "../glyphs/alphabet";
 
@@ -34,11 +34,18 @@ export function createStencilState(
   };
 }
 
-export function canLockIntoStencil(state: StencilState, piece: ActivePiece): boolean {
-  return getPieceCells(piece).every((cell) => {
+export function getStencilContributionCells(
+  state: StencilState,
+  piece: ActivePiece,
+): readonly Cell[] {
+  return getPieceCells(piece).filter((cell) => {
     const key = stencilCellKey(cell);
     return state.mask.has(key) && !state.filledCells.has(key);
   });
+}
+
+export function canLockIntoStencil(state: StencilState, piece: ActivePiece): boolean {
+  return getStencilContributionCells(state, piece).length > 0;
 }
 
 export function lockIntoStencil(
@@ -50,7 +57,7 @@ export function lockIntoStencil(
   }
 
   const filledCells = new Map(state.filledCells);
-  getPieceCells(piece).forEach((cell) => {
+  getStencilContributionCells(state, piece).forEach((cell) => {
     filledCells.set(stencilCellKey(cell), piece.type);
   });
 
@@ -73,7 +80,7 @@ export function getStencilCompletion(state: StencilState): StencilCompletion {
 
 const rotations: readonly Rotation[] = [0, 1, 2, 3];
 
-function getOriginBounds(
+function getPartiallyVisibleOriginBounds(
   state: StencilState,
   piece: Pick<ActivePiece, "type" | "rotation">,
 ) {
@@ -84,10 +91,10 @@ function getOriginBounds(
   const maximumColumn = Math.max(...cells.map(({ column }) => column));
 
   return {
-    minimumRow: minimumRow === 0 ? 0 : -minimumRow,
-    maximumRow: state.rows - 1 - maximumRow,
-    minimumColumn: minimumColumn === 0 ? 0 : -minimumColumn,
-    maximumColumn: state.columns - 1 - maximumColumn,
+    minimumRow: -maximumRow,
+    maximumRow: state.rows - 1 - minimumRow,
+    minimumColumn: -maximumColumn,
+    maximumColumn: state.columns - 1 - minimumColumn,
   };
 }
 
@@ -95,8 +102,11 @@ export function findFirstLegalStencilPlacement(
   state: StencilState,
   type: PieceType,
 ): ActivePiece | null {
+  let bestPlacement: ActivePiece | null = null;
+  let bestContribution = 0;
+
   for (const rotation of rotations) {
-    const bounds = getOriginBounds(state, { type, rotation });
+    const bounds = getPartiallyVisibleOriginBounds(state, { type, rotation });
 
     for (let row = bounds.minimumRow; row <= bounds.maximumRow; row += 1) {
       for (
@@ -105,18 +115,24 @@ export function findFirstLegalStencilPlacement(
         column += 1
       ) {
         const candidate = { type, rotation, row, column };
-        if (canLockIntoStencil(state, candidate)) {
-          return candidate;
+        const contribution = getStencilContributionCells(state, candidate).length;
+
+        if (contribution > bestContribution) {
+          bestPlacement = candidate;
+          bestContribution = contribution;
+          if (contribution === 4) {
+            return candidate;
+          }
         }
       }
     }
   }
 
-  return null;
+  return bestPlacement;
 }
 
 function clampPieceToStencil(state: StencilState, piece: ActivePiece): ActivePiece {
-  const bounds = getOriginBounds(state, piece);
+  const bounds = getPartiallyVisibleOriginBounds(state, piece);
 
   return {
     ...piece,

@@ -28,7 +28,7 @@ describe("StencilGrid", () => {
     );
   });
 
-  it("marks an overlapping active piece as an invalid preview", () => {
+  it("clips overlap and previews only the remaining new cells", () => {
     const stencil = {
       ...createStencilState(squareMask, 2, 2),
       filledCells: new Map([["0:0", "T" as const]]),
@@ -42,11 +42,12 @@ describe("StencilGrid", () => {
       />,
     );
 
+    const cells = screen.getAllByTestId("stencil-cell");
+    expect(cells.some((cell) => cell.dataset.status === "preview-invalid")).toBe(false);
+    expect(cells[0]).toHaveAttribute("data-status", "filled");
+    expect(cells[0]).toHaveAttribute("data-piece", "T");
     expect(
-      screen
-        .getAllByTestId("stencil-cell")
-        .some((cell) => cell.dataset.status === "preview-invalid"),
-    ).toBe(true);
-    expect(screen.getAllByTestId("stencil-cell")[0]).toHaveAttribute("data-piece", "T");
+      cells.filter((cell) => cell.dataset.status === "preview-valid"),
+    ).toHaveLength(3);
   });
 });

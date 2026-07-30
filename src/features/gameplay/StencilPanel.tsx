@@ -59,8 +59,8 @@ export function StencilPanel({
       {isPlacing ? (
         <div className="stencil-actions">
           <p>
-            Move in four directions. Rotate with X/Z. One credit is spent only on
-            lock.
+            Move and rotate freely. Only new cells inside the letter are kept; extra
+            cells are clipped. Lock spends one credit.
           </p>
           <div>
             <button type="button" className="secondary-button" onClick={onCancel}>
