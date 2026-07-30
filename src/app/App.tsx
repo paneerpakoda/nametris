@@ -1,4 +1,14 @@
+import { useState } from "react";
+
+import { GameplayScreen } from "../features/gameplay/GameplayScreen";
+
 export function App() {
+  const [screen, setScreen] = useState<"welcome" | "game">("welcome");
+
+  if (screen === "game") {
+    return <GameplayScreen />;
+  }
+
   return (
     <main className="welcome-shell">
       <section className="welcome-card" aria-labelledby="welcome-title">
@@ -13,7 +23,11 @@ export function App() {
         <p className="privacy-note">
           <span aria-hidden="true">◆</span> Your name stays on this device.
         </p>
-        <button type="button" className="primary-button">
+        <button
+          type="button"
+          className="primary-button"
+          onClick={() => setScreen("game")}
+        >
           Start building
         </button>
       </section>
