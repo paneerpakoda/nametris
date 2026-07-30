@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import type { PieceType } from "../model/types";
 import { BOARD_HEIGHT } from "./board";
 import { createBoardSession, getGhostPiece, reduceBoardSession } from "./session";
+import { createStencilState, getStencilCompletion } from "./stencil";
 
 const queue: readonly PieceType[] = ["T", "I", "O", "J", "L", "S", "Z"];
 
@@ -79,5 +80,83 @@ describe("normal-board session", () => {
     });
 
     expect(afterTick).toEqual(paused);
+  });
+});
+
+describe("piece routing", () => {
+  function routableSquareSession() {
+    return {
+      ...createBoardSession(["O", "I", "T", "J"]),
+      transferCount: 1,
+      stencil: createStencilState(new Set(["0:0", "0:1", "1:0", "1:1"]), 2, 2),
+    };
+  }
+
+  it("cancels back to the same spawned piece without spending a transfer", () => {
+    const state = routableSquareSession();
+    const placing = reduceBoardSession(state, { type: "route-to-stencil" });
+    const canceled = reduceBoardSession(placing, { type: "stencil-cancel" });
+
+    expect(placing.phase).toBe("placing-stencil");
+    expect(placing.stencilPiece?.type).toBe("O");
+    expect(canceled.phase).toBe("playing");
+    expect(canceled.activePiece).toEqual(state.activePiece);
+    expect(canceled.transferCount).toBe(1);
+    expect(canceled.canceledRoutes).toBe(1);
+  });
+
+  it("spends one transfer only after a legal stencil lock", () => {
+    const state = routableSquareSession();
+    const placing = reduceBoardSession(state, { type: "route-to-stencil" });
+    const locked = reduceBoardSession(placing, { type: "stencil-lock" });
+
+    expect(locked.transferCount).toBe(0);
+    expect(locked.successfulStencilLocks).toBe(1);
+    expect(locked.stencil.filledCells.size).toBe(4);
+    expect(locked.activePiece.type).toBe("I");
+    expect(locked.phase).toBe("won");
+  });
+
+  it("ignores an invalid stencil lock without spending a transfer", () => {
+    const state = {
+      ...createBoardSession(["O", "I", "T"]),
+      transferCount: 1,
+      stencil: createStencilState(new Set(["0:0", "0:1", "0:2", "0:3"]), 1, 4),
+    };
+    const placing = reduceBoardSession(state, { type: "route-to-stencil" });
+    const invalid = reduceBoardSession(placing, { type: "stencil-lock" });
+
+    expect(invalid).toBe(placing);
+    expect(invalid.transferCount).toBe(1);
+  });
+
+  it("keeps gameplay active when a legal lock reaches exact 80%", () => {
+    const mask = new Set(Array.from({ length: 20 }, (_, index) => `0:${index}`));
+    const state = {
+      ...createBoardSession(["I", "O", "T"]),
+      transferCount: 1,
+      stencil: {
+        ...createStencilState(mask, 1, 20),
+        filledCells: new Map(
+          Array.from({ length: 12 }, (_, index) => [`0:${index}`, "I"] as const),
+        ),
+      },
+    };
+    const placing = reduceBoardSession(state, { type: "route-to-stencil" });
+    const locked = reduceBoardSession(placing, { type: "stencil-lock" });
+
+    expect(getStencilCompletion(locked.stencil).ratio).toBe(0.8);
+    expect(locked.canFinish).toBe(true);
+    expect(locked.phase).toBe("playing");
+    expect(locked.activePiece.type).toBe("O");
+  });
+
+  it("finishes an 80–99% result only after the player claims it", () => {
+    const state = {
+      ...routableSquareSession(),
+      canFinish: true,
+    };
+
+    expect(reduceBoardSession(state, { type: "finish-run" }).phase).toBe("won");
   });
 });

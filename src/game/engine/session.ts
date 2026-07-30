@@ -5,16 +5,29 @@ import {
   spawnColumn,
   spawnRow,
 } from "../config/gameplay";
+import { composeNameMask } from "../glyphs/alphabet";
 import type { ActivePiece, Board, PieceType } from "../model/types";
-import { lockAndClearPiece, createEmptyBoard } from "./board";
+import { HIDDEN_BOARD_ROWS, createEmptyBoard, lockAndClearPiece } from "./board";
 import { canPlacePiece, movePiece } from "./collision";
+import { getPieceCells } from "./pieces";
 import { rotatePiece, type RotationDirection } from "./rotation";
 import { getHardDropScore, getLevel, getSoftDropScore } from "./scoring";
+import {
+  canLockIntoStencil,
+  createStencilPlacementPiece,
+  createStencilState,
+  getStencilCompletion,
+  lockIntoStencil,
+  moveStencilPiece,
+  rotateStencilPiece,
+  type StencilState,
+} from "./stencil";
 
-export type BoardPhase = "playing" | "paused" | "lost";
+export type BoardPhase = "playing" | "paused" | "placing-stencil" | "won" | "lost";
 export type PauseReason = "player" | "hidden" | "help";
 
 export interface BoardSession {
+  readonly name: string;
   readonly phase: BoardPhase;
   readonly pauseReason: PauseReason | null;
   readonly board: Board;
@@ -25,6 +38,13 @@ export interface BoardSession {
   readonly linesCleared: number;
   readonly level: number;
   readonly transferCount: number;
+  readonly stencil: StencilState;
+  readonly stencilPiece: ActivePiece | null;
+  readonly canFinish: boolean;
+  readonly routedAttempts: number;
+  readonly successfulStencilLocks: number;
+  readonly canceledRoutes: number;
+  readonly distinctStencilPieceTypes: ReadonlySet<PieceType>;
   readonly gravityAccumulatorMilliseconds: number;
   readonly lockAccumulatorMilliseconds: number;
   readonly lockResetCount: number;
@@ -40,7 +60,20 @@ export type BoardAction =
     }
   | { readonly type: "tick"; readonly elapsedMilliseconds: number }
   | { readonly type: "pause"; readonly reason: PauseReason }
-  | { readonly type: "resume" };
+  | { readonly type: "resume" }
+  | { readonly type: "route-to-stencil" }
+  | {
+      readonly type: "stencil-move";
+      readonly rowDelta: -1 | 0 | 1;
+      readonly columnDelta: -1 | 0 | 1;
+    }
+  | {
+      readonly type: "stencil-rotate";
+      readonly direction: RotationDirection;
+    }
+  | { readonly type: "stencil-lock" }
+  | { readonly type: "stencil-cancel" }
+  | { readonly type: "finish-run" };
 
 function spawnPiece(type: PieceType): ActivePiece {
   return {
@@ -51,7 +84,10 @@ function spawnPiece(type: PieceType): ActivePiece {
   };
 }
 
-export function createBoardSession(pieceQueue: readonly PieceType[]): BoardSession {
+export function createGameSession(
+  name: string,
+  pieceQueue: readonly PieceType[],
+): BoardSession {
   const activeType = pieceQueue[0];
   const nextType = pieceQueue[1];
 
@@ -59,7 +95,10 @@ export function createBoardSession(pieceQueue: readonly PieceType[]): BoardSessi
     throw new Error("A board session requires at least two queued pieces.");
   }
 
+  const mask = composeNameMask(name);
+
   return {
+    name,
     phase: "playing",
     pauseReason: null,
     board: createEmptyBoard(),
@@ -70,10 +109,21 @@ export function createBoardSession(pieceQueue: readonly PieceType[]): BoardSessi
     linesCleared: 0,
     level: 1,
     transferCount: 0,
+    stencil: createStencilState(mask.cells, mask.rows, mask.columns),
+    stencilPiece: null,
+    canFinish: false,
+    routedAttempts: 0,
+    successfulStencilLocks: 0,
+    canceledRoutes: 0,
+    distinctStencilPieceTypes: new Set(),
     gravityAccumulatorMilliseconds: 0,
     lockAccumulatorMilliseconds: 0,
     lockResetCount: 0,
   };
+}
+
+export function createBoardSession(pieceQueue: readonly PieceType[]): BoardSession {
+  return createGameSession("HARSH", pieceQueue);
 }
 
 export function getGhostPiece(board: Board, activePiece: ActivePiece): ActivePiece {
@@ -193,6 +243,78 @@ function tickPlayingSession(
   };
 }
 
+export function canRouteActivePiece(state: BoardSession): boolean {
+  return (
+    state.phase === "playing" &&
+    state.transferCount > 0 &&
+    getPieceCells(state.activePiece).some(({ row }) => row < HIDDEN_BOARD_ROWS)
+  );
+}
+
+function reduceStencilPlacement(
+  state: BoardSession,
+  action: BoardAction,
+): BoardSession {
+  const stencilPiece = state.stencilPiece;
+  if (stencilPiece === null) {
+    return state;
+  }
+
+  switch (action.type) {
+    case "stencil-move":
+      return {
+        ...state,
+        stencilPiece: moveStencilPiece(
+          state.stencil,
+          stencilPiece,
+          action.rowDelta,
+          action.columnDelta,
+        ),
+      };
+    case "stencil-rotate":
+      return {
+        ...state,
+        stencilPiece: rotateStencilPiece(state.stencil, stencilPiece, action.direction),
+      };
+    case "stencil-cancel":
+      return {
+        ...state,
+        phase: "playing",
+        stencilPiece: null,
+        canceledRoutes: state.canceledRoutes + 1,
+      };
+    case "stencil-lock": {
+      if (!canLockIntoStencil(state.stencil, stencilPiece)) {
+        return state;
+      }
+
+      const stencil = lockIntoStencil(state.stencil, stencilPiece).state;
+      const completion = getStencilCompletion(stencil);
+      const spawned = spawnNextPiece(state, state.board);
+
+      return {
+        ...state,
+        ...spawned,
+        phase: completion.perfect ? "won" : spawned.phase,
+        stencil,
+        stencilPiece: null,
+        transferCount: state.transferCount - 1,
+        canFinish: completion.canFinish,
+        successfulStencilLocks: state.successfulStencilLocks + 1,
+        distinctStencilPieceTypes: new Set([
+          ...state.distinctStencilPieceTypes,
+          stencilPiece.type,
+        ]),
+        gravityAccumulatorMilliseconds: 0,
+        lockAccumulatorMilliseconds: 0,
+        lockResetCount: 0,
+      };
+    }
+    default:
+      return state;
+  }
+}
+
 export function reduceBoardSession(
   state: BoardSession,
   action: BoardAction,
@@ -209,11 +331,33 @@ export function reduceBoardSession(
       : state;
   }
 
+  if (action.type === "finish-run") {
+    return state.phase === "playing" && state.canFinish
+      ? { ...state, phase: "won" }
+      : state;
+  }
+
+  if (state.phase === "placing-stencil") {
+    return reduceStencilPlacement(state, action);
+  }
+
   if (state.phase !== "playing") {
     return state;
   }
 
   switch (action.type) {
+    case "route-to-stencil":
+      return canRouteActivePiece(state)
+        ? {
+            ...state,
+            phase: "placing-stencil",
+            stencilPiece: createStencilPlacementPiece(
+              state.stencil,
+              state.activePiece.type,
+            ),
+            routedAttempts: state.routedAttempts + 1,
+          }
+        : state;
     case "move":
       return moveOrRotate(
         state,
@@ -244,5 +388,7 @@ export function reduceBoardSession(
     }
     case "tick":
       return tickPlayingSession(state, action.elapsedMilliseconds);
+    default:
+      return state;
   }
 }
