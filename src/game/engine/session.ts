@@ -31,6 +31,7 @@ export interface BoardSession {
   readonly name: string;
   readonly phase: BoardPhase;
   readonly pauseReason: PauseReason | null;
+  readonly pausedPhase: "playing" | "placing-stencil" | null;
   readonly board: Board;
   readonly activePiece: ActivePiece;
   readonly nextPiece: PieceType;
@@ -103,6 +104,7 @@ export function createGameSession(
     name,
     phase: "playing",
     pauseReason: null,
+    pausedPhase: null,
     board: createEmptyBoard(),
     activePiece: spawnPiece(activeType),
     nextPiece: nextType,
@@ -177,6 +179,7 @@ function lockActivePiece(state: BoardSession, extraScore = 0): BoardSession {
     ...spawned,
     phase: lockResult.toppedOut ? "lost" : spawned.phase,
     pauseReason: null,
+    pausedPhase: null,
     board: lockResult.board,
     score: state.score + extraScore + lockResult.scoreEarned,
     linesCleared,
@@ -292,6 +295,7 @@ function reduceStencilPlacement(
       return {
         ...state,
         phase: "playing",
+        pausedPhase: null,
         stencilPiece: null,
         canceledRoutes: state.canceledRoutes + 1,
       };
@@ -308,6 +312,7 @@ function reduceStencilPlacement(
         ...state,
         ...spawned,
         phase: completion.perfect ? "won" : spawned.phase,
+        pausedPhase: null,
         stencil,
         stencilPiece: null,
         transferCount: state.transferCount - 1,
@@ -333,13 +338,23 @@ export function reduceBoardSession(
 ): BoardSession {
   if (action.type === "resume") {
     return state.phase === "paused"
-      ? { ...state, phase: "playing", pauseReason: null }
+      ? {
+          ...state,
+          phase: state.pausedPhase ?? "playing",
+          pauseReason: null,
+          pausedPhase: null,
+        }
       : state;
   }
 
   if (action.type === "pause") {
-    return state.phase === "playing"
-      ? { ...state, phase: "paused", pauseReason: action.reason }
+    return state.phase === "playing" || state.phase === "placing-stencil"
+      ? {
+          ...state,
+          phase: "paused",
+          pauseReason: action.reason,
+          pausedPhase: state.phase,
+        }
       : state;
   }
 

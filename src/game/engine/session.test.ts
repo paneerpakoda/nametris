@@ -256,6 +256,26 @@ describe("piece routing", () => {
     expect(canceled.canceledRoutes).toBe(1);
   });
 
+  it("pauses hidden stencil placement and resumes the same piece", () => {
+    const state = routableSquareSession();
+    const placing = reduceBoardSession(state, { type: "route-to-stencil" });
+    const active = reduceBoardSession(placing, {
+      type: "tick",
+      elapsedMilliseconds: 250,
+    });
+    const paused = reduceBoardSession(active, { type: "pause", reason: "hidden" });
+    const hidden = reduceBoardSession(paused, {
+      type: "tick",
+      elapsedMilliseconds: 1_000,
+    });
+    const resumed = reduceBoardSession(hidden, { type: "resume" });
+
+    expect(paused.phase).toBe("paused");
+    expect(hidden.activeMilliseconds).toBe(250);
+    expect(resumed.phase).toBe("placing-stencil");
+    expect(resumed.stencilPiece).toEqual(placing.stencilPiece);
+  });
+
   it("spends one transfer only after a legal stencil lock", () => {
     const state = routableSquareSession();
     const placing = reduceBoardSession(state, { type: "route-to-stencil" });

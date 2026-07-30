@@ -1,35 +1,42 @@
+import type { BoardSession } from "../../game/engine/session";
+import { StencilPanel } from "./StencilPanel";
+
 interface GameSidebarProps {
-  readonly score: number;
-  readonly linesCleared: number;
-  readonly level: number;
-  readonly transferCount: number;
+  readonly state: BoardSession;
+  readonly onRoute: () => void;
+  readonly onStencilLock: () => void;
+  readonly onStencilCancel: () => void;
+  readonly onFinish: () => void;
 }
 
 export function GameSidebar({
-  score,
-  linesCleared,
-  level,
-  transferCount,
+  state,
+  onRoute,
+  onStencilLock,
+  onStencilCancel,
+  onFinish,
 }: GameSidebarProps) {
   return (
     <aside className="game-sidebar">
       <section className="metric-strip" aria-label="Game metrics">
-        <Metric label="Score" value={score} testId="score" />
-        <Metric label="Lines" value={linesCleared} />
-        <Metric label="Level" value={level} />
-        <Metric label="Transfers" value={transferCount} accent />
+        <Metric label="Score" value={state.score} testId="score" />
+        <Metric label="Lines" value={state.linesCleared} />
+        <Metric label="Level" value={state.level} />
+        <Metric
+          label="Transfers"
+          value={state.transferCount}
+          testId="transfers"
+          accent
+        />
       </section>
 
-      <section className="stencil-placeholder">
-        <p className="panel-kicker">02 / BUILD YOUR NAME</p>
-        <h2>NAME STENCIL</h2>
-        <div aria-hidden="true" className="placeholder-grid">
-          {Array.from({ length: 32 }, (_, index) => (
-            <span key={index} />
-          ))}
-        </div>
-        <p>Clear a row to earn a transfer. The stencil board comes next.</p>
-      </section>
+      <StencilPanel
+        state={state}
+        onRoute={onRoute}
+        onLock={onStencilLock}
+        onCancel={onStencilCancel}
+        onFinish={onFinish}
+      />
 
       <section className="controls-card" aria-labelledby="controls-title">
         <h2 id="controls-title">CONTROLS</h2>
@@ -49,6 +56,10 @@ export function GameSidebar({
           <div>
             <dt>Rotate</dt>
             <dd>↑ / X / Z</dd>
+          </div>
+          <div>
+            <dt>Route</dt>
+            <dd>N</dd>
           </div>
         </dl>
       </section>

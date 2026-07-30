@@ -37,7 +37,7 @@
 }
 
 .board-panel,
-.stencil-placeholder,
+.stencil-panel,
 .controls-card,
 .metric-strip {
   border: 1px solid rgb(169 175 200 / 18%);
@@ -65,7 +65,7 @@
 }
 
 .panel-heading h2,
-.stencil-placeholder h2,
+.stencil-panel h2,
 .controls-card h2 {
   margin: 0;
   font-size: 0.92rem;
@@ -194,32 +194,124 @@
   color: var(--lime);
 }
 
-.stencil-placeholder {
+.stencil-panel {
   display: grid;
-  padding: 24px;
-  align-content: center;
+  min-height: 0;
+  padding: 20px;
+  align-content: start;
 }
 
-.stencil-placeholder > p:last-child {
-  max-width: 380px;
-  margin: 20px 0 0;
-  color: var(--muted);
-  line-height: 1.5;
+.stencil-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 20px;
 }
 
-.placeholder-grid {
+.completion-value {
+  color: var(--lime);
+  font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
+  font-size: 1.25rem;
+}
+
+.completion-track {
+  height: 4px;
+  margin: 14px 0 18px;
+  overflow: hidden;
+  background: rgb(169 175 200 / 12%);
+}
+
+.completion-track span {
+  display: block;
+  height: 100%;
+  background: var(--lime);
+}
+
+.stencil-frame {
   display: grid;
-  max-width: 480px;
-  margin-top: 24px;
-  grid-template-columns: repeat(8, 1fr);
-  gap: 5px;
-  opacity: 0.6;
+  min-height: 150px;
+  padding: 12px;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid rgb(66 232 224 / 22%);
+  background: #070911;
 }
 
-.placeholder-grid span {
+.stencil-grid {
+  display: grid;
+  width: 100%;
+  grid-template-columns: repeat(var(--stencil-columns), minmax(0, 1fr));
+  gap: clamp(1px, 0.25vw, 3px);
+}
+
+.stencil-cell {
   aspect-ratio: 1;
-  border: 1px dashed rgb(66 232 224 / 35%);
+  min-width: 0;
+}
+
+.stencil-cell[data-status="void"] {
+  opacity: 0;
+}
+
+.stencil-cell[data-status="open"] {
+  border: 1px dashed rgb(66 232 224 / 38%);
   background: rgb(66 232 224 / 4%);
+}
+
+.stencil-cell[data-status="filled"],
+.stencil-cell[data-status="preview-valid"] {
+  border: 1px solid rgb(255 255 255 / 40%);
+  box-shadow: inset 0 0 0 1px rgb(0 0 0 / 20%);
+}
+
+.stencil-cell[data-status="preview-valid"] {
+  filter: brightness(1.18);
+}
+
+.stencil-cell[data-status="preview-invalid"] {
+  border: 1px solid #ff6888;
+  background: rgb(255 104 136 / 42%);
+  box-shadow: inset 0 0 0 1px rgb(7 9 17 / 35%);
+}
+
+.stencil-actions {
+  display: grid;
+  margin-top: 14px;
+  align-items: center;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 16px;
+}
+
+.stencil-actions p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.78rem;
+  line-height: 1.45;
+}
+
+.stencil-actions > div {
+  display: flex;
+  justify-content: end;
+  gap: 8px;
+}
+
+.route-button {
+  padding: 10px 14px;
+  border: 1px solid rgb(155 234 100 / 40%);
+  border-radius: 8px;
+  color: #07110a;
+  background: var(--lime);
+  cursor: pointer;
+  font-size: 0.72rem;
+  font-weight: 950;
+  letter-spacing: 0.07em;
+}
+
+.route-button:disabled,
+.primary-button:disabled {
+  cursor: not-allowed;
+  filter: grayscale(0.8);
+  opacity: 0.4;
 }
 
 .controls-card {

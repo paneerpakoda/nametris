@@ -5,8 +5,9 @@ import {
   createGameSession,
   getGhostPiece,
   reduceBoardSession,
+  type BoardSession,
 } from "../../game/engine/session";
-import { getNormalBoardAction } from "../../game/runtime/input";
+import { getGameAction } from "../../game/runtime/input";
 import { BoardGrid, PiecePreview } from "./BoardGrid";
 import { GameSidebar } from "./GameSidebar";
 import "../../styles/gameplay.css";
@@ -14,6 +15,7 @@ import "../../styles/gameplay.css";
 interface GameplayScreenProps {
   readonly seed?: number;
   readonly name?: string;
+  readonly initialSession?: BoardSession;
 }
 
 const clockResolutionMilliseconds = 50;
@@ -21,11 +23,14 @@ const clockResolutionMilliseconds = 50;
 export function GameplayScreen({
   seed = 20_260_730,
   name = "HARSH",
+  initialSession,
 }: GameplayScreenProps) {
   const queue = useMemo(() => createPieceQueue(createSeededRandom(seed), 100), [seed]);
-  const [state, dispatch] = useReducer(reduceBoardSession, queue, (pieces) =>
-    createGameSession(name, pieces),
+  const startingSession = useMemo(
+    () => initialSession ?? createGameSession(name, queue),
+    [initialSession, name, queue],
   );
+  const [state, dispatch] = useReducer(reduceBoardSession, startingSession);
   const gameRef = useRef<HTMLDivElement>(null);
   const ghostPiece = getGhostPiece(state.board, state.activePiece);
 
@@ -34,7 +39,7 @@ export function GameplayScreen({
   }, []);
 
   useEffect(() => {
-    if (state.phase !== "playing") {
+    if (state.phase !== "playing" && state.phase !== "placing-stencil") {
       return;
     }
 
@@ -63,7 +68,7 @@ export function GameplayScreen({
   }, []);
 
   function handleKeyDown(event: React.KeyboardEvent<HTMLDivElement>) {
-    const action = getNormalBoardAction(event.key, state.phase);
+    const action = getGameAction(event.key, state.phase);
 
     if (action === null) {
       return;
@@ -71,7 +76,16 @@ export function GameplayScreen({
 
     if (
       event.repeat &&
-      ["hard-drop", "rotate", "pause", "resume"].includes(action.type)
+      [
+        "hard-drop",
+        "rotate",
+        "pause",
+        "resume",
+        "route-to-stencil",
+        "stencil-lock",
+        "stencil-cancel",
+        "stencil-rotate",
+      ].includes(action.type)
     ) {
       return;
     }
@@ -87,12 +101,11 @@ export function GameplayScreen({
           <p className="eyebrow">NAMETRIS</p>
           <h1>BUILD THE NAME</h1>
         </div>
-        {state.phase !== "paused" && (
+        {state.phase === "playing" && (
           <button
             type="button"
             className="secondary-button"
             onClick={() => dispatch({ type: "pause", reason: "player" })}
-            disabled={state.phase === "lost"}
             aria-label="Pause game"
           >
             PAUSE
@@ -127,10 +140,11 @@ export function GameplayScreen({
         </section>
 
         <GameSidebar
-          score={state.score}
-          linesCleared={state.linesCleared}
-          level={state.level}
-          transferCount={state.transferCount}
+          state={state}
+          onRoute={() => dispatch({ type: "route-to-stencil" })}
+          onStencilLock={() => dispatch({ type: "stencil-lock" })}
+          onStencilCancel={() => dispatch({ type: "stencil-cancel" })}
+          onFinish={() => dispatch({ type: "finish-run" })}
         />
 
         {state.phase === "paused" && (
