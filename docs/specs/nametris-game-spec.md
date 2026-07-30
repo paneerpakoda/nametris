@@ -1,6 +1,6 @@
 # Spec: Nametris Desktop Game
 
-Status: Approved by the product owner on 30 July 2026.
+Status: Revised from direct product-owner playtest feedback on 30 July 2026.
 
 Source of truth for confirmed product intent: [`docs/intent/nametris.md`](../intent/nametris.md)
 
@@ -13,8 +13,13 @@ The product intent is confirmed. The product owner approved the following implem
 3. Use React context plus `useReducer` for session orchestration; keep all gameplay rules in pure TypeScript modules rather than Redux.
 4. Render both boards as semantic DOM/CSS grids rather than `<canvas>`.
 5. Use the modern seven-bag piece generator and a practical subset of Super Rotation System wall kicks.
-6. Award one transfer per cleared line, so a two-, three-, or four-line clear earns two, three, or four transfers.
-7. Let the player route a spawned piece while it remains in the board's spawn zone. Pressing the route control pauses gravity and enters stencil-placement mode.
+6. Award one routing credit per cleared line, so a two-, three-, or four-line
+   clear earns two, three, or four credits. Existing engine fields may retain
+   the `transferCount` domain name; player-facing copy says “credits.”
+7. Let the player route the active normal-board piece at any time before it
+   locks. The `N` shortcut is active throughout gameplay without requiring
+   focus on the route button. Pressing route pauses gravity and enters
+   stencil-placement mode.
 8. Use free four-direction grid movement without gravity in the stencil.
 9. Automatically finish the run at 100%.
 10. Do not include piece hold, audio, a leaderboard, or saved game restoration in the first release.
@@ -47,7 +52,9 @@ The experience is for casual players and should:
 
 - Desktop browsers only.
 - Target the latest two stable releases of Chrome, Edge, Firefox, and Safari.
-- Minimum viewport target: 1180 × 720 CSS pixels.
+- Minimum desktop viewport target: 900 × 600 CSS pixels.
+- Scale gameplay from available viewport height. The bottom rows and gameplay
+  controls must remain visible without page scrolling.
 - Keyboard is the primary input.
 - Mouse is used for menus, buttons, and reward-card hover.
 - Mobile layouts and touch controls are explicitly out of scope.
@@ -79,8 +86,8 @@ Input rules:
 
 Use lightweight contextual hints instead of a long tutorial:
 
-1. Point out that line clears earn transfers.
-2. When the first transfer is earned, highlight the route-to-name control.
+1. Point out that line clears earn credits.
+2. When the first credit is earned, highlight the route-to-name control.
 3. On the player's first stencil entry, show move, rotate, lock, and cancel controls.
 4. Never show the same hint again during the current run.
 5. Hints may be dismissed and must pause gameplay when they require reading.
@@ -94,12 +101,13 @@ The game screen contains:
 - Current score
 - Lines cleared
 - Level
-- Available transfers
+- Available credits
 - Stencil completion percentage
 - Active playtime
 - Next-piece preview
 - Controls/help and pause controls
-- A contextual route-to-name prompt when routing is allowed
+- A persistent, keyboard-accessible route-to-name action whenever a credit is
+  available
 - A finish button that appears only at 80% or higher
 
 ### 4. Successful finish
@@ -189,24 +197,28 @@ Scoring constants must live in one configuration module and be easy to tune afte
 
 ## Transfer Economy
 
-- A run begins with zero transfers.
-- Each cleared row adds one transfer.
-- Transfers accumulate with no initial cap.
-- Routing a piece is allowed only when at least one transfer is available.
+- A run begins with zero credits.
+- Each cleared row adds one credit.
+- Credits accumulate with no initial cap.
+- Routing a piece is allowed only when at least one credit is available.
 - Routing must be an affirmative action; ordinary Tetris play continues without a board/name confirmation dialog.
+- The route window lasts until the active normal-board piece locks.
+- The `N` shortcut must work while the gameplay screen is mounted, even when a
+  gameplay button rather than the board surface has pointer focus.
 - When routed, the exact spawned piece type moves to stencil-placement mode.
 - The normal board and gravity pause during stencil placement.
 - Active playtime continues during stencil placement but excludes explicit pause/help time and hidden-tab time.
-- A successful stencil lock spends exactly one transfer.
-- Canceling returns the same piece type to its normal spawn state and spends nothing.
+- A successful stencil lock spends exactly one credit.
+- Canceling returns the exact piece to its prior normal-board position and
+  rotation and spends nothing.
 - The board does not advance to the next piece until the routed piece is locked into the stencil.
-- If no legal stencil placement exists, make cancel prominent; never consume the transfer automatically.
+- If no legal stencil placement exists, make cancel prominent; never consume the credit automatically.
 
-### Proposed routing window
+### Routing window
 
-The route control remains available while the active piece overlaps the spawn zone. Once it leaves that zone, it is committed to the normal board. This provides a meaningful decision without pausing every spawn.
-
-This rule must be usability-tested. If players consistently miss the decision, revise the window before changing the transfer economy.
+The route action remains available for the current normal-board piece until it
+locks. This replaces the short spawn-zone window that failed product-owner
+playtesting.
 
 ## Stencil Rules
 
@@ -218,31 +230,25 @@ This rule must be usability-tested. If players consistently miss the decision, r
 - Scale cell size to fit 2–10 letters in the available desktop area.
 - Never allow horizontal page scrolling during play.
 
-### Tileability requirement
+### Glyph requirement
 
-Every supported name must be capable of reaching exactly 100%.
-
-To guarantee this:
-
-- Author a custom `A`–`Z` block-glyph set whose fillable cells are exact-cover tileable by the supported pieces.
-- Keep each individual glyph tileable so concatenating valid glyphs remains tileable.
-- Make each glyph's fillable cell count divisible by four.
-- Add an exact-cover/backtracking validator used in tests or build tooling.
-- Fail tests if any glyph is not tileable.
-- Do not ship a glyph merely because it visually resembles a letter; 100% must be mechanically possible.
-
-Visual legibility and tileability are both acceptance requirements.
+Prioritize a clean, conventional, legible `A`–`Z` block alphabet. Glyphs do not
+need to be exact-cover tileable by complete tetrominoes because stencil locking
+clips unused cells. Tests maintain visual snapshots and validate representative
+2-, 5-, and 10-letter compositions.
 
 ### Piece placement
 
 - Stencil pieces have no gravity.
 - Allow movement up, down, left, and right.
 - Allow clockwise and counter-clockwise rotation.
-- A legal lock requires all four piece cells to:
-  - lie inside fillable stencil cells, and
-  - avoid already filled stencil cells.
-- Show a valid/invalid preview before lock.
-- Ignore or visibly reject an invalid lock; do not spend a transfer.
+- A legal lock requires the piece to intersect at least one currently empty
+  fillable stencil cell.
+- On lock, retain only currently empty fillable cells. Clip cells outside the
+  stencil, in letter holes, beyond the rectangular mask bounds, or over
+  previously filled cells.
+- Show the retained cells in the placement preview.
+- Ignore a lock that adds no new cells; do not spend a credit.
 - Canceling is always available before lock.
 - Once locked, a stencil piece cannot be removed in version one.
 
@@ -283,7 +289,9 @@ Proposed defaults:
 
 Requirements:
 
-- Prevent browser scrolling for handled game keys only while game focus is active.
+- Prevent browser scrolling for handled board/stencil keys while game focus is
+  active. The `N` route shortcut is the exception and works globally while the
+  gameplay screen is mounted.
 - Do not trigger actions from repeated keydown events where repetition is inappropriate.
 - Release held-input state on blur and visibility change.
 - Display controls in the interface and help panel.
@@ -400,6 +408,7 @@ Proposed direction until separately approved:
 - Subtle grid texture
 - Premium holographic reward surface
 - Clear typography outside the block-letter name
+- Flat, deliberate surfaces with no CSS or exported-SVG gradients
 
 Use design tokens for:
 
@@ -420,7 +429,7 @@ Do not make the reward card's shine or gameplay state depend on color alone.
 - Provide visible focus states for every control.
 - Use real buttons and labels.
 - Associate validation errors with the name input.
-- Announce line clears, transfers earned, 80% availability, successful completion, and loss through a restrained `aria-live` region.
+- Announce line clears, credits earned, 80% availability, successful completion, and loss through a restrained `aria-live` region.
 - Provide text/icon differences in addition to color for valid and invalid stencil placement.
 - Respect `prefers-reduced-motion`.
 - Pause on hidden-tab state and never surprise the player with background game-over.
@@ -604,8 +613,7 @@ Use Vitest for:
 
 ### Glyph validation
 
-- Validate all 26 glyphs with the exact-cover solver.
-- Assert each glyph has a fill count divisible by four.
+- Maintain a visual snapshot for all 26 conventional glyphs.
 - Assert each glyph is legible in a maintained snapshot fixture.
 - Test representative 2-, 5-, and 10-letter combined masks.
 
@@ -676,7 +684,7 @@ Use Playwright with deterministic test hooks/seeds for:
 - Update the spec before implementing changed requirements.
 - Keep the gameplay engine deterministic and independently testable.
 - Run `npm run check` before declaring an implementation task complete.
-- Validate every supported glyph is 100% tileable.
+- Maintain a conventional, legible visual snapshot for every supported glyph.
 - Keep the player's name on-device and out of logs.
 - Respect reduced motion and keyboard accessibility.
 - Preserve existing documentation during scaffolding.
@@ -697,7 +705,7 @@ Use Playwright with deterministic test hooks/seeds for:
 - Put the name in a URL or remote error payload.
 - Use `dangerouslySetInnerHTML` for player content.
 - Replace the modern stack with the reference repo's obsolete dependencies.
-- Consume a transfer for an invalid or canceled stencil placement.
+- Consume a credit for a stencil placement that adds no cells or is canceled.
 - Make 100% mathematically impossible for a supported name.
 - Interrupt gameplay with a modal at 80%.
 - Put reward action buttons inside the card.
@@ -727,13 +735,16 @@ Use Playwright with deterministic test hooks/seeds for:
 
 ### Transfers and stencil
 
-- Every cleared row awards one transfer.
-- An eligible spawned piece can be routed into the stencil.
+- Every cleared row awards one credit.
+- The active normal-board piece can be routed into the stencil while a credit
+  is available.
 - Normal-board gravity pauses during stencil placement.
-- Legal stencil locks use the exact piece and spend one transfer.
+- Legal stencil locks use the routed piece, retain its new in-stencil cells, and
+  spend one credit.
 - Invalid locks spend nothing.
 - Cancel returns the same piece to the board and spends nothing.
-- Every valid 2–10-letter name is capable of reaching 100%.
+- Every valid 2–10-letter name is capable of reaching 100% through clipped
+  stencil locks.
 
 ### Completion
 
@@ -756,7 +767,8 @@ Use Playwright with deterministic test hooks/seeds for:
 ### Experience
 
 - The default-name run is playtestable in approximately 3–5 minutes after onboarding.
-- The transfer choice and 80% push-your-luck decision are understandable through the interface.
+- The credit-routing choice and 80% push-your-luck decision are understandable
+  through the interface.
 - No essential gameplay or reward information depends on color or motion alone.
 
 ## Non-Goals for Version One
@@ -778,7 +790,8 @@ Use Playwright with deterministic test hooks/seeds for:
 The product owner confirmed all six proposed defaults on 30 July 2026:
 
 1. Use the proposed modern tech stack and functional-core state approach, with exact stable dependency versions verified at scaffold time.
-2. Use the proposed spawn-zone routing window and validate its usability during browser playtesting.
+2. The original spawn-zone routing window was superseded after product-owner
+   playtesting. Routing now remains available until piece lock.
 3. Automatically finish the run at exact 100% stencil completion.
 4. Use the five regular and three exclusive perfect player-title names defined in this spec.
 5. Use the modern-retro placeholder art direction.

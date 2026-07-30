@@ -1,6 +1,6 @@
 # Nametris — Confirmed Product Intent
 
-Status: Confirmed by the product owner on 30 July 2026.
+Status: Revised from direct product-owner playtest feedback on 30 July 2026.
 
 ## Outcome
 
@@ -20,11 +20,15 @@ The name stencil turns a familiar game into something personal. A successful run
 - If they skip name entry, the default name is `HARSH`.
 - The first release accepts 2–10 English letters and renders them as uppercase block lettering.
 - Normal Tetris runs on one side of the screen; the name stencil is shown on the other.
-- Clearing one line earns one transfer.
-- When a new Tetris piece appears, the player decides whether to use it on the normal board or spend a transfer to use it in the name.
+- A cleared row earns one credit. The player may spend a credit to route the
+  current normal-board piece into the name at any time before it locks.
+- The `N` route shortcut works throughout the active run without requiring
+  pointer focus on the route button.
 - When routed to the name, normal Tetris pauses while the player moves and rotates the piece in the stencil.
-- Every square of the piece must fit inside the stencil and may not overlap a previously placed piece.
-- Before locking the piece into the stencil, the player may cancel and return it to the normal board without spending the transfer.
+- Only currently empty cells inside the stencil are retained when the piece
+  locks. Cells outside the letter or over already filled cells are clipped.
+- A stencil lock is legal when it adds at least one new letter cell.
+- Before locking the piece into the stencil, the player may cancel and return it to the normal board without spending the credit.
 
 ## Completion and Risk
 
@@ -74,7 +78,9 @@ The first version succeeds when:
 
 ## Binding Constraint
 
-The first release is desktop-only.
+The first release is desktop-only. Both boards and their controls must remain
+fully visible within the current desktop viewport, with the bottom of the
+normal board treated as the highest-priority content.
 
 ## Out of Scope
 
