@@ -21,6 +21,15 @@ export function createSevenBag(random: RandomSource): readonly PieceType[] {
   return bag;
 }
 
+export function createPieceQueue(
+  random: RandomSource,
+  bagCount: number,
+): readonly PieceType[] {
+  return Array.from({ length: Math.max(0, bagCount) }, () =>
+    createSevenBag(random),
+  ).flat();
+}
+
 export function createSeededRandom(seed: number): RandomSource {
   let value = seed >>> 0;
 
