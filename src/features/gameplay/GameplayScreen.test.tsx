@@ -53,6 +53,12 @@ describe("GameplayScreen", () => {
     expect(screen.getByRole("status")).toHaveTextContent(
       "1 line cleared. 1 transfer earned.",
     );
+    expect(screen.getByTestId("line-clear-feedback")).toHaveAttribute(
+      "data-kind",
+      "earned",
+    );
+    expect(screen.getByText("+1 TRANSFER EARNED")).toBeVisible();
+    expect(screen.getByText("ROW CLEAR · BANK 1 / 3")).toBeVisible();
   });
 
   it("announces that a full transfer bank cannot store another clear", () => {
@@ -79,8 +85,16 @@ describe("GameplayScreen", () => {
 
     expect(screen.getByTestId("transfers")).toHaveTextContent("3 / 3");
     expect(screen.getByRole("status")).toHaveTextContent(
-      "1 line cleared. Transfer bank already full at 3. Route a piece before clearing more.",
+      "1 line cleared. 1 transfer wasted because the bank was already full at 3. Use Shift before your next clear.",
     );
+    expect(screen.getByTestId("line-clear-feedback")).toHaveAttribute(
+      "data-kind",
+      "wasted",
+    );
+    expect(screen.getByText("1 TRANSFER WASTED")).toBeVisible();
+    expect(
+      screen.getByText("BANK WAS FULL · USE SHIFT BEFORE YOUR NEXT CLEAR"),
+    ).toBeVisible();
   });
 
   it("pauses and resumes from real buttons", async () => {
@@ -103,7 +117,7 @@ describe("GameplayScreen", () => {
 
     render(<GameplayScreen initialSession={initialSession} />);
     const game = screen.getByRole("application", { name: "Nametris game" });
-    fireEvent.keyDown(game, { key: "n" });
+    fireEvent.keyDown(game, { key: "Shift" });
 
     await user.click(screen.getByRole("button", { name: "Open controls help" }));
     expect(
@@ -117,7 +131,7 @@ describe("GameplayScreen", () => {
     expect(screen.getByText("PLACE THE O")).toBeInTheDocument();
   });
 
-  it("routes with N, shows stencil controls, and locks with Enter", () => {
+  it("routes with Shift, shows stencil controls, and locks with Enter", () => {
     const initialSession = {
       ...createBoardSession(["O", "I", "T", "J"]),
       transferCount: 1,
@@ -127,7 +141,7 @@ describe("GameplayScreen", () => {
     render(<GameplayScreen initialSession={initialSession} />);
     const game = screen.getByRole("application", { name: "Nametris game" });
 
-    fireEvent.keyDown(game, { key: "n" });
+    fireEvent.keyDown(game, { key: "Shift" });
 
     expect(screen.getByText("PLACE THE O")).toBeInTheDocument();
     expect(
@@ -150,7 +164,7 @@ describe("GameplayScreen", () => {
     render(<GameplayScreen initialSession={initialSession} />);
     const game = screen.getByRole("application", { name: "Nametris game" });
 
-    fireEvent.keyDown(game, { key: "n" });
+    fireEvent.keyDown(game, { key: "Shift" });
 
     expect(screen.getByText("1 CELL KEPT · 3 TRIMMED")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "LOCK & TRIM · ENTER" })).toBeEnabled();
@@ -171,7 +185,7 @@ describe("GameplayScreen", () => {
 
     render(<GameplayScreen initialSession={initialSession} onWon={onWon} />);
     const game = screen.getByRole("application", { name: "Nametris game" });
-    fireEvent.keyDown(game, { key: "n" });
+    fireEvent.keyDown(game, { key: "Shift" });
     fireEvent.keyDown(game, { key: "Enter" });
 
     await waitFor(() => expect(onWon).toHaveBeenCalledOnce());

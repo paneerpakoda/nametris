@@ -3,8 +3,11 @@ import { describe, expect, it } from "vitest";
 import { getGameAction } from "./input";
 
 describe("game keyboard input", () => {
-  it("routes a newly spawned piece with N during normal play", () => {
-    expect(getGameAction("n", "playing")).toEqual({ type: "route-to-stencil" });
+  it("routes a newly spawned piece with either Shift key during normal play", () => {
+    expect(getGameAction("Shift", "playing")).toEqual({
+      type: "route-to-stencil",
+    });
+    expect(getGameAction("n", "playing")).toBeNull();
   });
 
   it("maps four-direction stencil movement without gravity", () => {

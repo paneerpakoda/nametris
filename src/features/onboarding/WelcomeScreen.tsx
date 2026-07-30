@@ -45,7 +45,7 @@ export function WelcomeScreen({ onStart }: WelcomeScreenProps) {
             </li>
             <li>
               <strong>Route</strong>
-              <span>Press N before a piece crosses the visible route line.</span>
+              <span>Press Shift before a piece crosses the visible route line.</span>
             </li>
             <li>
               <strong>Risk</strong>
@@ -90,7 +90,7 @@ export function WelcomeScreen({ onStart }: WelcomeScreenProps) {
           <details className="controls-summary">
             <summary>View keyboard controls</summary>
             <p>
-              Arrow keys move. Space hard-drops. X and Z rotate. N routes before the
+              Arrow keys move. Space hard-drops. X and Z rotate. Shift routes before the
               cyan deadline; excess stencil cells are trimmed.
             </p>
           </details>

@@ -18,8 +18,8 @@ const guidanceCopy: Readonly<
     detail: `Every completed row earns one route. Bank up to ${maximumTransferCount}.`,
   },
   transfer: {
-    title: "TRANSFER READY → ROUTE WITH N",
-    detail: "Press N before the active piece crosses the cyan route deadline.",
+    title: "TRANSFER READY → ROUTE WITH SHIFT",
+    detail: "Press Shift before the active piece crosses the cyan route deadline.",
   },
   "transfer-cap": {
     title: "TRANSFER BANK FULL → BUILD YOUR NAME",

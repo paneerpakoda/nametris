@@ -21,6 +21,7 @@ import {
 import { BoardGrid, PiecePreview } from "./BoardGrid";
 import { GameHelpDialog } from "./GameHelpDialog";
 import { GameSidebar } from "./GameSidebar";
+import { LineClearFeedback, type LineClearFeedbackEvent } from "./LineClearFeedback";
 import { RunGuidance } from "./RunGuidance";
 import "../../styles/gameplay.css";
 
@@ -33,6 +34,7 @@ interface GameplayScreenProps {
 }
 
 const clockResolutionMilliseconds = 50;
+const lineClearFeedbackDurationMilliseconds = 2_000;
 
 type GameplayAction =
   | BoardAction
@@ -76,6 +78,9 @@ export function GameplayScreen({
     phase: "playing" as BoardSession["phase"],
   });
   const [announcement, setAnnouncement] = useState("");
+  const [lineClearFeedback, setLineClearFeedback] =
+    useState<LineClearFeedbackEvent | null>(null);
+  const lineClearFeedbackSequenceRef = useRef(0);
   const [helpOpen, setHelpOpen] = useState(false);
   const ghostPiece = getGhostPiece(state.board, state.activePiece);
 
@@ -115,17 +120,38 @@ export function GameplayScreen({
     if (state.linesCleared > previous.linesCleared) {
       const count = state.linesCleared - previous.linesCleared;
       const transfersStored = state.transferCount - previous.transferCount;
+      const transfersWasted = Math.max(0, count - transfersStored);
 
-      if (transfersStored === 0) {
-        setAnnouncement(
-          `${count} ${
-            count === 1 ? "line" : "lines"
-          } cleared. Transfer bank already full at ${maximumTransferCount}. Route a piece before clearing more.`,
-        );
+      lineClearFeedbackSequenceRef.current += 1;
+      setLineClearFeedback({
+        id: lineClearFeedbackSequenceRef.current,
+        linesCleared: count,
+        transfersStored,
+        transfersWasted,
+        bankCount: state.transferCount,
+      });
+
+      if (transfersWasted > 0) {
+        const linePhrase = `${count} ${count === 1 ? "line" : "lines"} cleared.`;
+        const wastedPhrase = `${transfersWasted} ${
+          transfersWasted === 1 ? "transfer" : "transfers"
+        } wasted`;
+
+        if (transfersStored > 0) {
+          setAnnouncement(
+            `${linePhrase} ${transfersStored} ${
+              transfersStored === 1 ? "transfer" : "transfers"
+            } earned and stored. ${wastedPhrase} because the bank reached ${maximumTransferCount}. Use Shift before your next clear.`,
+          );
+        } else {
+          setAnnouncement(
+            `${linePhrase} ${wastedPhrase} because the bank was already full at ${maximumTransferCount}. Use Shift before your next clear.`,
+          );
+        }
       } else {
         const fullBankPrompt =
           state.transferCount === maximumTransferCount
-            ? ` Transfer bank full at ${maximumTransferCount}. Route a piece before clearing more.`
+            ? ` Transfer bank full at ${maximumTransferCount}. Use Shift before clearing more.`
             : "";
         setAnnouncement(
           `${count} ${count === 1 ? "line" : "lines"} cleared. ${transfersStored} ${
@@ -157,6 +183,18 @@ export function GameplayScreen({
     state.stencil,
     state.transferCount,
   ]);
+
+  useEffect(() => {
+    if (lineClearFeedback === null) {
+      return;
+    }
+
+    const timeout = window.setTimeout(
+      () => setLineClearFeedback(null),
+      lineClearFeedbackDurationMilliseconds,
+    );
+    return () => window.clearTimeout(timeout);
+  }, [lineClearFeedback]);
 
   useEffect(() => {
     if (state.phase !== "playing" && state.phase !== "placing-stencil") {
@@ -265,6 +303,9 @@ export function GameplayScreen({
               <p className="panel-kicker">01 / CLEAR LINES</p>
               <h2 id="normal-board-title">TETRIS BOARD</h2>
             </div>
+            {lineClearFeedback && (
+              <LineClearFeedback key={lineClearFeedback.id} event={lineClearFeedback} />
+            )}
             <div className="next-piece">
               <span>NEXT</span>
               <PiecePreview type={state.nextPiece} />

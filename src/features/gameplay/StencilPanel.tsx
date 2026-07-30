@@ -139,7 +139,7 @@ export function StencilPanel({
                 {state.transferCount === 0
                   ? "EARN A TRANSFER"
                   : canRoute
-                    ? `ROUTE ${state.activePiece.type} · N`
+                    ? `ROUTE ${state.activePiece.type} · SHIFT`
                     : "ROUTE WINDOW PASSED"}
               </button>
             )}

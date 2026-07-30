@@ -59,7 +59,7 @@ export function getGameAction(key: string, phase: BoardPhase): BoardAction | nul
     case "p":
     case "escape":
       return { type: "pause", reason: "player" };
-    case "n":
+    case "shift":
       return { type: "route-to-stencil" };
     default:
       return null;

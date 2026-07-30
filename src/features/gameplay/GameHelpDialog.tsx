@@ -17,7 +17,7 @@ const boardControls = [
   { keys: ["SPACE"], label: "Hard drop" },
   { keys: ["↑", "X"], label: "Rotate clockwise" },
   { keys: ["Z"], label: "Rotate counter-clockwise" },
-  { keys: ["N"], label: "Route before the cyan deadline" },
+  { keys: ["SHIFT"], label: "Route before the cyan deadline" },
   { keys: ["P", "ESC"], label: "Pause" },
 ] as const satisfies readonly HelpControl[];
 
@@ -62,10 +62,10 @@ export function GameHelpDialog({ onClose }: GameHelpDialogProps) {
         <p className="panel-kicker">QUICK REFERENCE</p>
         <h2 id={titleId}>How to play Nametris</h2>
         <p id={descriptionId} className="help-intro">
-          Clear full rows to earn and bank up to three transfers, then press N before a
-          piece crosses the cyan route deadline. In the stencil, any part outside an
-          open NAME cell is trimmed. At 80% you may finish safely; 100% earns a perfect
-          result.
+          Clear full rows to earn and bank up to three transfers, then press Shift
+          before a piece crosses the cyan route deadline. In the stencil, any part
+          outside an open NAME cell is trimmed. At 80% you may finish safely; 100% earns
+          a perfect result.
         </p>
 
         <div className="help-columns">

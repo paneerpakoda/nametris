@@ -91,7 +91,7 @@ export function GameSidebar({
           <div>
             <dt>Route</dt>
             <dd className="key-hints">
-              <KeyHint>N</KeyHint>
+              <KeyHint wide>SHIFT</KeyHint>
             </dd>
           </div>
         </dl>

@@ -194,6 +194,7 @@ Scoring constants must live in one configuration module and be easy to tune afte
 - Transfers accumulate up to a bank limit of three.
 - At `3 / 3`, highlight the transfer metric and NAME panel with a persistent prompt to route a piece.
 - Additional cleared rows still score and count normally but cannot add transfers while the bank is full.
+- Show immediate visible feedback for transfers earned on a clear and transfers wasted because the bank had no room.
 - Routing a piece is allowed only when at least one transfer is available.
 - Routing must be an affirmative action; ordinary Tetris play continues without a board/name confirmation dialog.
 - When routed, the exact spawned piece type moves to stencil-placement mode.
@@ -273,7 +274,7 @@ Proposed defaults:
 - `Space`: hard drop
 - `ArrowUp` / `X`: rotate clockwise
 - `Z`: rotate counter-clockwise
-- `N`: route eligible piece to the name
+- `Shift`: route eligible piece to the name
 - `P` / `Escape`: pause
 
 ### Stencil
