@@ -1,36 +1,14 @@
 import { useState } from "react";
 
 import { GameplayScreen } from "../features/gameplay/GameplayScreen";
+import { WelcomeScreen } from "../features/onboarding/WelcomeScreen";
 
 export function App() {
-  const [screen, setScreen] = useState<"welcome" | "game">("welcome");
+  const [sessionName, setSessionName] = useState<string | null>(null);
 
-  if (screen === "game") {
-    return <GameplayScreen />;
+  if (sessionName !== null) {
+    return <GameplayScreen name={sessionName} />;
   }
 
-  return (
-    <main className="welcome-shell">
-      <section className="welcome-card" aria-labelledby="welcome-title">
-        <p className="eyebrow">A TWO-BOARD BLOCK GAME</p>
-        <h1 id="welcome-title">NAMETRIS</h1>
-        <p className="premise">
-          Clear lines on one board. Route earned pieces to build your name on the other.
-        </p>
-        <div className="name-preview" aria-label="Default name: HARSH">
-          HARSH
-        </div>
-        <p className="privacy-note">
-          <span aria-hidden="true">◆</span> Your name stays on this device.
-        </p>
-        <button
-          type="button"
-          className="primary-button"
-          onClick={() => setScreen("game")}
-        >
-          Start building
-        </button>
-      </section>
-    </main>
-  );
+  return <WelcomeScreen onStart={setSessionName} />;
 }

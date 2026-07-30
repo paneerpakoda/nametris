@@ -2,7 +2,7 @@ import { useEffect, useMemo, useReducer, useRef } from "react";
 
 import { createPieceQueue, createSeededRandom } from "../../game/engine/bag";
 import {
-  createBoardSession,
+  createGameSession,
   getGhostPiece,
   reduceBoardSession,
 } from "../../game/engine/session";
@@ -13,13 +13,19 @@ import "../../styles/gameplay.css";
 
 interface GameplayScreenProps {
   readonly seed?: number;
+  readonly name?: string;
 }
 
 const clockResolutionMilliseconds = 50;
 
-export function GameplayScreen({ seed = 20_260_730 }: GameplayScreenProps) {
+export function GameplayScreen({
+  seed = 20_260_730,
+  name = "HARSH",
+}: GameplayScreenProps) {
   const queue = useMemo(() => createPieceQueue(createSeededRandom(seed), 100), [seed]);
-  const [state, dispatch] = useReducer(reduceBoardSession, queue, createBoardSession);
+  const [state, dispatch] = useReducer(reduceBoardSession, queue, (pieces) =>
+    createGameSession(name, pieces),
+  );
   const gameRef = useRef<HTMLDivElement>(null);
   const ghostPiece = getGhostPiece(state.board, state.activePiece);
 
