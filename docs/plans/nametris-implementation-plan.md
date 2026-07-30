@@ -1,6 +1,6 @@
 # Implementation Plan: Nametris Desktop MVP
 
-Status: Approved by the product owner on 30 July 2026.
+Status: Completed on 30 July 2026 from the approved product-owner plan.
 
 Source specification: [`docs/specs/nametris-game-spec.md`](../specs/nametris-game-spec.md)
 
@@ -43,14 +43,14 @@ approved spec
 
 **Acceptance criteria:**
 
-- [ ] Git tracks the existing documentation and ignores generated artifacts.
-- [ ] `package.json` uses verified stable versions of the approved stack.
-- [ ] No reference source is copied unless its license and required notice are recorded.
+- [x] Git tracks the existing documentation and ignores generated artifacts.
+- [x] `package.json` uses verified stable versions of the approved stack.
+- [x] No reference source is copied unless its license and required notice are recorded.
 
 **Verification:**
 
-- [ ] `git status --short` lists only intentional project files.
-- [ ] `npm install` produces a lockfile with no unresolved dependency errors.
+- [x] `git status --short` lists only intentional project files.
+- [x] `npm install` produces a lockfile with no unresolved dependency errors.
 
 **Dependencies:** Approved specification.
 
@@ -64,15 +64,15 @@ approved spec
 
 **Acceptance criteria:**
 
-- [ ] Every command required by the specification exists.
-- [ ] TypeScript uses strict mode and tests run in a browser-like environment.
-- [ ] `npm run check` composes typecheck, lint, formatting, unit tests, and build.
+- [x] Every command required by the specification exists.
+- [x] TypeScript uses strict mode and tests run in a browser-like environment.
+- [x] `npm run check` composes typecheck, lint, formatting, unit tests, and build.
 
 **Verification:**
 
-- [ ] `npm run typecheck`
-- [ ] `npm run lint`
-- [ ] `npm run format:check`
+- [x] `npm run typecheck`
+- [x] `npm run lint`
+- [x] `npm run format:check`
 
 **Dependencies:** Task 1
 
@@ -86,15 +86,15 @@ approved spec
 
 **Acceptance criteria:**
 
-- [ ] The welcome shell renders at the supported minimum viewport.
-- [ ] Global styling exposes accessible modern-retro tokens.
-- [ ] A smoke test proves the app mounts.
+- [x] The welcome shell renders at the supported minimum viewport.
+- [x] Global styling exposes accessible modern-retro tokens.
+- [x] A smoke test proves the app mounts.
 
 **Verification:**
 
-- [ ] `npm run test -- --run`
-- [ ] `npm run build`
-- [ ] Manual check at `1180 × 720`
+- [x] `npm run test -- --run`
+- [x] `npm run build`
+- [x] Manual check at `1180 × 720`
 
 **Dependencies:** Task 2
 
@@ -104,9 +104,9 @@ approved spec
 
 ### Checkpoint 1: Foundation
 
-- [ ] `npm run check` passes.
-- [ ] `docs/` remains intact.
-- [ ] The production bundle starts locally with no console errors.
+- [x] `npm run check` passes.
+- [x] `docs/` remains intact.
+- [x] The production bundle starts locally with no console errors.
 
 ### Phase 2: Deterministic Gameplay Core
 
@@ -116,14 +116,14 @@ approved spec
 
 **Acceptance criteria:**
 
-- [ ] All seven pieces expose correct four-cell rotations.
-- [ ] Collision and movement behave deterministically at walls, floor, and occupied cells.
-- [ ] Engine code contains no browser or React dependencies.
+- [x] All seven pieces expose correct four-cell rotations.
+- [x] Collision and movement behave deterministically at walls, floor, and occupied cells.
+- [x] Engine code contains no browser or React dependencies.
 
 **Verification:**
 
-- [ ] `npm run test -- --run src/game/engine/collision.test.ts`
-- [ ] `npm run typecheck`
+- [x] `npm run test -- --run src/game/engine/collision.test.ts`
+- [x] `npm run typecheck`
 
 **Dependencies:** Task 3
 
@@ -137,14 +137,14 @@ approved spec
 
 **Acceptance criteria:**
 
-- [ ] Rotations succeed in open space and use deterministic kicks near boundaries.
-- [ ] Illegal rotations leave state unchanged.
-- [ ] I, O, and JLSTZ behavior has explicit boundary coverage.
+- [x] Rotations succeed in open space and use deterministic kicks near boundaries.
+- [x] Illegal rotations leave state unchanged.
+- [x] I, O, and JLSTZ behavior has explicit boundary coverage.
 
 **Verification:**
 
-- [ ] `npm run test -- --run src/game/engine/rotation.test.ts`
-- [ ] `npm run typecheck`
+- [x] `npm run test -- --run src/game/engine/rotation.test.ts`
+- [x] `npm run typecheck`
 
 **Dependencies:** Task 4
 
@@ -158,14 +158,14 @@ approved spec
 
 **Acceptance criteria:**
 
-- [ ] Seeded bags are repeatable and each bag contains all seven pieces.
-- [ ] Locks clear all full rows and award the configured score and transfer count.
-- [ ] One-, two-, three-, and four-line boundaries are covered.
+- [x] Seeded bags are repeatable and each bag contains all seven pieces.
+- [x] Locks clear all full rows and award the configured score and transfer count.
+- [x] One-, two-, three-, and four-line boundaries are covered.
 
 **Verification:**
 
-- [ ] `npm run test -- --run src/game/engine/bag.test.ts src/game/engine/board.test.ts`
-- [ ] Engine branch coverage report meets the interim 90% target for implemented modules.
+- [x] `npm run test -- --run src/game/engine/bag.test.ts src/game/engine/board.test.ts`
+- [x] Engine branch coverage report meets the interim 90% target for implemented modules.
 
 **Dependencies:** Tasks 4–5
 
@@ -179,15 +179,15 @@ approved spec
 
 **Acceptance criteria:**
 
-- [ ] A seeded game can be played entirely by keyboard.
-- [ ] Gravity, drops, ghost, line clears, next piece, pause, and top-out are visible.
-- [ ] Hidden tabs pause automatically and require explicit resume.
+- [x] A seeded game can be played entirely by keyboard.
+- [x] Gravity, drops, ghost, line clears, next piece, pause, and top-out are visible.
+- [x] Hidden tabs pause automatically and require explicit resume.
 
 **Verification:**
 
-- [ ] Focused runtime and component tests pass.
-- [ ] Manual browser play confirms handled keys do not scroll the page.
-- [ ] `npm run check`
+- [x] Focused runtime and component tests pass.
+- [x] Manual browser play confirms handled keys do not scroll the page.
+- [x] `npm run check`
 
 **Dependencies:** Task 6
 
@@ -197,9 +197,9 @@ approved spec
 
 ### Checkpoint 2: Playable Board
 
-- [ ] `npm run check` passes.
-- [ ] A normal Tetris run is playable from spawn through line clear and loss.
-- [ ] Deterministic seed replay produces the same piece sequence.
+- [x] `npm run check` passes.
+- [x] A normal Tetris run is playable from spawn through line clear and loss.
+- [x] Deterministic seed replay produces the same piece sequence.
 
 ### Phase 3: Name-Building Core
 
@@ -209,14 +209,14 @@ approved spec
 
 **Acceptance criteria:**
 
-- [ ] Every glyph has a fill count divisible by four and an exact-cover solution.
-- [ ] Representative 2-, 5-, and 10-letter masks validate.
-- [ ] Maintained fixtures make glyph legibility changes reviewable.
+- [x] Every glyph has a fill count divisible by four and an exact-cover solution.
+- [x] Representative 2-, 5-, and 10-letter masks validate.
+- [x] Maintained fixtures make glyph legibility changes reviewable.
 
 **Verification:**
 
-- [ ] `npm run test -- --run src/game/glyphs`
-- [ ] `npm run test:coverage` reports at least 90% branch coverage for glyph logic.
+- [x] `npm run test -- --run src/game/glyphs`
+- [x] `npm run test:coverage` reports at least 90% branch coverage for glyph logic.
 
 **Dependencies:** Tasks 4–6
 
@@ -230,14 +230,14 @@ approved spec
 
 **Acceptance criteria:**
 
-- [ ] A piece locks only when all four cells are unoccupied fillable cells.
-- [ ] Invalid placement never changes filled cells.
-- [ ] Completion uses exact ratios and floors display percentages.
+- [x] A piece locks only when all four cells are unoccupied fillable cells.
+- [x] Invalid placement never changes filled cells.
+- [x] Completion uses exact ratios and floors display percentages.
 
 **Verification:**
 
-- [ ] `npm run test -- --run src/game/engine/stencil.test.ts`
-- [ ] Boundary tests cover immediately below, at, and above 80%, plus exact 100%.
+- [x] `npm run test -- --run src/game/engine/stencil.test.ts`
+- [x] Boundary tests cover immediately below, at, and above 80%, plus exact 100%.
 
 **Dependencies:** Task 8
 
@@ -251,14 +251,14 @@ approved spec
 
 **Acceptance criteria:**
 
-- [ ] Cancel returns the exact piece to spawn and preserves its transfer.
-- [ ] Legal lock spends exactly one transfer and advances to the next piece.
-- [ ] 80% remains active play, 100% auto-finishes, and top-out before claiming 80–99% loses.
+- [x] Cancel returns the exact piece to spawn and preserves its transfer.
+- [x] Legal lock spends exactly one transfer and advances to the next piece.
+- [x] 80% remains active play, 100% auto-finishes, and top-out before claiming 80–99% loses.
 
 **Verification:**
 
-- [ ] `npm run test -- --run src/game/engine/session.test.ts`
-- [ ] State-transition coverage meets the 90% engine branch target.
+- [x] `npm run test -- --run src/game/engine/session.test.ts`
+- [x] State-transition coverage meets the 90% engine branch target.
 
 **Dependencies:** Tasks 7 and 9
 
@@ -272,14 +272,14 @@ approved spec
 
 **Acceptance criteria:**
 
-- [ ] Active time excludes explicit pause, help, and hidden-tab time.
-- [ ] Every title and threshold boundary has a unit test.
-- [ ] Perfect results can select only the three perfect titles.
+- [x] Active time excludes explicit pause, help, and hidden-tab time.
+- [x] Every title and threshold boundary has a unit test.
+- [x] Perfect results can select only the three perfect titles.
 
 **Verification:**
 
-- [ ] `npm run test -- --run src/game/engine/titles.test.ts src/game/runtime/clock.test.ts`
-- [ ] Title and timer branch coverage is at least 90%.
+- [x] `npm run test -- --run src/game/engine/titles.test.ts src/game/runtime/clock.test.ts`
+- [x] Title and timer branch coverage is at least 90%.
 
 **Dependencies:** Task 10
 
@@ -289,9 +289,9 @@ approved spec
 
 ### Checkpoint 3: Complete Rules
 
-- [ ] `npm run check` passes.
-- [ ] All 26 glyphs are exactly tileable.
-- [ ] Reducer tests prove transfer, 80%, 100%, and top-out semantics.
+- [x] `npm run check` passes.
+- [x] All 26 glyphs are exactly tileable.
+- [x] Reducer tests prove transfer, 80%, 100%, and top-out semantics.
 
 ### Phase 4: Complete Product Experience
 
@@ -301,14 +301,14 @@ approved spec
 
 **Acceptance criteria:**
 
-- [ ] Empty input starts `HARSH`; valid names normalize to uppercase.
-- [ ] Invalid names produce an associated accessible inline error.
-- [ ] The name is absent from URLs, storage, logs, and automatic requests.
+- [x] Empty input starts `HARSH`; valid names normalize to uppercase.
+- [x] Invalid names produce an associated accessible inline error.
+- [x] The name is absent from URLs, storage, logs, and automatic requests.
 
 **Verification:**
 
-- [ ] Focused React Testing Library onboarding tests pass.
-- [ ] Manual storage, URL, console, and network inspection passes.
+- [x] Focused React Testing Library onboarding tests pass.
+- [x] Manual storage, URL, console, and network inspection passes.
 
 **Dependencies:** Task 3
 
@@ -322,15 +322,15 @@ approved spec
 
 **Acceptance criteria:**
 
-- [ ] Board/name routing is understandable and fully keyboard-operable.
-- [ ] The finish action appears at exact 80% without modal, focus theft, or pause.
-- [ ] Validity and essential status use text/icon differences as well as color.
+- [x] Board/name routing is understandable and fully keyboard-operable.
+- [x] The finish action appears at exact 80% without modal, focus theft, or pause.
+- [x] Validity and essential status use text/icon differences as well as color.
 
 **Verification:**
 
-- [ ] Focused gameplay integration tests pass.
-- [ ] Manual check at minimum viewport and 200% zoom.
-- [ ] `npm run check`
+- [x] Focused gameplay integration tests pass.
+- [x] Manual check at minimum viewport and 200% zoom.
+- [x] `npm run check`
 
 **Dependencies:** Tasks 10–12
 
@@ -344,14 +344,14 @@ approved spec
 
 **Acceptance criteria:**
 
-- [ ] Success freezes score, completion, title, and active playtime.
-- [ ] Loss never receives a success title.
-- [ ] Replay preserves the name only in memory; new-name returns to onboarding.
+- [x] Success freezes score, completion, title, and active playtime.
+- [x] Loss never receives a success title.
+- [x] Replay preserves the name only in memory; new-name returns to onboarding.
 
 **Verification:**
 
-- [ ] Focused result-flow integration tests pass.
-- [ ] Manual replay/new-name checks confirm no browser persistence.
+- [x] Focused result-flow integration tests pass.
+- [x] Manual replay/new-name checks confirm no browser persistence.
 
 **Dependencies:** Tasks 11 and 13
 
@@ -365,15 +365,15 @@ approved spec
 
 **Acceptance criteria:**
 
-- [ ] Card content and all outside actions match the specification.
-- [ ] Reduced motion removes moving tilt/shine while preserving the design.
-- [ ] Export, copy, and share preparation remain local and user-initiated.
+- [x] Card content and all outside actions match the specification.
+- [x] Reduced motion removes moving tilt/shine while preserving the design.
+- [x] Export, copy, and share preparation remain local and user-initiated.
 
 **Verification:**
 
-- [ ] Reward interaction, DOM-boundary, and reduced-motion tests pass.
-- [ ] Downloaded SVG opens and matches frozen result data.
-- [ ] Network inspection shows no reward action sends the name remotely.
+- [x] Reward interaction, DOM-boundary, and reduced-motion tests pass.
+- [x] Downloaded SVG opens and matches frozen result data.
+- [x] Network inspection shows no reward action sends the name remotely.
 
 **Dependencies:** Task 14
 
@@ -383,9 +383,9 @@ approved spec
 
 ### Checkpoint 4: Feature Complete
 
-- [ ] `npm run check` passes.
-- [ ] Production JavaScript remains under the 250 KB gzip target or any regression is investigated.
-- [ ] All specification acceptance criteria have an automated or recorded manual verification.
+- [x] `npm run check` passes.
+- [x] Production JavaScript remains under the 250 KB gzip target or any regression is investigated.
+- [x] All specification acceptance criteria have an automated or recorded manual verification.
 
 ### Phase 5: Browser QA and Handoff
 
@@ -395,14 +395,14 @@ approved spec
 
 **Acceptance criteria:**
 
-- [ ] Every specified integration scenario has a stable test.
-- [ ] Tests assert reward controls remain outside the card.
-- [ ] Privacy tests fail if the name reaches storage, URL, logging, or request construction.
+- [x] Every specified integration scenario has a stable test.
+- [x] Tests assert reward controls remain outside the card.
+- [x] Privacy tests fail if the name reaches storage, URL, logging, or request construction.
 
 **Verification:**
 
-- [ ] `npm run test:coverage`
-- [ ] `npm run check`
+- [x] `npm run test:coverage`
+- [x] `npm run check`
 
 **Dependencies:** Tasks 12–15
 
@@ -416,15 +416,15 @@ approved spec
 
 **Acceptance criteria:**
 
-- [ ] Automated flows cover route/cancel/lock, 80% continuation, 100% auto-finish, top-out after 80%, and local download.
-- [ ] No observed request contains a custom test name.
-- [ ] Chrome desktop QA passes at `1180 × 720`, including full keyboard operation.
+- [x] Automated flows cover route/cancel/lock, 80% continuation, 100% auto-finish, top-out after 80%, and local download.
+- [x] No observed request contains a custom test name.
+- [x] Chrome desktop QA passes at `1180 × 720`, including full keyboard operation.
 
 **Verification:**
 
-- [ ] `npm run test:e2e`
-- [ ] Browser console and network panels remain clean.
-- [ ] Record results for supported-browser limitations, if any.
+- [x] `npm run test:e2e`
+- [x] Browser console and network panels remain clean.
+- [x] Record results for supported-browser limitations, if any.
 
 **Dependencies:** Task 16
 
@@ -438,16 +438,16 @@ approved spec
 
 **Acceptance criteria:**
 
-- [ ] Every acceptance criterion is satisfied or explicitly documented as a limitation.
-- [ ] No high-priority review finding remains open.
-- [ ] Development and verification commands are accurate in the repository.
+- [x] Every acceptance criterion is satisfied or explicitly documented as a limitation.
+- [x] No high-priority review finding remains open.
+- [x] Development and verification commands are accurate in the repository.
 
 **Verification:**
 
-- [ ] `npm run check`
-- [ ] `npm run test:coverage`
-- [ ] `npm run test:e2e`
-- [ ] Final manual reward, reduced-motion, download, and privacy checks pass.
+- [x] `npm run check`
+- [x] `npm run test:coverage`
+- [x] `npm run test:e2e`
+- [x] Final manual reward, reduced-motion, download, and privacy checks pass.
 
 **Dependencies:** Task 17
 
@@ -457,9 +457,41 @@ approved spec
 
 ### Checkpoint 5: MVP Complete
 
-- [ ] Unit, integration, lint, typecheck, formatting, build, and browser tests pass.
-- [ ] Engine, glyph, and title branch coverage is at least 90%.
-- [ ] Exact commands and results, bundle size, browser QA, and remaining limitations are ready for handoff.
+- [x] Unit, integration, lint, typecheck, formatting, build, and browser tests pass.
+- [x] Engine, glyph, and title branch coverage is at least 90%.
+- [x] Exact commands and results, bundle size, browser QA, and remaining limitations are ready for handoff.
+
+## Completion Evidence
+
+Recorded on 30 July 2026:
+
+- `npm run check` passed strict TypeScript, ESLint with zero warnings, Prettier,
+  23 Vitest files with 165 tests, and the production build.
+- `npm run test:coverage` passed all 165 tests with 97.85% statement, 94.85%
+  branch, 100% function, and 97.73% line coverage. Engine branch coverage was
+  95.13%; glyph branch coverage was 93.54%.
+- `npm run test:e2e` passed 7 Chromium flows at exactly 1180 × 720, covering
+  keyboard routing/cancel/lock/pause/resume, viewport fit, exact 80%
+  continuation, exact 100% automatic finish, top-out risk after 80%, reward
+  hover/reduced motion, local SVG download, and custom-name request/log/URL
+  privacy.
+- The final production JavaScript was 353.44 KB raw and 111.11 KB gzip. The
+  production browser audit observed no failed requests, console warnings or
+  errors, page overflow, or focus-order defects.
+- `npm audit` reported zero known vulnerabilities across 320 dependencies.
+- All 26 glyphs passed exact-cover validation; every regular and perfect title
+  plus its threshold boundaries has deterministic unit coverage.
+
+## Remaining Validation Limits
+
+- The workspace automated Chrome-compatible Chromium 151. Edge, Firefox, and
+  Safari were not available for an additional automated run.
+- The game has not had a human usability study to validate the proposed
+  spawn-zone routing window or the 3–5 minute target. Those are product-tuning
+  questions rather than known implementation failures.
+- Verification ran successfully on the workspace's Node 25.6.1, but jsdom does
+  not declare support for odd-numbered Node 25. Supported development versions
+  are Node 22.22.2+, Node 24.15.0+, or Node 26+ as declared in `package.json`.
 
 ## Risks and Mitigations
 
