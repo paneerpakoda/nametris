@@ -47,6 +47,7 @@ describe("local reward export", () => {
     expect(first).toContain("HARSH");
     expect(first).toContain("Block-Poet");
     expect(first).toContain("NAME COMPLETE · 80%");
+    expect(first).not.toMatch(/gradient|url\(#/i);
     expect(first.replace('xmlns="http://www.w3.org/2000/svg"', "")).not.toMatch(
       /https?:|<script|foreignObject|<image/,
     );

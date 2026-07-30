@@ -61,18 +61,7 @@ input:focus-visible {
   place-items: center;
   overflow: hidden;
   padding: 32px;
-  background:
-    radial-gradient(circle at 20% 15%, rgb(94 66 190 / 26%), transparent 34%),
-    radial-gradient(circle at 82% 75%, rgb(29 176 176 / 15%), transparent 32%),
-    linear-gradient(rgb(255 255 255 / 2%) 1px, transparent 1px),
-    linear-gradient(90deg, rgb(255 255 255 / 2%) 1px, transparent 1px),
-    var(--background);
-  background-size:
-    auto,
-    auto,
-    28px 28px,
-    28px 28px,
-    auto;
+  background: var(--background);
 }
 
 .welcome-card {
@@ -80,7 +69,7 @@ input:focus-visible {
   padding: 54px;
   border: 1px solid rgb(155 124 255 / 45%);
   border-radius: var(--radius-large);
-  background: linear-gradient(145deg, rgb(26 31 53 / 96%), rgb(14 17 30 / 97%));
+  background: var(--surface);
   box-shadow: var(--shadow-glow);
   text-align: center;
 }
@@ -135,7 +124,7 @@ h1 {
   border: 0;
   border-radius: var(--radius-medium);
   color: #090a12;
-  background: linear-gradient(90deg, var(--lime), var(--cyan));
+  background: var(--lime);
   box-shadow: 0 8px 30px rgb(66 232 224 / 20%);
   cursor: pointer;
   font-weight: 900;
