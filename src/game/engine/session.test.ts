@@ -8,6 +8,10 @@ import { createStencilState, getStencilCompletion } from "./stencil";
 const queue: readonly PieceType[] = ["T", "I", "O", "J", "L", "S", "Z"];
 
 describe("normal-board session", () => {
+  it("requires at least two queued pieces", () => {
+    expect(() => createBoardSession(["I"])).toThrow(/at least two/);
+  });
+
   it("spawns the active and next pieces from an injected queue", () => {
     const state = createBoardSession(queue);
 
@@ -80,6 +84,153 @@ describe("normal-board session", () => {
     });
 
     expect(afterTick).toEqual(paused);
+  });
+
+  it("counts injected active time only while play is active", () => {
+    const state = createBoardSession(queue);
+    const active = reduceBoardSession(state, {
+      type: "tick",
+      elapsedMilliseconds: 250,
+    });
+    const paused = reduceBoardSession(active, {
+      type: "pause",
+      reason: "hidden",
+    });
+    const hidden = reduceBoardSession(paused, {
+      type: "tick",
+      elapsedMilliseconds: 1_000,
+    });
+
+    expect(active.activeMilliseconds).toBe(250);
+    expect(hidden.activeMilliseconds).toBe(250);
+  });
+
+  it("soft drops for one point and rejects a blocked soft drop", () => {
+    const state = createBoardSession(queue);
+    const dropped = reduceBoardSession(state, { type: "soft-drop" });
+    const grounded = {
+      ...dropped,
+      activePiece: {
+        type: "O" as const,
+        rotation: 0 as const,
+        row: BOARD_HEIGHT - 2,
+        column: 3,
+      },
+    };
+
+    expect(dropped.score).toBe(1);
+    expect(reduceBoardSession(grounded, { type: "soft-drop" })).toBe(grounded);
+  });
+
+  it("applies gravity from injected elapsed time", () => {
+    const state = createBoardSession(queue);
+    const ticked = reduceBoardSession(state, {
+      type: "tick",
+      elapsedMilliseconds: 800,
+    });
+
+    expect(ticked.activePiece.row).toBe(state.activePiece.row + 1);
+  });
+
+  it("caps grounded lock-delay resets", () => {
+    const grounded = {
+      ...createBoardSession(queue),
+      activePiece: {
+        type: "O" as const,
+        rotation: 0 as const,
+        row: BOARD_HEIGHT - 2,
+        column: 3,
+      },
+      lockAccumulatorMilliseconds: 100,
+    };
+    const reset = reduceBoardSession(grounded, {
+      type: "move",
+      columnDelta: -1,
+    });
+    const capped = reduceBoardSession(
+      { ...grounded, lockResetCount: 15 },
+      { type: "move", columnDelta: -1 },
+    );
+
+    expect(reset.lockAccumulatorMilliseconds).toBe(0);
+    expect(reset.lockResetCount).toBe(1);
+    expect(capped.lockAccumulatorMilliseconds).toBe(100);
+    expect(capped.lockResetCount).toBe(15);
+  });
+
+  it("loses safely when the injected queue is exhausted", () => {
+    const first = reduceBoardSession(createBoardSession(["T", "I"]), {
+      type: "hard-drop",
+    });
+    const exhausted = reduceBoardSession(first, { type: "hard-drop" });
+
+    expect(first.nextPiece).toBe("I");
+    expect(exhausted.phase).toBe("lost");
+  });
+
+  it("loses when the next piece cannot spawn", () => {
+    const state = createBoardSession(["O", "I", "T"]);
+    const board = state.board.map((row, rowIndex) =>
+      row.map((cell, columnIndex) =>
+        rowIndex === 1 && columnIndex === 3 ? "J" : cell,
+      ),
+    );
+    const blocked = {
+      ...state,
+      board,
+      activePiece: {
+        type: "O" as const,
+        rotation: 0 as const,
+        row: BOARD_HEIGHT - 2,
+        column: 3,
+      },
+    };
+
+    expect(reduceBoardSession(blocked, { type: "hard-drop" }).phase).toBe("lost");
+  });
+
+  it("loses when a grounded lock occupies hidden rows", () => {
+    const state = createBoardSession(["O", "I", "T"]);
+    const board = state.board.map((row, rowIndex) =>
+      row.map((cell, columnIndex) =>
+        rowIndex === 2 && (columnIndex === 4 || columnIndex === 5) ? "J" : cell,
+      ),
+    );
+
+    const toppedOut = reduceBoardSession(
+      { ...state, board },
+      { type: "tick", elapsedMilliseconds: 500 },
+    );
+
+    expect(toppedOut.phase).toBe("lost");
+  });
+
+  it("leaves invalid and terminal actions unchanged", () => {
+    const state = createBoardSession(queue);
+    const atWall = {
+      ...state,
+      activePiece: {
+        type: "I" as const,
+        rotation: 1 as const,
+        row: 3,
+        column: -2,
+      },
+    };
+    const lost = { ...state, phase: "lost" as const };
+
+    expect(reduceBoardSession(atWall, { type: "move", columnDelta: -1 })).toBe(atWall);
+    expect(reduceBoardSession(state, { type: "resume" })).toBe(state);
+    expect(
+      reduceBoardSession(
+        { ...state, phase: "paused" },
+        {
+          type: "pause",
+          reason: "player",
+        },
+      ),
+    ).toMatchObject({ phase: "paused" });
+    expect(reduceBoardSession(state, { type: "finish-run" })).toBe(state);
+    expect(reduceBoardSession(lost, { type: "hard-drop" })).toBe(lost);
   });
 });
 
@@ -158,5 +309,68 @@ describe("piece routing", () => {
     };
 
     expect(reduceBoardSession(state, { type: "finish-run" }).phase).toBe("won");
+  });
+
+  it("moves, rotates, and counts time during stencil placement", () => {
+    const mask = new Set(
+      Array.from({ length: 16 }, (_, index) => `${Math.floor(index / 4)}:${index % 4}`),
+    );
+    const state = {
+      ...createBoardSession(["T", "I", "O"]),
+      transferCount: 1,
+      stencil: createStencilState(mask, 4, 4),
+    };
+    const placing = reduceBoardSession(state, { type: "route-to-stencil" });
+    const moved = reduceBoardSession(placing, {
+      type: "stencil-move",
+      rowDelta: 1,
+      columnDelta: 0,
+    });
+    const rotated = reduceBoardSession(moved, {
+      type: "stencil-rotate",
+      direction: "clockwise",
+    });
+    const timed = reduceBoardSession(rotated, {
+      type: "tick",
+      elapsedMilliseconds: 200,
+    });
+
+    expect(moved.stencilPiece).not.toBeNull();
+    expect(rotated.stencilPiece?.rotation).toBe(1);
+    expect(timed.activeMilliseconds).toBe(200);
+  });
+
+  it("does not route without a transfer or after leaving the spawn zone", () => {
+    const state = createBoardSession(queue);
+    const noTransfer = reduceBoardSession(state, {
+      type: "route-to-stencil",
+    });
+    const tooLate = reduceBoardSession(
+      {
+        ...state,
+        transferCount: 1,
+        activePiece: { ...state.activePiece, row: 3 },
+      },
+      { type: "route-to-stencil" },
+    );
+
+    expect(noTransfer).toBe(state);
+    expect(tooLate.phase).toBe("playing");
+  });
+
+  it("fails safe if stencil mode has no active stencil piece", () => {
+    const state = {
+      ...createBoardSession(queue),
+      phase: "placing-stencil" as const,
+      stencilPiece: null,
+    };
+
+    expect(
+      reduceBoardSession(state, {
+        type: "stencil-move",
+        rowDelta: 1,
+        columnDelta: 0,
+      }),
+    ).toBe(state);
   });
 });

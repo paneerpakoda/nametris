@@ -12,6 +12,7 @@ import { canPlacePiece, movePiece } from "./collision";
 import { getPieceCells } from "./pieces";
 import { rotatePiece, type RotationDirection } from "./rotation";
 import { getHardDropScore, getLevel, getSoftDropScore } from "./scoring";
+import { addActiveMilliseconds } from "../runtime/clock";
 import {
   canLockIntoStencil,
   createStencilPlacementPiece,
@@ -45,6 +46,7 @@ export interface BoardSession {
   readonly successfulStencilLocks: number;
   readonly canceledRoutes: number;
   readonly distinctStencilPieceTypes: ReadonlySet<PieceType>;
+  readonly activeMilliseconds: number;
   readonly gravityAccumulatorMilliseconds: number;
   readonly lockAccumulatorMilliseconds: number;
   readonly lockResetCount: number;
@@ -116,6 +118,7 @@ export function createGameSession(
     successfulStencilLocks: 0,
     canceledRoutes: 0,
     distinctStencilPieceTypes: new Set(),
+    activeMilliseconds: 0,
     gravityAccumulatorMilliseconds: 0,
     lockAccumulatorMilliseconds: 0,
     lockResetCount: 0,
@@ -261,6 +264,15 @@ function reduceStencilPlacement(
   }
 
   switch (action.type) {
+    case "tick":
+      return {
+        ...state,
+        activeMilliseconds: addActiveMilliseconds(
+          state.activeMilliseconds,
+          action.elapsedMilliseconds,
+          true,
+        ),
+      };
     case "stencil-move":
       return {
         ...state,
@@ -386,8 +398,17 @@ export function reduceBoardSession(
         getHardDropScore(distance),
       );
     }
-    case "tick":
-      return tickPlayingSession(state, action.elapsedMilliseconds);
+    case "tick": {
+      const ticked = tickPlayingSession(state, action.elapsedMilliseconds);
+      return {
+        ...ticked,
+        activeMilliseconds: addActiveMilliseconds(
+          state.activeMilliseconds,
+          action.elapsedMilliseconds,
+          true,
+        ),
+      };
+    }
     default:
       return state;
   }
