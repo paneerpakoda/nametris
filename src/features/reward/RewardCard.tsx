@@ -1,6 +1,7 @@
 import { motion, useMotionValue, useReducedMotion, useSpring } from "motion/react";
 import { useRef, type CSSProperties, type PointerEvent } from "react";
 
+import { NametrisMark } from "../../components/NametrisMark";
 import type { RunResult } from "../../game/engine/result";
 import { formatActiveTime } from "./exportCard";
 
@@ -71,7 +72,10 @@ export function RewardCard({ result, reducedMotion }: RewardCardProps) {
       onFocus={resetCard}
     >
       <div className="reward-shine" aria-hidden="true" />
-      <p className="reward-brand">NAMETRIS</p>
+      <div className="reward-brand-lockup">
+        <NametrisMark compact />
+        <p className="reward-brand">NAMETRIS</p>
+      </div>
       <h2>{result.name}</h2>
       <div
         className="result-stencil"

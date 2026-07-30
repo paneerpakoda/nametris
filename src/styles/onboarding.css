@@ -6,6 +6,10 @@
   align-items: center;
 }
 
+.welcome-brand-mark {
+  margin-bottom: 20px;
+}
+
 .welcome-copy h1 {
   font-size: clamp(5rem, 10vw, 8.5rem);
 }

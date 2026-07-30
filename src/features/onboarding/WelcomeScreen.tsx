@@ -1,5 +1,6 @@
 import { useState } from "react";
 
+import { NametrisMark } from "../../components/NametrisMark";
 import { validatePlayerName } from "./nameValidation";
 import "../../styles/onboarding.css";
 
@@ -28,6 +29,9 @@ export function WelcomeScreen({ onStart }: WelcomeScreenProps) {
     <main className="welcome-shell">
       <section className="welcome-layout" aria-labelledby="welcome-title">
         <div className="welcome-copy">
+          <div className="welcome-brand-mark">
+            <NametrisMark />
+          </div>
           <p className="eyebrow">A TWO-BOARD BLOCK GAME</p>
           <h1 id="welcome-title">NAMETRIS</h1>
           <p className="premise">

@@ -91,6 +91,13 @@
   letter-spacing: 0.25em;
 }
 
+.reward-brand-lockup {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
 .reward-card h2 {
   margin: 8px 0 10px;
   color: var(--text);

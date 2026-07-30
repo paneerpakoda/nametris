@@ -1,3 +1,4 @@
+import { KeyHint } from "../../components/KeyHint";
 import type { BoardSession } from "../../game/engine/session";
 import { formatActiveTime } from "../../game/runtime/clock";
 import { StencilPanel } from "./StencilPanel";
@@ -49,23 +50,41 @@ export function GameSidebar({
         <dl>
           <div>
             <dt>Move</dt>
-            <dd>← → / A D</dd>
+            <dd className="key-hints">
+              <KeyHint>←</KeyHint>
+              <KeyHint>→</KeyHint>
+              <span>or</span>
+              <KeyHint>A</KeyHint>
+              <KeyHint>D</KeyHint>
+            </dd>
           </div>
           <div>
             <dt>Soft drop</dt>
-            <dd>↓ / S</dd>
+            <dd className="key-hints">
+              <KeyHint>↓</KeyHint>
+              <span>or</span>
+              <KeyHint>S</KeyHint>
+            </dd>
           </div>
           <div>
             <dt>Hard drop</dt>
-            <dd>SPACE</dd>
+            <dd className="key-hints">
+              <KeyHint wide>SPACE</KeyHint>
+            </dd>
           </div>
           <div>
             <dt>Rotate</dt>
-            <dd>↑ / X / Z</dd>
+            <dd className="key-hints">
+              <KeyHint>↑</KeyHint>
+              <KeyHint>X</KeyHint>
+              <KeyHint>Z</KeyHint>
+            </dd>
           </div>
           <div>
             <dt>Route</dt>
-            <dd>N</dd>
+            <dd className="key-hints">
+              <KeyHint>N</KeyHint>
+            </dd>
           </div>
         </dl>
       </section>

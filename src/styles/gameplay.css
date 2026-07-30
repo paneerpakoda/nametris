@@ -26,6 +26,12 @@
   letter-spacing: -0.03em;
 }
 
+.game-title-lockup {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
 .run-guidance {
   display: flex;
   max-width: 470px;
@@ -133,7 +139,7 @@
 }
 
 .board-frame {
-  max-width: 390px;
+  width: min(390px, calc((100vh - 232px) / 2));
   margin: 0 auto;
   padding: 7px;
   border: 1px solid rgb(66 232 224 / 30%);
@@ -381,6 +387,19 @@
   font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
   font-size: 0.78rem;
   font-weight: 800;
+}
+
+.controls-card .key-hints {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.controls-card .key-hints > span {
+  color: var(--muted);
+  font-family: inherit;
+  font-size: 0.58rem;
+  font-weight: 700;
 }
 
 .secondary-button {

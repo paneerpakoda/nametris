@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useReducer, useRef, useState } from "react";
 
+import { NametrisMark } from "../../components/NametrisMark";
 import { createPieceQueue, createSeededRandom } from "../../game/engine/bag";
 import {
   createGameSession,
@@ -191,9 +192,12 @@ export function GameplayScreen({
   return (
     <main className="game-shell">
       <header className="game-header">
-        <div>
-          <p className="eyebrow">NAMETRIS</p>
-          <h1>BUILD THE NAME</h1>
+        <div className="game-title-lockup">
+          <NametrisMark compact />
+          <div>
+            <p className="eyebrow">NAMETRIS</p>
+            <h1>BUILD THE NAME</h1>
+          </div>
         </div>
         <RunGuidance
           state={state}
