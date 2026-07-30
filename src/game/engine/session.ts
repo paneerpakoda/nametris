@@ -7,11 +7,7 @@ import {
 } from "../config/gameplay";
 import { composeNameMask } from "../glyphs/alphabet";
 import type { ActivePiece, Board, PieceType } from "../model/types";
-import {
-  createEmptyBoard,
-  getBoardStackHeight,
-  lockAndClearPiece,
-} from "./board";
+import { createEmptyBoard, getBoardStackHeight, lockAndClearPiece } from "./board";
 import { canPlacePiece, movePiece } from "./collision";
 import { rotatePiece, type RotationDirection } from "./rotation";
 import { getHardDropScore, getLevel, getSoftDropScore } from "./scoring";

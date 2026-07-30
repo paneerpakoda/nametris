@@ -30,7 +30,7 @@ These defaults are binding for the first implementation unless changed through a
 
 ## Objective
 
-Create a polished desktop-browser game in which classic Tetris play powers a second name-building board. The player clears lines to earn transfer credits, selectively routes newly spawned pieces into a block-letter stencil, and chooses whether to secure success after 80% or risk continuing toward a perfect 100%.
+Create a polished desktop-browser game in which classic Tetris play powers a second name-building board. The player clears lines to earn credits, selectively routes active pieces into a block-letter stencil, and chooses whether to secure success after 80% or risk continuing toward a perfect 100%.
 
 The experience is for casual players and should:
 
@@ -492,7 +492,6 @@ src/
       session.ts
     glyphs/
       alphabet.ts
-      exactCover.ts
     model/
       types.ts
     runtime/

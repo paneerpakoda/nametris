@@ -23,12 +23,7 @@ export function GameSidebar({
         <Metric label="Score" value={state.score} testId="score" />
         <Metric label="Lines" value={state.linesCleared} />
         <Metric label="Level" value={state.level} />
-        <Metric
-          label="Credits"
-          value={state.transferCount}
-          testId="transfers"
-          accent
-        />
+        <Metric label="Credits" value={state.transferCount} testId="transfers" accent />
         <Metric
           label="Active"
           value={formatActiveTime(state.activeMilliseconds)}

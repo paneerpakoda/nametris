@@ -79,8 +79,8 @@ export function StencilPanel({
       ) : (
         <div className="stencil-actions">
           <p>
-            Spend one credit to send the current piece here. Each cleared row earns
-            one credit.
+            Spend one credit to send the current piece here. Each cleared row earns one
+            credit.
           </p>
           <div>
             {state.canFinish && state.phase === "playing" && (

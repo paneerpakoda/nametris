@@ -1,9 +1,9 @@
 # Nametris
 
 Nametris is a desktop block game: clear rows on a normal Tetris board, earn one
-transfer per cleared row, and route eligible spawned pieces into a stencil of
-your name. Claim a safe result from 80–99%, or keep playing and risk the run for
-a perfect 100% reward.
+credit per cleared row, and spend credits to route active pieces into a stencil
+of your name. Claim a safe result from 80–99%, or keep playing and risk the run
+for a perfect 100% reward.
 
 The product intent, binding game rules, and approved implementation sequence
 live in:
@@ -11,6 +11,7 @@ live in:
 - [`docs/intent/nametris.md`](docs/intent/nametris.md)
 - [`docs/specs/nametris-game-spec.md`](docs/specs/nametris-game-spec.md)
 - [`docs/plans/nametris-implementation-plan.md`](docs/plans/nametris-implementation-plan.md)
+- [`docs/plans/nametris-usability-revision-plan.md`](docs/plans/nametris-usability-revision-plan.md)
 
 ## Run locally
 
@@ -22,7 +23,7 @@ npm run dev
 ```
 
 Open the local URL printed by Vite. The supported minimum desktop viewport is
-1180 × 720 CSS pixels.
+900 × 600 CSS pixels.
 
 For the real-browser suite, install the matching Chromium build once:
 
@@ -43,9 +44,11 @@ npm run test:e2e
 | Route / cancel           | `N`                          | Escape                        |
 | Pause / resume           | `P`, Escape, or Pause button | `P` or Pause button           |
 
-Routing is available only while a spawned piece overlaps the hidden spawn rows
-and at least one transfer is available. Canceling preserves both the exact
-piece and its transfer; a legal stencil lock spends one transfer.
+Press `N` at any time before the active board piece locks when at least one
+credit is available. Stencil placement keeps only new cells inside the letter;
+extra cells outside the stencil or over existing cells are clipped. Canceling
+restores the exact piece and spends nothing. A legal lock that adds at least one
+new cell spends one credit.
 
 ## Verification
 
@@ -63,7 +66,7 @@ random piece order and elapsed time enter through injected sources.
 
 - `src/game/engine/` contains pure reducers and rules for collision, rotation,
   board locking, stencil placement, completion, result snapshots, and titles.
-- `src/game/glyphs/` contains the custom A–Z alphabet and exact-cover validator.
+- `src/game/glyphs/` contains the conventional 5 × 7 A–Z stencil alphabet.
 - `src/features/` adapts the engine to React, keyboard input, local browser
   actions, and semantic DOM/CSS grids.
 - `src/game/testing/fixtures.ts` exposes deterministic rare states only when

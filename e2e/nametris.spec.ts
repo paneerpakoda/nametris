@@ -114,7 +114,9 @@ test("the board bottom and controls fit a compact desktop browser panel", async 
   await expect(page.getByText("Route", { exact: true })).toBeInViewport();
   await loadFixture(page, "route-return");
   await page.keyboard.press("KeyN");
-  await expect(page.getByRole("grid", { name: "Name stencil for AB" })).toBeInViewport();
+  await expect(
+    page.getByRole("grid", { name: "Name stencil for AB" }),
+  ).toBeInViewport();
   await expect(page.getByRole("button", { name: "LOCK · ENTER" })).toBeInViewport();
   await page.keyboard.press("Escape");
   expect(

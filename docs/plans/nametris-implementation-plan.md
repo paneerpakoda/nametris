@@ -4,6 +4,10 @@ Status: Completed on 30 July 2026 from the approved product-owner plan.
 
 Source specification: [`docs/specs/nametris-game-spec.md`](../specs/nametris-game-spec.md)
 
+The initial rules in this historical plan were revised after direct playtesting.
+The current rules and follow-up work are recorded in
+[`nametris-usability-revision-plan.md`](nametris-usability-revision-plan.md).
+
 ## Overview
 
 Build Nametris as a desktop-only React application with a deterministic TypeScript gameplay core, a two-board keyboard interface, exact-cover-validated name glyphs, uninterrupted 80% completion, automatic perfect completion, and a locally generated animated reward. Work proceeds in tested vertical slices so a small normal-board game is playable before the full stencil and reward flows are added.
