@@ -1,0 +1,68 @@
+import { useState } from "react";
+
+import { GameplayScreen } from "../features/gameplay/GameplayScreen";
+import { WelcomeScreen } from "../features/onboarding/WelcomeScreen";
+import { LossScreen } from "../features/results/LossScreen";
+import { SuccessScreen } from "../features/results/SuccessScreen";
+import type { LossResult, RunResult } from "../game/engine/result";
+
+interface AppProps {
+  readonly initialOutcome?: RunResult | LossResult;
+}
+
+export function App({ initialOutcome }: AppProps) {
+  const [sessionName, setSessionName] = useState<string | null>(
+    initialOutcome?.name ?? null,
+  );
+  const [outcome, setOutcome] = useState<RunResult | LossResult | null>(
+    initialOutcome ?? null,
+  );
+  const [runNumber, setRunNumber] = useState(0);
+
+  function playAgain() {
+    setRunNumber((current) => current + 1);
+    setOutcome(null);
+  }
+
+  function tryAnotherName() {
+    setOutcome(null);
+    setSessionName(null);
+  }
+
+  if (outcome?.outcome === "won") {
+    return (
+      <SuccessScreen
+        result={outcome}
+        onPlayAgain={playAgain}
+        onNewName={tryAnotherName}
+      />
+    );
+  }
+
+  if (outcome?.outcome === "lost") {
+    return (
+      <LossScreen result={outcome} onPlayAgain={playAgain} onNewName={tryAnotherName} />
+    );
+  }
+
+  if (sessionName !== null) {
+    return (
+      <GameplayScreen
+        key={runNumber}
+        name={sessionName}
+        seed={20_260_730 + runNumber}
+        onWon={setOutcome}
+        onLost={setOutcome}
+      />
+    );
+  }
+
+  return (
+    <WelcomeScreen
+      onStart={(name) => {
+        setOutcome(null);
+        setSessionName(name);
+      }}
+    />
+  );
+}

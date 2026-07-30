@@ -1,0 +1,143 @@
+.welcome-layout {
+  display: grid;
+  width: min(1040px, 100%);
+  grid-template-columns: minmax(0, 1.1fr) minmax(360px, 0.9fr);
+  gap: 72px;
+  align-items: center;
+}
+
+.welcome-copy h1 {
+  font-size: clamp(5rem, 10vw, 8.5rem);
+}
+
+.welcome-copy .premise {
+  margin-inline: 0;
+  font-size: 1.2rem;
+}
+
+.premise-steps {
+  display: grid;
+  margin: 36px 0 0;
+  padding: 0;
+  gap: 12px;
+  list-style: none;
+}
+
+.premise-steps li {
+  display: grid;
+  grid-template-columns: 70px 1fr;
+  gap: 16px;
+  color: var(--muted);
+}
+
+.premise-steps strong {
+  color: var(--cyan);
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.welcome-form {
+  padding: 32px;
+  border: 1px solid rgb(169 175 200 / 22%);
+  background: rgb(18 21 37 / 94%);
+  box-shadow: 12px 12px 0 rgb(66 232 224 / 8%);
+}
+
+.form-index {
+  margin: 0 0 28px;
+  color: var(--cyan);
+  font-size: 0.65rem;
+  font-weight: 900;
+  letter-spacing: 0.16em;
+}
+
+.welcome-form label {
+  display: block;
+  margin-bottom: 10px;
+  font-weight: 800;
+}
+
+.welcome-form input {
+  width: 100%;
+  padding: 14px 16px;
+  border: 1px solid rgb(169 175 200 / 35%);
+  border-radius: 8px;
+  color: var(--text);
+  background: #090b15;
+  font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
+  font-size: 1.35rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.welcome-form input[aria-invalid="true"] {
+  border-color: var(--danger);
+}
+
+.field-help,
+.field-error {
+  margin: 8px 0 0;
+  font-size: 0.78rem;
+  line-height: 1.4;
+}
+
+.field-help {
+  color: var(--muted);
+}
+
+.field-error {
+  color: #ff9eb1;
+}
+
+.field-error span {
+  display: inline-grid;
+  width: 18px;
+  height: 18px;
+  place-items: center;
+  margin-right: 4px;
+  border-radius: 50%;
+  color: #090a12;
+  background: var(--danger);
+  font-size: 0.7rem;
+  font-weight: 900;
+}
+
+.field-error span::before {
+  content: "!";
+}
+
+.welcome-form .privacy-note {
+  margin-block: 20px 8px;
+}
+
+.controls-summary {
+  margin-top: 20px;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.controls-summary summary {
+  color: var(--text);
+  cursor: pointer;
+  font-weight: 800;
+}
+
+.controls-summary p {
+  line-height: 1.5;
+}
+
+@media (max-height: 760px) {
+  .welcome-layout {
+    gap: 48px;
+  }
+
+  .welcome-form {
+    padding: 24px;
+  }
+
+  .premise-steps {
+    margin-top: 24px;
+  }
+}
