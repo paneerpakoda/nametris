@@ -69,7 +69,12 @@ describe("result views", () => {
     );
 
     expect(screen.getByRole("heading", { name: "STACK OVERFLOW" })).toBeVisible();
+    expect(screen.getByText("HARSH")).toBeVisible();
     expect(screen.getByText("80%")).toBeVisible();
+    expect(
+      screen.getByRole("img", { name: "HARSH block composition at 80%" }),
+    ).toBeVisible();
+    expect(screen.getByText("Level").closest("div")).toHaveTextContent("Level2");
     expect(
       within(screen.getByRole("main")).queryByText(playerTitles.blockPoet),
     ).not.toBeInTheDocument();

@@ -4,6 +4,7 @@ import { useRef, type CSSProperties, type PointerEvent } from "react";
 import { NametrisMark } from "../../components/NametrisMark";
 import type { RunResult } from "../../game/engine/result";
 import { formatActiveTime } from "./exportCard";
+import { ResultStencil } from "./ResultStencil";
 
 interface RewardCardProps {
   readonly result: RunResult;
@@ -18,15 +19,10 @@ export function RewardCard({ result, reducedMotion }: RewardCardProps) {
   const tiltY = useMotionValue(0);
   const rotateX = useSpring(tiltX, { stiffness: 230, damping: 24 });
   const rotateY = useSpring(tiltY, { stiffness: 230, damping: 24 });
-  const filled = new Map(result.stencil.filledCells);
-  const mask = new Set(result.stencil.mask);
   const badge =
     result.displayPercent === 100
       ? "PERFECT · 100%"
       : `NAME COMPLETE · ${result.displayPercent}%`;
-  const stencilStyle = {
-    "--result-columns": result.stencil.columns,
-  } as CSSProperties;
   const cardStyle = {
     rotateX,
     rotateY,
@@ -77,30 +73,11 @@ export function RewardCard({ result, reducedMotion }: RewardCardProps) {
         <p className="reward-brand">NAMETRIS</p>
       </div>
       <h2>{result.name}</h2>
-      <div
-        className="result-stencil"
-        style={stencilStyle}
-        role="img"
-        aria-label={`${result.name} block composition at ${result.displayPercent}%`}
-      >
-        {Array.from(
-          { length: result.stencil.rows * result.stencil.columns },
-          (_, index) => {
-            const row = Math.floor(index / result.stencil.columns);
-            const column = index % result.stencil.columns;
-            const key = `${row}:${column}`;
-            const piece = filled.get(key);
-            return (
-              <span
-                key={key}
-                data-mask={mask.has(key) || undefined}
-                data-piece={piece}
-                data-filled={piece !== undefined || undefined}
-              />
-            );
-          },
-        )}
-      </div>
+      <ResultStencil
+        name={result.name}
+        displayPercent={result.displayPercent}
+        stencil={result.stencil}
+      />
       <p className="reward-title">{result.title}</p>
       <p className="reward-badge">{badge}</p>
       <dl className="reward-metrics">

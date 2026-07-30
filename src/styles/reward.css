@@ -120,7 +120,7 @@
   aspect-ratio: 1;
 }
 
-.result-stencil span[data-mask] {
+.result-stencil span[data-mask]:not([data-filled]) {
   border: 1px dashed rgb(66 232 224 / 30%);
   background: rgb(66 232 224 / 3%);
 }
@@ -205,7 +205,7 @@
 .loss-card {
   display: grid;
   width: min(620px, 100%);
-  padding: 48px;
+  padding: 40px 48px;
   justify-items: center;
   border: 1px solid rgb(255 107 138 / 38%);
   border-radius: 28px;
@@ -218,9 +218,18 @@
   font-size: clamp(2.2rem, 8vw, 4.8rem);
 }
 
+.loss-name {
+  margin: 12px 0 0;
+  color: var(--cyan);
+  font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
+  font-size: 0.8rem;
+  font-weight: 900;
+  letter-spacing: 0.18em;
+}
+
 .loss-message {
   max-width: 450px;
-  margin: 20px 0 8px;
+  margin: 14px 0 6px;
   color: var(--muted);
   line-height: 1.55;
 }
@@ -231,11 +240,17 @@
   font-size: 3.8rem;
 }
 
+.loss-stencil {
+  width: min(420px, calc(var(--result-columns) * 12px));
+  margin: 12px auto 6px;
+  gap: 1px;
+}
+
 .loss-metrics {
   display: grid;
   width: 100%;
-  margin: 20px 0 26px;
-  grid-template-columns: repeat(3, 1fr);
+  margin: 16px 0 24px;
+  grid-template-columns: repeat(4, 1fr);
   gap: 12px;
 }
 
