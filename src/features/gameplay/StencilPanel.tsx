@@ -57,7 +57,7 @@ export function StencilPanel({
       />
 
       {isPlacing ? (
-        <div className="stencil-actions">
+        <div className="stencil-actions is-placing">
           <p>
             Move and rotate freely. Only new cells inside the letter are kept; extra
             cells are clipped. Lock spends one credit.

@@ -1,6 +1,7 @@
 import { BOARD_HEIGHT } from "../engine/board";
 import type { BoardSession } from "../engine/session";
 import { createStencilState } from "../engine/stencil";
+import { composeNameMask } from "../glyphs/alphabet";
 
 export type E2EFixtureKind =
   "line-clear" | "route-return" | "eighty" | "perfect-ready" | "topout-eighty";
@@ -50,7 +51,8 @@ export function createE2EFixture(
         transferCount: 0,
       };
     }
-    case "route-return":
+    case "route-return": {
+      const mask = composeNameMask("AB");
       return {
         ...base,
         activePiece: {
@@ -61,12 +63,9 @@ export function createE2EFixture(
         },
         transferCount: 1,
         canFinish: false,
-        stencil: createStencilState(
-          new Set(["0:0", "0:1", "1:0", "1:1", "0:4", "0:5", "0:6", "0:7"]),
-          2,
-          8,
-        ),
+        stencil: createStencilState(mask.cells, mask.rows, mask.columns),
       };
+    }
     case "eighty":
       return {
         ...base,

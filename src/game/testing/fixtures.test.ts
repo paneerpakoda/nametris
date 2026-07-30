@@ -23,7 +23,8 @@ describe("deterministic browser fixtures", () => {
     expect(placing.phase).toBe("placing-stencil");
     expect(locked.phase).toBe("playing");
     expect(locked.transferCount).toBe(0);
-    expect(getStencilCompletion(locked.stencil).displayPercent).toBe(50);
+    expect(locked.stencil.filledCells.size).toBe(3);
+    expect(getStencilCompletion(locked.stencil).displayPercent).toBe(7);
   });
 
   it("keeps exact-80 fixture gameplay active until finish is claimed", () => {

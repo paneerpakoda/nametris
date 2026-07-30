@@ -42,6 +42,7 @@ test("keyboard flow earns, routes, cancels, locks, and returns to play", async (
 
   await page.keyboard.press("Space");
   await expect(page.getByTestId("transfers")).toHaveText("1");
+  await page.getByRole("button", { name: "Pause game" }).focus();
   await page.keyboard.press("KeyN");
   await expect(page.getByText(/^PLACE THE [A-Z]$/)).toBeVisible();
   await expect(page.getByRole("status")).toContainText(
@@ -88,6 +89,50 @@ test("the complete game surface fits the accepted desktop viewport", async ({
     viewportHeight: 720,
     documentWidth: 1180,
     documentHeight: 720,
+  });
+});
+
+test("the board bottom and controls fit a compact desktop browser panel", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 900, height: 600 });
+  await page.goto("/");
+  await expect(page.getByRole("heading", { name: "NAMETRIS" })).toBeInViewport();
+  await expect(page.getByLabel("Your name (optional)")).toBeInViewport();
+  await expect(page.getByRole("button", { name: "START BUILDING" })).toBeInViewport();
+  await expect(page.getByText("View keyboard controls")).toBeInViewport();
+
+  const input = page.getByLabel("Your name (optional)");
+  await input.fill("AB");
+  await input.press("Enter");
+  await expect(page.getByRole("application", { name: "Nametris game" })).toBeFocused();
+
+  await expect(
+    page.getByRole("grid", { name: "Normal Tetris board" }),
+  ).toBeInViewport();
+  await expect(page.getByRole("heading", { name: "CONTROLS" })).toBeInViewport();
+  await expect(page.getByText("Route", { exact: true })).toBeInViewport();
+  await loadFixture(page, "route-return");
+  await page.keyboard.press("KeyN");
+  await expect(page.getByRole("grid", { name: "Name stencil for AB" })).toBeInViewport();
+  await expect(page.getByRole("button", { name: "LOCK · ENTER" })).toBeInViewport();
+  await page.keyboard.press("Escape");
+  expect(
+    await page.evaluate(() => ({
+      scrollX: window.scrollX,
+      scrollY: window.scrollY,
+      viewportWidth: window.innerWidth,
+      viewportHeight: window.innerHeight,
+      documentWidth: document.documentElement.scrollWidth,
+      documentHeight: document.documentElement.scrollHeight,
+    })),
+  ).toEqual({
+    scrollX: 0,
+    scrollY: 0,
+    viewportWidth: 900,
+    viewportHeight: 600,
+    documentWidth: 900,
+    documentHeight: 600,
   });
 });
 
