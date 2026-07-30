@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 
+import { maximumTransferCount } from "../../game/config/gameplay";
 import type { BoardSession } from "../../game/engine/session";
 
-type GuidanceKind = "line-clear" | "transfer" | "stencil";
+type GuidanceKind = "line-clear" | "transfer" | "transfer-cap" | "stencil";
 
 interface RunGuidanceProps {
   readonly state: BoardSession;
@@ -14,11 +15,15 @@ const guidanceCopy: Readonly<
 > = {
   "line-clear": {
     title: "CLEAR LINES → EARN TRANSFERS",
-    detail: "Every completed row earns one piece route.",
+    detail: `Every completed row earns one route. Bank up to ${maximumTransferCount}.`,
   },
   transfer: {
     title: "TRANSFER READY → ROUTE WITH N",
     detail: "Press N before the active piece crosses the cyan route deadline.",
+  },
+  "transfer-cap": {
+    title: "TRANSFER BANK FULL → BUILD YOUR NAME",
+    detail: `You can hold ${maximumTransferCount}. Extra line clears cannot add more.`,
   },
   stencil: {
     title: "STENCIL MODE → PLACE, TRIM, OR CANCEL",
@@ -34,6 +39,8 @@ export function RunGuidance({ state, onDismiss }: RunGuidanceProps) {
     let nextHint: GuidanceKind | null = null;
     if (state.phase === "placing-stencil") {
       nextHint = "stencil";
+    } else if (state.transferCount >= maximumTransferCount) {
+      nextHint = "transfer-cap";
     } else if (state.transferCount > 0 && state.successfulStencilLocks === 0) {
       nextHint = "transfer";
     } else if (state.linesCleared === 0) {
@@ -57,7 +64,11 @@ export function RunGuidance({ state, onDismiss }: RunGuidanceProps) {
 
   const copy = guidanceCopy[visibleHint];
   return (
-    <aside className="run-guidance" aria-label="Current guidance">
+    <aside
+      className="run-guidance"
+      aria-label="Current guidance"
+      data-kind={visibleHint}
+    >
       <span aria-hidden="true">◆</span>
       <div>
         <strong>{copy.title}</strong>

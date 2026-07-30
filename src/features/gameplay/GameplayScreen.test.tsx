@@ -55,6 +55,34 @@ describe("GameplayScreen", () => {
     );
   });
 
+  it("announces that a full transfer bank cannot store another clear", () => {
+    const session = createBoardSession(["I", "O", "T"]);
+    const board = session.board.map((row, rowIndex) =>
+      row.map((cell, columnIndex) =>
+        rowIndex === BOARD_HEIGHT - 1 && columnIndex !== 5 ? "J" : cell,
+      ),
+    );
+    const initialSession = {
+      ...session,
+      board,
+      transferCount: 3,
+      activePiece: {
+        type: "I" as const,
+        rotation: 1 as const,
+        row: 0,
+        column: 3,
+      },
+    };
+
+    render(<GameplayScreen initialSession={initialSession} />);
+    fireEvent.keyDown(screen.getByRole("application"), { key: " " });
+
+    expect(screen.getByTestId("transfers")).toHaveTextContent("3 / 3");
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "1 line cleared. Transfer bank already full at 3. Route a piece before clearing more.",
+    );
+  });
+
   it("pauses and resumes from real buttons", async () => {
     const user = userEvent.setup();
     render(<GameplayScreen seed={7} />);
@@ -180,6 +208,24 @@ describe("GameplayScreen", () => {
     expect(routeButton).toBeEnabled();
     await user.click(routeButton);
     expect(screen.getByText("PLACE THE O")).toBeInTheDocument();
+  });
+
+  it("persistently highlights a full transfer bank and directs play to NAME", () => {
+    const initialSession = {
+      ...createBoardSession(["O", "I", "T", "J"]),
+      transferCount: 3,
+    };
+
+    render(<GameplayScreen initialSession={initialSession} />);
+
+    expect(screen.getByTestId("transfer-metric")).toHaveAttribute(
+      "data-status",
+      "full",
+    );
+    expect(screen.getByTestId("transfers")).toHaveTextContent("3 / 3");
+    expect(screen.getByText("FULL")).toBeVisible();
+    expect(screen.getByText("TRANSFER BANK FULL · ROUTE A PIECE")).toBeVisible();
+    expect(screen.getByText("Extra line clears cannot add transfers.")).toBeVisible();
   });
 
   it("enables finish at exact 80% without interrupting board input", async () => {

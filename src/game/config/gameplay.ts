@@ -3,6 +3,7 @@ export const spawnColumn = 3;
 export const lockDelayMilliseconds = 500;
 export const lockResetLimit = 15;
 export const minimumGravityMilliseconds = 80;
+export const maximumTransferCount = 3;
 export const routeZoneVisibleRows = 7;
 
 export function getGravityMilliseconds(level: number): number {

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useReducer, useRef, useState } from "react";
 
 import { NametrisMark } from "../../components/NametrisMark";
+import { maximumTransferCount } from "../../game/config/gameplay";
 import { createPieceQueue, createSeededRandom } from "../../game/engine/bag";
 import {
   createGameSession,
@@ -70,6 +71,7 @@ export function GameplayScreen({
   const reportedOutcomeRef = useRef<"won" | "lost" | null>(null);
   const previousAnnouncementState = useRef({
     linesCleared: state.linesCleared,
+    transferCount: state.transferCount,
     canFinish: false,
     phase: "playing" as BoardSession["phase"],
   });
@@ -112,11 +114,25 @@ export function GameplayScreen({
     const previous = previousAnnouncementState.current;
     if (state.linesCleared > previous.linesCleared) {
       const count = state.linesCleared - previous.linesCleared;
-      setAnnouncement(
-        `${count} ${count === 1 ? "line" : "lines"} cleared. ${count} ${
-          count === 1 ? "transfer" : "transfers"
-        } earned.`,
-      );
+      const transfersStored = state.transferCount - previous.transferCount;
+
+      if (transfersStored === 0) {
+        setAnnouncement(
+          `${count} ${
+            count === 1 ? "line" : "lines"
+          } cleared. Transfer bank already full at ${maximumTransferCount}. Route a piece before clearing more.`,
+        );
+      } else {
+        const fullBankPrompt =
+          state.transferCount === maximumTransferCount
+            ? ` Transfer bank full at ${maximumTransferCount}. Route a piece before clearing more.`
+            : "";
+        setAnnouncement(
+          `${count} ${count === 1 ? "line" : "lines"} cleared. ${transfersStored} ${
+            transfersStored === 1 ? "transfer" : "transfers"
+          } earned.${fullBankPrompt}`,
+        );
+      }
     } else if (state.canFinish && !previous.canFinish) {
       setAnnouncement(
         `Name reached ${Math.floor(
@@ -130,10 +146,17 @@ export function GameplayScreen({
     }
     previousAnnouncementState.current = {
       linesCleared: state.linesCleared,
+      transferCount: state.transferCount,
       canFinish: state.canFinish,
       phase: state.phase,
     };
-  }, [state.canFinish, state.linesCleared, state.phase, state.stencil]);
+  }, [
+    state.canFinish,
+    state.linesCleared,
+    state.phase,
+    state.stencil,
+    state.transferCount,
+  ]);
 
   useEffect(() => {
     if (state.phase !== "playing" && state.phase !== "placing-stencil") {

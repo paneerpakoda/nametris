@@ -2,6 +2,7 @@ import {
   getStencilCompletion,
   getStencilPieceProjection,
 } from "../../game/engine/stencil";
+import { maximumTransferCount } from "../../game/config/gameplay";
 import { canRouteActivePiece, type BoardSession } from "../../game/engine/session";
 import { StencilGrid } from "./StencilGrid";
 
@@ -30,12 +31,17 @@ export function StencilPanel({
   const trimmedCellCount = projection?.trimmedCellKeys.size ?? 0;
   const canLock = keptCellCount > 0;
   const canRoute = canRouteActivePiece(state);
+  const transferBankIsFull = state.transferCount >= maximumTransferCount;
+  const panelClassName = [
+    "stencil-panel",
+    state.canFinish ? "is-finish-ready" : "",
+    transferBankIsFull ? "is-transfer-full" : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
 
   return (
-    <section
-      className={state.canFinish ? "stencil-panel is-finish-ready" : "stencil-panel"}
-      aria-labelledby="stencil-title"
-    >
+    <section className={panelClassName} aria-labelledby="stencil-title">
       <div className="stencil-heading">
         <div>
           <p className="panel-kicker">02 / BUILD YOUR NAME</p>
@@ -71,6 +77,13 @@ export function StencilPanel({
         </span>
       </div>
 
+      {transferBankIsFull && state.phase === "playing" && (
+        <div className="transfer-cap-notice" role="note">
+          <strong>TRANSFER BANK FULL · ROUTE A PIECE</strong>
+          <span>Extra line clears cannot add transfers.</span>
+        </div>
+      )}
+
       <StencilGrid
         name={state.name}
         stencil={state.stencil}
@@ -103,7 +116,7 @@ export function StencilPanel({
         <div className="stencil-actions">
           <p>
             Spend one transfer while any part of the piece is above the board’s route
-            deadline. Finish unlocks at 80%.
+            deadline. Bank up to {maximumTransferCount}. Finish unlocks at 80%.
           </p>
           <div className="stencil-action-buttons">
             {state.canFinish && state.phase === "playing" && (

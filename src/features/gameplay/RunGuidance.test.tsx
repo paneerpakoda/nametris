@@ -16,6 +16,9 @@ describe("RunGuidance", () => {
     rerender(<RunGuidance state={{ ...session, transferCount: 1 }} />);
     expect(screen.getByText("TRANSFER READY → ROUTE WITH N")).toBeVisible();
 
+    rerender(<RunGuidance state={{ ...session, transferCount: 3 }} />);
+    expect(screen.getByText("TRANSFER BANK FULL → BUILD YOUR NAME")).toBeVisible();
+
     rerender(
       <RunGuidance
         state={{

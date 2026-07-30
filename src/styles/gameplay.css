@@ -44,6 +44,13 @@
   background: rgb(18 21 37 / 92%);
 }
 
+.run-guidance[data-kind="transfer-cap"] {
+  border-color: rgb(181 245 90 / 62%);
+  color: var(--lime);
+  background: rgb(24 31 25 / 96%);
+  box-shadow: 0 0 24px rgb(181 245 90 / 10%);
+}
+
 .run-guidance > span {
   font-size: 0.62rem;
 }
@@ -282,6 +289,56 @@
   color: var(--lime);
 }
 
+.transfer-metric strong {
+  display: flex;
+  align-items: baseline;
+  gap: 2px;
+  color: var(--lime);
+}
+
+.transfer-metric strong small {
+  color: var(--muted);
+  font-size: 0.7rem;
+}
+
+.transfer-metric > span {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+}
+
+.transfer-full-label {
+  padding: 2px 4px;
+  border: 1px solid rgb(181 245 90 / 55%);
+  border-radius: 3px;
+  color: var(--lime);
+  background: rgb(181 245 90 / 10%);
+  font-size: 0.48rem;
+  font-style: normal;
+  letter-spacing: 0.06em;
+}
+
+.metric.is-transfer-full {
+  position: relative;
+  z-index: 1;
+  border: 1px solid rgb(181 245 90 / 58%);
+  background: rgb(181 245 90 / 8%);
+  box-shadow:
+    inset 0 0 18px rgb(181 245 90 / 7%),
+    0 0 18px rgb(181 245 90 / 8%);
+  animation: transfer-bank-pulse 1.8s ease-in-out infinite;
+}
+
+@keyframes transfer-bank-pulse {
+  50% {
+    border-color: rgb(181 245 90 / 88%);
+    box-shadow:
+      inset 0 0 24px rgb(181 245 90 / 12%),
+      0 0 22px rgb(181 245 90 / 14%);
+  }
+}
+
 .stencil-panel {
   display: grid;
   min-height: 0;
@@ -347,6 +404,33 @@
 .stencil-panel.is-finish-ready {
   border-color: rgb(181 245 90 / 30%);
   box-shadow: inset 0 0 0 1px rgb(181 245 90 / 5%);
+}
+
+.stencil-panel.is-transfer-full {
+  border-color: rgb(181 245 90 / 42%);
+}
+
+.transfer-cap-notice {
+  display: flex;
+  min-height: 34px;
+  margin: -10px 0 12px;
+  padding: 8px 10px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border: 1px solid rgb(181 245 90 / 42%);
+  color: var(--lime);
+  background: rgb(181 245 90 / 7%);
+}
+
+.transfer-cap-notice strong {
+  font-size: 0.6rem;
+  letter-spacing: 0.08em;
+}
+
+.transfer-cap-notice span {
+  color: var(--text);
+  font-size: 0.64rem;
 }
 
 .stencil-frame {

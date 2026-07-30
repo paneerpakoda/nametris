@@ -75,6 +75,31 @@ describe("normal-board session", () => {
     expect(cleared.fourLineClears).toBe(1);
   });
 
+  it("caps the transfer bank at three after a four-line clear", () => {
+    const state = createBoardSession(["I", "O", "T"]);
+    const board = state.board.map((row, rowIndex) =>
+      row.map((cell, columnIndex) =>
+        rowIndex >= BOARD_HEIGHT - 4 && columnIndex !== 4 ? "J" : cell,
+      ),
+    );
+    const cleared = reduceBoardSession(
+      {
+        ...state,
+        board,
+        activePiece: {
+          type: "I" as const,
+          rotation: 1 as const,
+          row: BOARD_HEIGHT - 4,
+          column: 2,
+        },
+      },
+      { type: "hard-drop" },
+    );
+
+    expect(cleared.linesCleared).toBe(4);
+    expect(cleared.transferCount).toBe(3);
+  });
+
   it("shows the active piece at its landing position as the ghost", () => {
     const state = createBoardSession(queue);
     const ghost = getGhostPiece(state.board, state.activePiece);

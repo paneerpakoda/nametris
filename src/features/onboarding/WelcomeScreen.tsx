@@ -41,7 +41,7 @@ export function WelcomeScreen({ onStart }: WelcomeScreenProps) {
           <ol className="premise-steps">
             <li>
               <strong>Clear</strong>
-              <span>Every completed row earns one transfer.</span>
+              <span>Every completed row earns one transfer; bank up to three.</span>
             </li>
             <li>
               <strong>Route</strong>

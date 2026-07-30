@@ -1,4 +1,5 @@
 import { KeyHint } from "../../components/KeyHint";
+import { maximumTransferCount } from "../../game/config/gameplay";
 import type { BoardSession } from "../../game/engine/session";
 import { formatActiveTime } from "../../game/runtime/clock";
 import { StencilPanel } from "./StencilPanel";
@@ -26,12 +27,7 @@ export function GameSidebar({
         <Metric label="Score" value={state.score} testId="score" />
         <Metric label="Lines" value={state.linesCleared} />
         <Metric label="Level" value={state.level} />
-        <Metric
-          label="Transfers"
-          value={state.transferCount}
-          testId="transfers"
-          accent
-        />
+        <TransferMetric value={state.transferCount} />
         <Metric
           label="Active"
           value={formatActiveTime(state.activeMilliseconds)}
@@ -117,6 +113,31 @@ function Metric({ label, value, accent = false, testId }: MetricProps) {
       <span>{label}</span>
       <strong data-testid={testId}>
         {typeof value === "number" ? value.toLocaleString() : value}
+      </strong>
+    </div>
+  );
+}
+
+function TransferMetric({ value }: { readonly value: number }) {
+  const isFull = value >= maximumTransferCount;
+
+  return (
+    <div
+      className={
+        isFull ? "metric transfer-metric is-transfer-full" : "metric transfer-metric"
+      }
+      data-testid="transfer-metric"
+      data-status={isFull ? "full" : "available"}
+      aria-label={`Transfers: ${value} of ${maximumTransferCount}${
+        isFull ? ". Bank full; route a piece." : ""
+      }`}
+    >
+      <span>
+        Transfers
+        {isFull && <em className="transfer-full-label">FULL</em>}
+      </span>
+      <strong data-testid="transfers">
+        {value} <small>/ {maximumTransferCount}</small>
       </strong>
     </div>
   );

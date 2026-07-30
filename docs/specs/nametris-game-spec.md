@@ -191,7 +191,9 @@ Scoring constants must live in one configuration module and be easy to tune afte
 
 - A run begins with zero transfers.
 - Each cleared row adds one transfer.
-- Transfers accumulate with no initial cap.
+- Transfers accumulate up to a bank limit of three.
+- At `3 / 3`, highlight the transfer metric and NAME panel with a persistent prompt to route a piece.
+- Additional cleared rows still score and count normally but cannot add transfers while the bank is full.
 - Routing a piece is allowed only when at least one transfer is available.
 - Routing must be an affirmative action; ordinary Tetris play continues without a board/name confirmation dialog.
 - When routed, the exact spawned piece type moves to stencil-placement mode.
