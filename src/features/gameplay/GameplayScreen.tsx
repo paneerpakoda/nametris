@@ -5,9 +5,11 @@ import {
   createGameSession,
   getGhostPiece,
   reduceBoardSession,
+  type BoardAction,
   type BoardSession,
 } from "../../game/engine/session";
 import { getGameAction } from "../../game/runtime/input";
+import { createE2EFixture, type E2EFixtureKind } from "../../game/testing/fixtures";
 import {
   createLossResult,
   createRunResult,
@@ -29,6 +31,26 @@ interface GameplayScreenProps {
 
 const clockResolutionMilliseconds = 50;
 
+type GameplayAction =
+  | BoardAction
+  | {
+      readonly type: "load-e2e-fixture";
+      readonly kind: E2EFixtureKind;
+    };
+
+function reduceGameplaySession(
+  state: BoardSession,
+  action: GameplayAction,
+): BoardSession {
+  if (
+    import.meta.env.VITE_NAMETRIS_E2E === "true" &&
+    action.type === "load-e2e-fixture"
+  ) {
+    return createE2EFixture(state, action.kind);
+  }
+  return action.type === "load-e2e-fixture" ? state : reduceBoardSession(state, action);
+}
+
 export function GameplayScreen({
   seed = 20_260_730,
   name = "HARSH",
@@ -41,7 +63,7 @@ export function GameplayScreen({
     () => initialSession ?? createGameSession(name, queue),
     [initialSession, name, queue],
   );
-  const [state, dispatch] = useReducer(reduceBoardSession, startingSession);
+  const [state, dispatch] = useReducer(reduceGameplaySession, startingSession);
   const gameRef = useRef<HTMLDivElement>(null);
   const reportedOutcomeRef = useRef<"won" | "lost" | null>(null);
   const previousAnnouncementState = useRef({
@@ -54,6 +76,22 @@ export function GameplayScreen({
 
   useEffect(() => {
     gameRef.current?.focus();
+  }, []);
+
+  useEffect(() => {
+    if (import.meta.env.VITE_NAMETRIS_E2E !== "true") {
+      return;
+    }
+    const api = {
+      loadFixture: (kind: E2EFixtureKind) =>
+        dispatch({ type: "load-e2e-fixture", kind }),
+    };
+    window.__NAMETRIS_E2E__ = api;
+    return () => {
+      if (window.__NAMETRIS_E2E__ === api) {
+        delete window.__NAMETRIS_E2E__;
+      }
+    };
   }, []);
 
   useEffect(() => {
