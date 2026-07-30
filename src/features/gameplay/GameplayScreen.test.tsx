@@ -4,6 +4,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import { createBoardSession } from "../../game/engine/session";
 import { createStencilState } from "../../game/engine/stencil";
+import { BOARD_HEIGHT } from "../../game/engine/board";
 import { GameplayScreen } from "./GameplayScreen";
 
 describe("GameplayScreen", () => {
@@ -14,6 +15,44 @@ describe("GameplayScreen", () => {
     fireEvent.keyDown(game, { key: " " });
 
     expect(Number(screen.getByTestId("score").textContent)).toBeGreaterThan(0);
+  });
+
+  it("shows active playtime as a normal metric", () => {
+    const initialSession = {
+      ...createBoardSession(["O", "I", "T"]),
+      activeMilliseconds: 125_000,
+    };
+
+    render(<GameplayScreen initialSession={initialSession} />);
+
+    expect(screen.getByTestId("active-time")).toHaveTextContent("02:05");
+  });
+
+  it("announces a line clear and the earned transfer", () => {
+    const session = createBoardSession(["I", "O", "T"]);
+    const board = session.board.map((row, rowIndex) =>
+      row.map((cell, columnIndex) =>
+        rowIndex === BOARD_HEIGHT - 1 && columnIndex !== 5 ? "J" : cell,
+      ),
+    );
+    const initialSession = {
+      ...session,
+      board,
+      activePiece: {
+        type: "I" as const,
+        rotation: 1 as const,
+        row: 0,
+        column: 3,
+      },
+    };
+
+    render(<GameplayScreen initialSession={initialSession} />);
+    fireEvent.keyDown(screen.getByRole("application"), { key: " " });
+
+    expect(screen.getByTestId("transfers")).toHaveTextContent("1");
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "1 line cleared. 1 transfer earned.",
+    );
   });
 
   it("pauses and resumes from real buttons", async () => {
@@ -97,5 +136,33 @@ describe("GameplayScreen", () => {
     expect(routeButton).toBeEnabled();
     await user.click(routeButton);
     expect(screen.getByText("PLACE THE O")).toBeInTheDocument();
+  });
+
+  it("enables finish at exact 80% without interrupting board input", async () => {
+    const user = userEvent.setup();
+    const onWon = vi.fn();
+    const mask = new Set(Array.from({ length: 20 }, (_, index) => `0:${index}`));
+    const initialSession = {
+      ...createBoardSession(["O", "I", "T", "J"]),
+      canFinish: true,
+      stencil: {
+        ...createStencilState(mask, 1, 20),
+        filledCells: new Map(
+          Array.from({ length: 16 }, (_, index) => [`0:${index}`, "I"] as const),
+        ),
+      },
+    };
+
+    render(<GameplayScreen initialSession={initialSession} onWon={onWon} />);
+    const game = screen.getByRole("application", { name: "Nametris game" });
+    const finish = screen.getByRole("button", { name: "FINISH AT 80%" });
+
+    fireEvent.keyDown(game, { key: " " });
+    expect(Number(screen.getByTestId("score").textContent)).toBeGreaterThan(0);
+    expect(finish).toBeEnabled();
+
+    await user.click(finish);
+    await waitFor(() => expect(onWon).toHaveBeenCalledOnce());
+    expect(onWon.mock.calls[0]?.[0]).toMatchObject({ displayPercent: 80 });
   });
 });

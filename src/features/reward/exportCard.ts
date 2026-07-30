@@ -1,5 +1,8 @@
 import type { PieceType } from "../../game/model/types";
 import type { RunResult } from "../../game/engine/result";
+import { formatActiveTime } from "../../game/runtime/clock";
+
+export { formatActiveTime } from "../../game/runtime/clock";
 
 const pieceColors: Readonly<Record<PieceType, string>> = {
   I: "#3de8df",
@@ -18,15 +21,6 @@ function escapeXml(value: string): string {
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&apos;");
-}
-
-export function formatActiveTime(milliseconds: number): string {
-  const totalSeconds = Math.max(0, Math.floor(milliseconds / 1000));
-  const minutes = Math.floor(totalSeconds / 60);
-  const seconds = totalSeconds % 60;
-  return `${minutes.toString().padStart(2, "0")}:${seconds
-    .toString()
-    .padStart(2, "0")}`;
 }
 
 function createStencilRects(result: RunResult): string {

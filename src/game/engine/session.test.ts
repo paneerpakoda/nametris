@@ -356,6 +356,28 @@ describe("piece routing", () => {
     expect(reduceBoardSession(state, { type: "finish-run" }).phase).toBe("won");
   });
 
+  it("still loses after 80% if the next spawn tops out before finish", () => {
+    const state = createBoardSession(["O", "I", "T"]);
+    const board = state.board.map((row, rowIndex) =>
+      row.map((cell, columnIndex) =>
+        rowIndex === 1 && columnIndex === 3 ? "J" : cell,
+      ),
+    );
+    const atRisk = {
+      ...state,
+      canFinish: true,
+      board,
+      activePiece: {
+        type: "O" as const,
+        rotation: 0 as const,
+        row: BOARD_HEIGHT - 2,
+        column: 3,
+      },
+    };
+
+    expect(reduceBoardSession(atRisk, { type: "hard-drop" }).phase).toBe("lost");
+  });
+
   it("moves, rotates, and counts time during stencil placement", () => {
     const mask = new Set(
       Array.from({ length: 16 }, (_, index) => `${Math.floor(index / 4)}:${index % 4}`),

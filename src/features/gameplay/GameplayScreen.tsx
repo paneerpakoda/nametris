@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useReducer, useRef } from "react";
+import { useEffect, useMemo, useReducer, useRef, useState } from "react";
 
 import { createPieceQueue, createSeededRandom } from "../../game/engine/bag";
 import {
@@ -16,6 +16,7 @@ import {
 } from "../../game/engine/result";
 import { BoardGrid, PiecePreview } from "./BoardGrid";
 import { GameSidebar } from "./GameSidebar";
+import { RunGuidance } from "./RunGuidance";
 import "../../styles/gameplay.css";
 
 interface GameplayScreenProps {
@@ -43,6 +44,12 @@ export function GameplayScreen({
   const [state, dispatch] = useReducer(reduceBoardSession, startingSession);
   const gameRef = useRef<HTMLDivElement>(null);
   const reportedOutcomeRef = useRef<"won" | "lost" | null>(null);
+  const previousAnnouncementState = useRef({
+    linesCleared: state.linesCleared,
+    canFinish: false,
+    phase: "playing" as BoardSession["phase"],
+  });
+  const [announcement, setAnnouncement] = useState("");
   const ghostPiece = getGhostPiece(state.board, state.activePiece);
 
   useEffect(() => {
@@ -59,6 +66,33 @@ export function GameplayScreen({
       onLost?.(createLossResult(state));
     }
   }, [onLost, onWon, state]);
+
+  useEffect(() => {
+    const previous = previousAnnouncementState.current;
+    if (state.linesCleared > previous.linesCleared) {
+      const count = state.linesCleared - previous.linesCleared;
+      setAnnouncement(
+        `${count} ${count === 1 ? "line" : "lines"} cleared. ${count} ${
+          count === 1 ? "transfer" : "transfers"
+        } earned.`,
+      );
+    } else if (state.canFinish && !previous.canFinish) {
+      setAnnouncement(
+        `Name reached ${Math.floor(
+          (state.stencil.filledCells.size / state.stencil.mask.size) * 100,
+        )} percent. Finish is available; play continues.`,
+      );
+    } else if (state.phase === "won" && previous.phase !== "won") {
+      setAnnouncement("Name complete. Run won.");
+    } else if (state.phase === "lost" && previous.phase !== "lost") {
+      setAnnouncement("The stack topped out. Run lost.");
+    }
+    previousAnnouncementState.current = {
+      linesCleared: state.linesCleared,
+      canFinish: state.canFinish,
+      phase: state.phase,
+    };
+  }, [state.canFinish, state.linesCleared, state.phase, state.stencil]);
 
   useEffect(() => {
     if (state.phase !== "playing" && state.phase !== "placing-stencil") {
@@ -123,6 +157,10 @@ export function GameplayScreen({
           <p className="eyebrow">NAMETRIS</p>
           <h1>BUILD THE NAME</h1>
         </div>
+        <RunGuidance
+          state={state}
+          onDismiss={() => window.requestAnimationFrame(() => gameRef.current?.focus())}
+        />
         {state.phase === "playing" && (
           <button
             type="button"
@@ -170,7 +208,7 @@ export function GameplayScreen({
         />
 
         {state.phase === "paused" && (
-          <div className="game-overlay" role="status">
+          <div className="game-overlay" role="dialog" aria-modal="true">
             <p className="eyebrow">TAKE A BREATH</p>
             <h2>Game paused</h2>
             <p>
@@ -189,7 +227,7 @@ export function GameplayScreen({
         )}
 
         {state.phase === "lost" && (
-          <div className="game-overlay" role="status">
+          <div className="game-overlay" role="alert">
             <p className="eyebrow">STACK OVERFLOW</p>
             <h2>Run over</h2>
             <p>Final score: {state.score.toLocaleString()}</p>
@@ -197,9 +235,8 @@ export function GameplayScreen({
         )}
       </div>
 
-      <p className="sr-only" aria-live="polite">
-        Score {state.score}. Lines {state.linesCleared}. Transfers {state.transferCount}
-        .
+      <p className="sr-only" role="status" aria-live="polite">
+        {announcement}
       </p>
     </main>
   );

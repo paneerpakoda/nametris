@@ -1,4 +1,5 @@
 import type { BoardSession } from "../../game/engine/session";
+import { formatActiveTime } from "../../game/runtime/clock";
 import { StencilPanel } from "./StencilPanel";
 
 interface GameSidebarProps {
@@ -27,6 +28,11 @@ export function GameSidebar({
           value={state.transferCount}
           testId="transfers"
           accent
+        />
+        <Metric
+          label="Active"
+          value={formatActiveTime(state.activeMilliseconds)}
+          testId="active-time"
         />
       </section>
 
@@ -69,7 +75,7 @@ export function GameSidebar({
 
 interface MetricProps {
   readonly label: string;
-  readonly value: number;
+  readonly value: number | string;
   readonly accent?: boolean;
   readonly testId?: string;
 }
@@ -78,7 +84,9 @@ function Metric({ label, value, accent = false, testId }: MetricProps) {
   return (
     <div className={accent ? "metric is-accent" : "metric"}>
       <span>{label}</span>
-      <strong data-testid={testId}>{value.toLocaleString()}</strong>
+      <strong data-testid={testId}>
+        {typeof value === "number" ? value.toLocaleString() : value}
+      </strong>
     </div>
   );
 }

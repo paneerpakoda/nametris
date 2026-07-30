@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { addActiveMilliseconds } from "./clock";
+import { addActiveMilliseconds, formatActiveTime } from "./clock";
 
 describe("active game clock", () => {
   it("adds safe elapsed time during active play", () => {
@@ -13,5 +13,9 @@ describe("active game clock", () => {
 
   it("ignores negative elapsed values", () => {
     expect(addActiveMilliseconds(1_000, -50, true)).toBe(1_000);
+  });
+
+  it("formats active duration without wall-clock data", () => {
+    expect(formatActiveTime(125_000)).toBe("02:05");
   });
 });
