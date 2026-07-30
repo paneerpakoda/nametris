@@ -84,9 +84,9 @@ function getOriginBounds(
   const maximumColumn = Math.max(...cells.map(({ column }) => column));
 
   return {
-    minimumRow: -minimumRow,
+    minimumRow: minimumRow === 0 ? 0 : -minimumRow,
     maximumRow: state.rows - 1 - maximumRow,
-    minimumColumn: -minimumColumn,
+    minimumColumn: minimumColumn === 0 ? 0 : -minimumColumn,
     maximumColumn: state.columns - 1 - maximumColumn,
   };
 }

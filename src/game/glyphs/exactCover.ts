@@ -43,35 +43,29 @@ function getComponents(cells: ReadonlySet<string>): readonly ReadonlySet<string>
   const components: Set<string>[] = [];
 
   while (unseen.size > 0) {
-    const start = unseen.values().next().value;
-    if (start === undefined) {
-      break;
-    }
+    for (const start of unseen) {
+      const component = new Set<string>([start]);
+      const pending = [start];
+      unseen.delete(start);
 
-    const component = new Set<string>([start]);
-    const pending = [start];
-    unseen.delete(start);
+      for (const currentKey of pending) {
+        const current = parseCellKey(currentKey);
 
-    while (pending.length > 0) {
-      const currentKey = pending.pop();
-      if (currentKey === undefined) {
-        continue;
-      }
-      const current = parseCellKey(currentKey);
-
-      for (const offset of neighborOffsets) {
-        const neighborKey = stencilCellKey({
-          row: current.row + offset.row,
-          column: current.column + offset.column,
-        });
-        if (unseen.delete(neighborKey)) {
-          component.add(neighborKey);
-          pending.push(neighborKey);
+        for (const offset of neighborOffsets) {
+          const neighborKey = stencilCellKey({
+            row: current.row + offset.row,
+            column: current.column + offset.column,
+          });
+          if (unseen.delete(neighborKey)) {
+            component.add(neighborKey);
+            pending.push(neighborKey);
+          }
         }
       }
-    }
 
-    components.push(component);
+      components.push(component);
+      break;
+    }
   }
 
   return components;
@@ -126,19 +120,19 @@ function solveComponent(
     return false;
   }
 
-  let bestPlacements: readonly (readonly string[])[] | null = null;
+  let bestPlacements: readonly (readonly string[])[] = [];
   for (const key of remaining) {
     const placements = placementsContaining(key, remaining);
     if (placements.length === 0) {
       failedStates.add(stateKey);
       return false;
     }
-    if (bestPlacements === null || placements.length < bestPlacements.length) {
+    if (bestPlacements.length === 0 || placements.length < bestPlacements.length) {
       bestPlacements = placements;
     }
   }
 
-  for (const placement of bestPlacements ?? []) {
+  for (const placement of bestPlacements) {
     const next = new Set(remaining);
     placement.forEach((key) => next.delete(key));
     if (solveComponent(next, failedStates)) {

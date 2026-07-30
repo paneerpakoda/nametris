@@ -33,4 +33,30 @@ describe("Nametris glyph alphabet", () => {
         .join("\n\n"),
     ).toMatchSnapshot();
   });
+
+  it("rejects unsupported glyph and name-mask input", () => {
+    expect(() => getGlyphPattern("?")).toThrow(/uppercase A–Z/);
+    expect(() => composeNameMask("A?")).toThrow(/uppercase A–Z/);
+  });
+});
+
+describe("exact-cover rejection", () => {
+  it("rejects empty and non-tetromino-sized masks", () => {
+    expect(isMaskTileable(new Set())).toBe(false);
+    expect(isMaskTileable(new Set(["0:0", "0:1", "0:2"]))).toBe(false);
+  });
+
+  it("rejects disconnected components that are not divisible by four", () => {
+    expect(
+      isMaskTileable(
+        new Set(["0:0", "0:1", "10:10", "10:11", "20:20", "20:21", "30:30", "30:31"]),
+      ),
+    ).toBe(false);
+  });
+
+  it("rejects a connected, divisible mask with no exact cover", () => {
+    expect(
+      isMaskTileable(new Set(["0:1", "1:0", "1:1", "1:2", "1:3", "2:1", "3:1", "4:1"])),
+    ).toBe(false);
+  });
 });

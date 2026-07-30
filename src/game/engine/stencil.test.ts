@@ -6,6 +6,10 @@ import {
   createStencilState,
   getStencilCompletion,
   lockIntoStencil,
+  createStencilPlacementPiece,
+  findFirstLegalStencilPlacement,
+  moveStencilPiece,
+  rotateStencilPiece,
 } from "./stencil";
 
 const squareMask = new Set(["0:0", "0:1", "1:0", "1:1"]);
@@ -77,5 +81,46 @@ describe("stencil placement", () => {
 
     expect(getStencilCompletion(state).canFinish).toBe(false);
     expect(getStencilCompletion(state).displayPercent).toBe(79);
+  });
+
+  it("reports zero completion for an empty mask", () => {
+    expect(getStencilCompletion(createStencilState(new Set(), 0, 0))).toEqual({
+      ratio: 0,
+      displayPercent: 0,
+      canFinish: false,
+      perfect: false,
+    });
+  });
+
+  it("finds a legal rotation and placement for an exact piece type", () => {
+    const lineState = createStencilState(new Set(["0:0", "0:1", "0:2", "0:3"]), 1, 4);
+
+    expect(findFirstLegalStencilPlacement(lineState, "I")).toEqual({
+      type: "I",
+      rotation: 0,
+      row: -1,
+      column: 0,
+    });
+    expect(findFirstLegalStencilPlacement(lineState, "O")).toBeNull();
+  });
+
+  it("keeps movement and rotation inside the stencil canvas", () => {
+    const state = createStencilState(
+      new Set(
+        Array.from(
+          { length: 16 },
+          (_, index) => `${Math.floor(index / 4)}:${index % 4}`,
+        ),
+      ),
+      4,
+      4,
+    );
+    const active = createStencilPlacementPiece(state, "T");
+    const moved = moveStencilPiece(state, active, 99, 99);
+    const rotated = rotateStencilPiece(state, moved, "counterclockwise");
+
+    expect(moved.row).toBeLessThanOrEqual(2);
+    expect(moved.column).toBeLessThanOrEqual(1);
+    expect(rotated.rotation).toBe(3);
   });
 });
