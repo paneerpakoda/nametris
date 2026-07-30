@@ -56,7 +56,7 @@ export function createE2EFixture(
         activePiece: {
           type: "O",
           rotation: 0,
-          row: 0,
+          row: 8,
           column: 3,
         },
         transferCount: 1,

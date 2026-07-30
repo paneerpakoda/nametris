@@ -24,7 +24,7 @@ export function GameSidebar({
         <Metric label="Lines" value={state.linesCleared} />
         <Metric label="Level" value={state.level} />
         <Metric
-          label="Transfers"
+          label="Credits"
           value={state.transferCount}
           testId="transfers"
           accent

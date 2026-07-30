@@ -45,7 +45,7 @@ test("keyboard flow earns, routes, cancels, locks, and returns to play", async (
   await page.keyboard.press("KeyN");
   await expect(page.getByText(/^PLACE THE [A-Z]$/)).toBeVisible();
   await expect(page.getByRole("status")).toContainText(
-    "1 line cleared. 1 transfer earned.",
+    "1 line cleared. 1 credit earned.",
   );
 
   await page.keyboard.press("KeyP");

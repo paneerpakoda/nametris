@@ -28,7 +28,7 @@ describe("GameplayScreen", () => {
     expect(screen.getByTestId("active-time")).toHaveTextContent("02:05");
   });
 
-  it("announces a line clear and the earned transfer", () => {
+  it("announces a line clear and the earned credit", () => {
     const session = createBoardSession(["I", "O", "T"]);
     const board = session.board.map((row, rowIndex) =>
       row.map((cell, columnIndex) =>
@@ -51,7 +51,7 @@ describe("GameplayScreen", () => {
 
     expect(screen.getByTestId("transfers")).toHaveTextContent("1");
     expect(screen.getByRole("status")).toHaveTextContent(
-      "1 line cleared. 1 transfer earned.",
+      "1 line cleared. 1 credit earned.",
     );
   });
 
@@ -155,10 +155,32 @@ describe("GameplayScreen", () => {
     };
 
     render(<GameplayScreen initialSession={initialSession} />);
-    const routeButton = screen.getByRole("button", { name: "Route O to stencil" });
+    const routeButton = screen.getByRole("button", {
+      name: "Route O to stencil using 1 credit",
+    });
 
     expect(routeButton).toBeEnabled();
     await user.click(routeButton);
+    expect(screen.getByText("PLACE THE O")).toBeInTheDocument();
+  });
+
+  it("routes with N even when focus is on a control outside the game surface", () => {
+    const initialSession = {
+      ...createBoardSession(["O", "I", "T", "J"]),
+      transferCount: 1,
+      activePiece: {
+        type: "O" as const,
+        rotation: 0 as const,
+        row: 8,
+        column: 3,
+      },
+    };
+
+    render(<GameplayScreen initialSession={initialSession} />);
+    const pause = screen.getByRole("button", { name: "Pause game" });
+    pause.focus();
+    fireEvent.keyDown(pause, { key: "n" });
+
     expect(screen.getByText("PLACE THE O")).toBeInTheDocument();
   });
 

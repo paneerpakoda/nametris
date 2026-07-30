@@ -8,13 +8,11 @@ import {
 import { composeNameMask } from "../glyphs/alphabet";
 import type { ActivePiece, Board, PieceType } from "../model/types";
 import {
-  HIDDEN_BOARD_ROWS,
   createEmptyBoard,
   getBoardStackHeight,
   lockAndClearPiece,
 } from "./board";
 import { canPlacePiece, movePiece } from "./collision";
-import { getPieceCells } from "./pieces";
 import { rotatePiece, type RotationDirection } from "./rotation";
 import { getHardDropScore, getLevel, getSoftDropScore } from "./scoring";
 import { addActiveMilliseconds } from "../runtime/clock";
@@ -264,11 +262,7 @@ function tickPlayingSession(
 }
 
 export function canRouteActivePiece(state: BoardSession): boolean {
-  return (
-    state.phase === "playing" &&
-    state.transferCount > 0 &&
-    getPieceCells(state.activePiece).some(({ row }) => row < HIDDEN_BOARD_ROWS)
-  );
+  return state.phase === "playing" && state.transferCount > 0;
 }
 
 function reduceStencilPlacement(

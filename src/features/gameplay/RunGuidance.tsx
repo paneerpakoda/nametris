@@ -13,16 +13,16 @@ const guidanceCopy: Readonly<
   Record<GuidanceKind, { readonly title: string; readonly detail: string }>
 > = {
   "line-clear": {
-    title: "CLEAR LINES → EARN TRANSFERS",
-    detail: "Every completed row earns one piece route.",
+    title: "CLEAR LINES → EARN CREDITS",
+    detail: "Every completed row earns one routing credit.",
   },
   transfer: {
-    title: "TRANSFER READY → ROUTE WITH N",
-    detail: "Route while the active piece is still in the spawn zone.",
+    title: "CREDIT READY → ROUTE WITH N",
+    detail: "Route the current piece any time before it locks.",
   },
   stencil: {
     title: "STENCIL MODE → PLACE, LOCK, OR CANCEL",
-    detail: "Arrows/WASD move, X/Z rotate, Enter locks, Escape cancels.",
+    detail: "Arrows/WASD move, X/Z rotate, Enter spends 1 credit, Escape cancels.",
   },
 };
 

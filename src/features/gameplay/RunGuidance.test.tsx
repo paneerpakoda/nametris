@@ -11,10 +11,10 @@ describe("RunGuidance", () => {
     const session = createBoardSession(["I", "O", "T"]);
     const { rerender } = render(<RunGuidance state={session} />);
 
-    expect(screen.getByText("CLEAR LINES → EARN TRANSFERS")).toBeVisible();
+    expect(screen.getByText("CLEAR LINES → EARN CREDITS")).toBeVisible();
 
     rerender(<RunGuidance state={{ ...session, transferCount: 1 }} />);
-    expect(screen.getByText("TRANSFER READY → ROUTE WITH N")).toBeVisible();
+    expect(screen.getByText("CREDIT READY → ROUTE WITH N")).toBeVisible();
 
     rerender(
       <RunGuidance

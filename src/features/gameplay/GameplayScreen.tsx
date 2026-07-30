@@ -116,7 +116,7 @@ export function GameplayScreen({
       const count = state.linesCleared - previous.linesCleared;
       setAnnouncement(
         `${count} ${count === 1 ? "line" : "lines"} cleared. ${count} ${
-          count === 1 ? "transfer" : "transfers"
+          count === 1 ? "credit" : "credits"
         } earned.`,
       );
     } else if (state.canFinish && !previous.canFinish) {
@@ -165,6 +165,25 @@ export function GameplayScreen({
     document.addEventListener("visibilitychange", handleVisibility);
     return () => document.removeEventListener("visibilitychange", handleVisibility);
   }, []);
+
+  useEffect(() => {
+    const handleGlobalRoute = (event: KeyboardEvent) => {
+      if (
+        state.phase !== "playing" ||
+        event.repeat ||
+        event.key.toLowerCase() !== "n" ||
+        (event.target instanceof Node && gameRef.current?.contains(event.target))
+      ) {
+        return;
+      }
+
+      event.preventDefault();
+      dispatch({ type: "route-to-stencil" });
+    };
+
+    window.addEventListener("keydown", handleGlobalRoute);
+    return () => window.removeEventListener("keydown", handleGlobalRoute);
+  }, [state.phase]);
 
   function handleKeyDown(event: React.KeyboardEvent<HTMLDivElement>) {
     const action = getGameAction(event.key, state.phase);

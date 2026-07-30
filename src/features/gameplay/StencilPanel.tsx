@@ -59,7 +59,8 @@ export function StencilPanel({
       {isPlacing ? (
         <div className="stencil-actions">
           <p>
-            Move in four directions. Rotate with X/Z. A transfer is spent only on lock.
+            Move in four directions. Rotate with X/Z. One credit is spent only on
+            lock.
           </p>
           <div>
             <button type="button" className="secondary-button" onClick={onCancel}>
@@ -78,8 +79,8 @@ export function StencilPanel({
       ) : (
         <div className="stencil-actions">
           <p>
-            Route a piece while it is in the spawn zone. Each cleared row earns one
-            transfer.
+            Spend one credit to send the current piece here. Each cleared row earns
+            one credit.
           </p>
           <div>
             {state.canFinish && state.phase === "playing" && (
@@ -95,11 +96,11 @@ export function StencilPanel({
               <button
                 type="button"
                 className="route-button"
-                aria-label={`Route ${state.activePiece.type} to stencil`}
+                aria-label={`Route ${state.activePiece.type} to stencil using 1 credit`}
                 onClick={onRoute}
                 disabled={!canRouteActivePiece(state)}
               >
-                ROUTE {state.activePiece.type} · N
+                ROUTE {state.activePiece.type} · 1 CREDIT · N
               </button>
             )}
           </div>

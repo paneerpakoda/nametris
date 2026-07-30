@@ -407,22 +407,22 @@ describe("piece routing", () => {
     expect(timed.activeMilliseconds).toBe(200);
   });
 
-  it("does not route without a transfer or after leaving the spawn zone", () => {
+  it("requires a credit but allows routing after the piece leaves spawn", () => {
     const state = createBoardSession(queue);
-    const noTransfer = reduceBoardSession(state, {
+    const noCredit = reduceBoardSession(state, {
       type: "route-to-stencil",
     });
-    const tooLate = reduceBoardSession(
+    const laterPiece = reduceBoardSession(
       {
         ...state,
         transferCount: 1,
-        activePiece: { ...state.activePiece, row: 3 },
+        activePiece: { ...state.activePiece, row: 8 },
       },
       { type: "route-to-stencil" },
     );
 
-    expect(noTransfer).toBe(state);
-    expect(tooLate.phase).toBe("playing");
+    expect(noCredit).toBe(state);
+    expect(laterPiece.phase).toBe("placing-stencil");
   });
 
   it("fails safe if stencil mode has no active stencil piece", () => {

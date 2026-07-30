@@ -37,11 +37,11 @@ export function WelcomeScreen({ onStart }: WelcomeScreenProps) {
           <ol className="premise-steps">
             <li>
               <strong>Clear</strong>
-              <span>Every completed row earns one transfer.</span>
+              <span>Every completed row earns one credit.</span>
             </li>
             <li>
               <strong>Route</strong>
-              <span>Send an eligible spawned piece into your stencil.</span>
+              <span>Press N before a piece locks to send it into your stencil.</span>
             </li>
             <li>
               <strong>Risk</strong>
