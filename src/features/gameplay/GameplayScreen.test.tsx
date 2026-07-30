@@ -61,9 +61,11 @@ describe("GameplayScreen", () => {
 
     await user.click(screen.getByRole("button", { name: "Pause game" }));
     expect(screen.getByText("Game paused")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Resume game" })).toHaveFocus();
 
     await user.click(screen.getByRole("button", { name: "Resume game" }));
     expect(screen.queryByText("Game paused")).not.toBeInTheDocument();
+    expect(screen.getByRole("application", { name: "Nametris game" })).toHaveFocus();
   });
 
   it("routes with N, shows stencil controls, and locks with Enter", () => {
@@ -87,6 +89,28 @@ describe("GameplayScreen", () => {
 
     expect(screen.getByText("NAME COMPLETE")).toBeInTheDocument();
     expect(screen.getByTestId("transfers")).toHaveTextContent("0");
+  });
+
+  it("pauses and resumes the exact stencil placement", async () => {
+    const user = userEvent.setup();
+    const initialSession = {
+      ...createBoardSession(["O", "I", "T", "J"]),
+      transferCount: 1,
+      stencil: createStencilState(new Set(["0:0", "0:1", "1:0", "1:1"]), 2, 2),
+    };
+
+    render(<GameplayScreen initialSession={initialSession} />);
+    const game = screen.getByRole("application", { name: "Nametris game" });
+    fireEvent.keyDown(game, { key: "n" });
+
+    await user.click(screen.getByRole("button", { name: "Pause game" }));
+    expect(screen.getByText("Game paused")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Resume game" })).toHaveFocus();
+
+    await user.click(screen.getByRole("button", { name: "Resume game" }));
+    expect(screen.getByText("PLACE THE O")).toBeInTheDocument();
+    expect(screen.getByTestId("transfers")).toHaveTextContent("1");
+    expect(game).toHaveFocus();
   });
 
   it("reports one frozen success result when a run is won", async () => {

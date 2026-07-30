@@ -8,6 +8,10 @@ export function getGameAction(key: string, phase: BoardPhase): BoardAction | nul
   }
 
   if (phase === "placing-stencil") {
+    if (key.toLowerCase() === "p") {
+      return { type: "pause", reason: "player" };
+    }
+
     switch (key.toLowerCase()) {
       case "arrowleft":
       case "a":

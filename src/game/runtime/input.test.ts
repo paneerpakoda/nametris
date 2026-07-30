@@ -49,4 +49,11 @@ describe("game keyboard input", () => {
       type: "stencil-cancel",
     });
   });
+
+  it("allows explicit pause during stencil placement", () => {
+    expect(getGameAction("p", "placing-stencil")).toEqual({
+      type: "pause",
+      reason: "player",
+    });
+  });
 });

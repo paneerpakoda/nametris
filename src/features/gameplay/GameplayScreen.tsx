@@ -65,6 +65,7 @@ export function GameplayScreen({
   );
   const [state, dispatch] = useReducer(reduceGameplaySession, startingSession);
   const gameRef = useRef<HTMLDivElement>(null);
+  const resumeButtonRef = useRef<HTMLButtonElement>(null);
   const reportedOutcomeRef = useRef<"won" | "lost" | null>(null);
   const previousAnnouncementState = useRef({
     linesCleared: state.linesCleared,
@@ -75,8 +76,12 @@ export function GameplayScreen({
   const ghostPiece = getGhostPiece(state.board, state.activePiece);
 
   useEffect(() => {
-    gameRef.current?.focus();
-  }, []);
+    if (state.phase === "paused") {
+      resumeButtonRef.current?.focus();
+    } else if (state.phase === "playing" || state.phase === "placing-stencil") {
+      gameRef.current?.focus();
+    }
+  }, [state.phase]);
 
   useEffect(() => {
     if (import.meta.env.VITE_NAMETRIS_E2E !== "true") {
@@ -199,7 +204,7 @@ export function GameplayScreen({
           state={state}
           onDismiss={() => window.requestAnimationFrame(() => gameRef.current?.focus())}
         />
-        {state.phase === "playing" && (
+        {(state.phase === "playing" || state.phase === "placing-stencil") && (
           <button
             type="button"
             className="secondary-button"
@@ -255,6 +260,7 @@ export function GameplayScreen({
                 : "Your stack is waiting."}
             </p>
             <button
+              ref={resumeButtonRef}
               type="button"
               className="primary-button compact"
               onClick={() => dispatch({ type: "resume" })}

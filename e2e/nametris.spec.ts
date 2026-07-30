@@ -48,6 +48,12 @@ test("keyboard flow earns, routes, cancels, locks, and returns to play", async (
     "1 line cleared. 1 transfer earned.",
   );
 
+  await page.keyboard.press("KeyP");
+  await expect(page.getByRole("button", { name: "Resume game" })).toBeFocused();
+  await page.keyboard.press("Enter");
+  await expect(page.getByText(/^PLACE THE [A-Z]$/)).toBeVisible();
+  await expect(page.getByRole("application")).toBeFocused();
+
   await page.keyboard.press("Escape");
   await expect(page.getByText("NAME STENCIL")).toBeVisible();
   await expect(page.getByTestId("transfers")).toHaveText("1");
@@ -56,6 +62,33 @@ test("keyboard flow earns, routes, cancels, locks, and returns to play", async (
   await page.keyboard.press("Enter");
   await expect(page.getByText("TETRIS BOARD")).toBeVisible();
   await expect(page.getByTestId("transfers")).toHaveText("0");
+});
+
+test("the complete game surface fits the accepted desktop viewport", async ({
+  page,
+}) => {
+  await startRun(page);
+  await expect(
+    page.getByRole("grid", { name: "Normal Tetris board" }),
+  ).toBeInViewport();
+  await expect(page.getByRole("heading", { name: "CONTROLS" })).toBeInViewport();
+  expect(
+    await page.evaluate(() => ({
+      scrollX: window.scrollX,
+      scrollY: window.scrollY,
+      viewportWidth: window.innerWidth,
+      viewportHeight: window.innerHeight,
+      documentWidth: document.documentElement.scrollWidth,
+      documentHeight: document.documentElement.scrollHeight,
+    })),
+  ).toEqual({
+    scrollX: 0,
+    scrollY: 0,
+    viewportWidth: 1180,
+    viewportHeight: 720,
+    documentWidth: 1180,
+    documentHeight: 720,
+  });
 });
 
 test("exact 80 percent continues until the player explicitly finishes", async ({
