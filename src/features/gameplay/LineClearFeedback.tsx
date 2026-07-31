@@ -18,17 +18,17 @@ export function LineClearFeedback({ event }: LineClearFeedbackProps) {
   const title = hasWaste
     ? `${event.transfersWasted} ${
         event.transfersWasted === 1 ? "TRANSFER" : "TRANSFERS"
-      } WASTED`
+      } LOST!`
     : `+${event.transfersStored} ${
         event.transfersStored === 1 ? "TRANSFER" : "TRANSFERS"
-      } EARNED`;
+      }!`;
   const detail = hasWaste
     ? event.transfersStored > 0
-      ? `${event.transfersStored} STORED · BANK HIT ${maximumTransferCount} / ${maximumTransferCount} · USE SHIFT SOONER`
-      : "BANK WAS FULL · USE SHIFT BEFORE YOUR NEXT CLEAR"
+      ? `+${event.transfersStored} BANKED · ${maximumTransferCount}/${maximumTransferCount} · SHIFT SOONER`
+      : "BANK FULL · HIT SHIFT SOONER"
     : `${event.linesCleared === 1 ? "ROW CLEAR" : `${event.linesCleared} ROWS CLEARED`} · BANK ${
         event.bankCount
-      } / ${maximumTransferCount}`;
+      }/${maximumTransferCount}`;
 
   return (
     <div
@@ -37,11 +37,8 @@ export function LineClearFeedback({ event }: LineClearFeedbackProps) {
       data-testid="line-clear-feedback"
       aria-hidden="true"
     >
-      <span className="line-clear-feedback-mark">{hasWaste ? "!" : "+"}</span>
-      <span>
-        <strong>{title}</strong>
-        <small>{detail}</small>
-      </span>
+      <strong>{title}</strong>
+      <small>{detail}</small>
     </div>
   );
 }

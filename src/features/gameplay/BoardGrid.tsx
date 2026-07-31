@@ -1,4 +1,4 @@
-import { useMemo, type CSSProperties } from "react";
+import { useMemo, type CSSProperties, type ReactNode } from "react";
 
 import { routeZoneVisibleRows } from "../../game/config/gameplay";
 import { HIDDEN_BOARD_ROWS, VISIBLE_BOARD_HEIGHT } from "../../game/engine/board";
@@ -9,13 +9,19 @@ interface BoardGridProps {
   readonly board: Board;
   readonly activePiece: ActivePiece;
   readonly ghostPiece: ActivePiece;
+  readonly children?: ReactNode;
 }
 
 function cellKey(row: number, column: number): string {
   return `${row}:${column}`;
 }
 
-export function BoardGrid({ board, activePiece, ghostPiece }: BoardGridProps) {
+export function BoardGrid({
+  board,
+  activePiece,
+  ghostPiece,
+  children,
+}: BoardGridProps) {
   const activeCells = useMemo(
     () =>
       new Set(
@@ -70,6 +76,7 @@ export function BoardGrid({ board, activePiece, ghostPiece }: BoardGridProps) {
           }),
         )}
       </div>
+      {children}
     </div>
   );
 }

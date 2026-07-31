@@ -8,13 +8,19 @@ import { BOARD_HEIGHT } from "../../game/engine/board";
 import { GameplayScreen } from "./GameplayScreen";
 
 describe("GameplayScreen", () => {
-  it("hard drops the active piece from the focused game surface", () => {
+  it("hard drops the active piece and retriggers a subtle surface impact", () => {
     render(<GameplayScreen seed={7} />);
     const game = screen.getByRole("application", { name: "Nametris game" });
 
+    expect(game).toHaveAttribute("data-impact", "idle");
     fireEvent.keyDown(game, { key: " " });
 
     expect(Number(screen.getByTestId("score").textContent)).toBeGreaterThan(0);
+    expect(game).toHaveAttribute("data-impact", "a");
+
+    fireEvent.keyDown(game, { key: " " });
+
+    expect(game).toHaveAttribute("data-impact", "b");
   });
 
   it("shows active playtime as a normal metric", () => {
@@ -53,12 +59,13 @@ describe("GameplayScreen", () => {
     expect(screen.getByRole("status")).toHaveTextContent(
       "1 line cleared. 1 transfer earned.",
     );
-    expect(screen.getByTestId("line-clear-feedback")).toHaveAttribute(
-      "data-kind",
-      "earned",
-    );
-    expect(screen.getByText("+1 TRANSFER EARNED")).toBeVisible();
-    expect(screen.getByText("ROW CLEAR · BANK 1 / 3")).toBeVisible();
+    const feedback = screen.getByTestId("line-clear-feedback");
+    expect(feedback).toHaveAttribute("data-kind", "earned");
+    expect(
+      screen.getByRole("grid", { name: "Normal Tetris board" }).parentElement,
+    ).toContainElement(feedback);
+    expect(screen.getByText("+1 TRANSFER!")).toBeVisible();
+    expect(screen.getByText("ROW CLEAR · BANK 1/3")).toBeVisible();
   });
 
   it("announces that a full transfer bank cannot store another clear", () => {
@@ -87,14 +94,13 @@ describe("GameplayScreen", () => {
     expect(screen.getByRole("status")).toHaveTextContent(
       "1 line cleared. 1 transfer wasted because the bank was already full at 3. Use Shift before your next clear.",
     );
-    expect(screen.getByTestId("line-clear-feedback")).toHaveAttribute(
-      "data-kind",
-      "wasted",
-    );
-    expect(screen.getByText("1 TRANSFER WASTED")).toBeVisible();
+    const feedback = screen.getByTestId("line-clear-feedback");
+    expect(feedback).toHaveAttribute("data-kind", "wasted");
     expect(
-      screen.getByText("BANK WAS FULL · USE SHIFT BEFORE YOUR NEXT CLEAR"),
-    ).toBeVisible();
+      screen.getByRole("grid", { name: "Normal Tetris board" }).parentElement,
+    ).toContainElement(feedback);
+    expect(screen.getByText("1 TRANSFER LOST!")).toBeVisible();
+    expect(screen.getByText("BANK FULL · HIT SHIFT SOONER")).toBeVisible();
   });
 
   it("pauses and resumes from real buttons", async () => {

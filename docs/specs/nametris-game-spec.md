@@ -162,6 +162,7 @@ WELCOME
 - Horizontal movement
 - Soft drop
 - Hard drop
+- Give each hard drop a subtle, brief gameplay-surface shake; remove the motion when reduced motion is requested.
 - Clockwise and counter-clockwise rotation
 - Wall kicks sufficient for expected modern Tetris behavior
 - Lock delay with reset cap to prevent indefinite stalling
@@ -194,7 +195,7 @@ Scoring constants must live in one configuration module and be easy to tune afte
 - Transfers accumulate up to a bank limit of three.
 - At `3 / 3`, highlight the transfer metric and NAME panel with a persistent prompt to route a piece.
 - Additional cleared rows still score and count normally but cannot add transfers while the bank is full.
-- Show immediate visible feedback for transfers earned on a clear and transfers wasted because the bank had no room.
+- Show concise arcade-style feedback over the lower board for transfers earned on a clear and transfers lost because the bank had no room.
 - Routing a piece is allowed only when at least one transfer is available.
 - Routing must be an affirmative action; ordinary Tetris play continues without a board/name confirmation dialog.
 - When routed, the exact spawned piece type moves to stencil-placement mode.

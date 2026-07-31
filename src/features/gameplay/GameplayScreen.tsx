@@ -35,6 +35,7 @@ interface GameplayScreenProps {
 
 const clockResolutionMilliseconds = 50;
 const lineClearFeedbackDurationMilliseconds = 2_000;
+type HardDropImpact = "idle" | "a" | "b";
 
 type GameplayAction =
   | BoardAction
@@ -81,6 +82,7 @@ export function GameplayScreen({
   const [lineClearFeedback, setLineClearFeedback] =
     useState<LineClearFeedbackEvent | null>(null);
   const lineClearFeedbackSequenceRef = useRef(0);
+  const [hardDropImpact, setHardDropImpact] = useState<HardDropImpact>("idle");
   const [helpOpen, setHelpOpen] = useState(false);
   const ghostPiece = getGhostPiece(state.board, state.activePiece);
 
@@ -249,6 +251,9 @@ export function GameplayScreen({
     }
 
     event.preventDefault();
+    if (action.type === "hard-drop") {
+      setHardDropImpact((current) => (current === "a" ? "b" : "a"));
+    }
     dispatch(action);
   }
 
@@ -291,7 +296,12 @@ export function GameplayScreen({
 
       <div
         ref={gameRef}
-        className="game-surface"
+        className={
+          hardDropImpact === "idle"
+            ? "game-surface"
+            : `game-surface is-hard-drop-impact-${hardDropImpact}`
+        }
+        data-impact={hardDropImpact}
         role="application"
         aria-label="Nametris game"
         tabIndex={0}
@@ -303,9 +313,6 @@ export function GameplayScreen({
               <p className="panel-kicker">01 / CLEAR LINES</p>
               <h2 id="normal-board-title">TETRIS BOARD</h2>
             </div>
-            {lineClearFeedback && (
-              <LineClearFeedback key={lineClearFeedback.id} event={lineClearFeedback} />
-            )}
             <div className="next-piece">
               <span>NEXT</span>
               <PiecePreview type={state.nextPiece} />
@@ -315,7 +322,11 @@ export function GameplayScreen({
             board={state.board}
             activePiece={state.activePiece}
             ghostPiece={ghostPiece}
-          />
+          >
+            {lineClearFeedback && (
+              <LineClearFeedback key={lineClearFeedback.id} event={lineClearFeedback} />
+            )}
+          </BoardGrid>
         </section>
 
         <GameSidebar
