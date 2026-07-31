@@ -2,7 +2,8 @@ import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vitest/config";
 
-export default defineConfig({
+export default defineConfig(({ command }) => ({
+  base: command === "build" ? "/nametris/" : "/",
   plugins: [react(), tailwindcss()],
   test: {
     environment: "jsdom",
@@ -23,4 +24,4 @@ export default defineConfig({
       },
     },
   },
-});
+}));
