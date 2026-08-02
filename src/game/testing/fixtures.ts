@@ -1,9 +1,10 @@
 import { BOARD_HEIGHT } from "../engine/board";
 import type { BoardSession } from "../engine/session";
 import { createStencilState } from "../engine/stencil";
+import { maximumTransferCount } from "../config/gameplay";
 
 export type E2EFixtureKind =
-  "route-return" | "eighty" | "perfect-ready" | "topout-eighty";
+  "route-return" | "transfer-full" | "eighty" | "perfect-ready" | "topout-eighty";
 
 function progressStencil(filledCount: number) {
   const mask = new Set(Array.from({ length: 20 }, (_, index) => `0:${index}`));
@@ -32,6 +33,18 @@ export function createE2EFixture(
   const base = resetPlacement(state);
 
   switch (kind) {
+    case "transfer-full":
+      return {
+        ...base,
+        activePiece: {
+          type: "T",
+          rotation: 0,
+          row: 0,
+          column: 3,
+        },
+        transferCount: maximumTransferCount,
+        canFinish: false,
+      };
     case "route-return":
       return {
         ...base,

@@ -7,6 +7,13 @@ import { createE2EFixture } from "./fixtures";
 const baseSession = createBoardSession(["O", "I", "T", "J", "L"]);
 
 describe("deterministic browser fixtures", () => {
+  it("exposes a full transfer bank for visual coverage", () => {
+    const fixture = createE2EFixture(baseSession, "transfer-full");
+
+    expect(fixture.phase).toBe("playing");
+    expect(fixture.transferCount).toBe(3);
+  });
+
   it("routes, locks, and returns to normal play", () => {
     const fixture = createE2EFixture(baseSession, "route-return");
     const placing = reduceBoardSession(fixture, { type: "route-to-stencil" });
