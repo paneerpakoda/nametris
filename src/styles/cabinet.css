@@ -1,0 +1,304 @@
+.cabinet-stage {
+  display: grid;
+  min-width: 1280px;
+  min-height: 720px;
+  height: 100vh;
+  padding: clamp(8px, 1.2vh, 14px);
+  place-items: center;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 50% 12%, rgb(83 69 50 / 42%), transparent 36%), #161714;
+}
+
+.cabinet-machine {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  width: min(1920px, 100%);
+  height: 100%;
+  grid-template-rows: minmax(0, 1fr) auto;
+  overflow: hidden;
+  border: 1px solid var(--cabinet-highlight);
+  border-radius: clamp(24px, 2.4vw, 42px);
+  background:
+    linear-gradient(
+      90deg,
+      rgb(93 59 23 / 10%),
+      transparent 8% 92%,
+      rgb(93 59 23 / 10%)
+    ),
+    linear-gradient(180deg, var(--cabinet-ivory), var(--cabinet-plastic));
+  box-shadow:
+    0 18px 60px rgb(0 0 0 / 56%),
+    inset 0 0 0 3px rgb(255 244 216 / 54%),
+    inset 0 -14px 24px rgb(113 73 30 / 12%);
+}
+
+.cabinet-display-section {
+  position: relative;
+  display: grid;
+  min-height: 0;
+  padding: clamp(28px, 4vh, 48px) clamp(66px, 6vw, 108px) clamp(18px, 2.4vh, 28px);
+}
+
+.cabinet-bezel {
+  min-width: 0;
+  min-height: 0;
+  padding: clamp(10px, 1.25vw, 20px);
+  border: 2px solid rgb(100 68 32 / 58%);
+  border-radius: clamp(32px, 3.4vw, 58px);
+  background: linear-gradient(145deg, #b59469, #f4dcb5 15%, #c5a176 86%);
+  box-shadow:
+    inset 5px 7px 13px rgb(73 43 14 / 52%),
+    0 3px 0 rgb(255 245 218 / 55%);
+}
+
+.cabinet-screen {
+  position: relative;
+  isolation: isolate;
+  height: 100%;
+  overflow: hidden;
+  border: 4px solid #15130f;
+  border-radius: clamp(24px, 2.7vw, 46px);
+  color: var(--crt-text);
+  background: var(--crt-black);
+  box-shadow:
+    inset 0 0 42px #000,
+    0 0 0 3px rgb(65 45 24 / 62%),
+    0 4px 12px rgb(62 39 16 / 45%);
+}
+
+.cabinet-screen-content {
+  position: relative;
+  z-index: 1;
+  height: 100%;
+}
+
+.crt-rgb,
+.crt-scanlines,
+.crt-vignette {
+  position: absolute;
+  z-index: 20;
+  inset: 0;
+  pointer-events: none;
+}
+
+.crt-rgb {
+  background: repeating-linear-gradient(
+    90deg,
+    rgb(255 65 65 / 4%) 0 1px,
+    rgb(68 255 111 / 2%) 1px 2px,
+    rgb(72 116 255 / 4%) 2px 3px
+  );
+  mix-blend-mode: screen;
+}
+
+.crt-scanlines {
+  background: repeating-linear-gradient(
+    0deg,
+    rgb(0 0 0 / 20%) 0 1px,
+    transparent 1px 3px
+  );
+  opacity: 0.58;
+}
+
+.crt-vignette {
+  border-radius: inherit;
+  background:
+    radial-gradient(ellipse at center, transparent 58%, rgb(0 0 0 / 42%) 100%),
+    linear-gradient(
+      90deg,
+      rgb(255 255 255 / 2%),
+      transparent 8% 92%,
+      rgb(255 255 255 / 2%)
+    );
+  box-shadow: inset 0 0 34px rgb(0 0 0 / 74%);
+}
+
+.cabinet-speaker {
+  position: absolute;
+  z-index: 3;
+  bottom: clamp(22px, 3vh, 34px);
+  width: 44px;
+  height: 78px;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent 0 8px,
+    rgb(63 47 28 / 86%) 8px 11px,
+    transparent 11px 15px
+  );
+}
+
+.cabinet-speaker-left {
+  left: 24px;
+}
+
+.cabinet-speaker-right {
+  right: 24px;
+}
+
+.cabinet-console {
+  position: relative;
+  display: grid;
+  min-height: clamp(120px, 16.5vh, 166px);
+  margin: 0 clamp(92px, 9.4vw, 178px);
+  grid-template-columns: 88px minmax(0, 1fr);
+  align-items: center;
+  border: 2px solid rgb(102 69 31 / 63%);
+  border-bottom: 0;
+  border-radius: 22px 22px 0 0;
+  background:
+    linear-gradient(180deg, rgb(255 239 207 / 32%), transparent 24%),
+    var(--cabinet-plastic);
+  box-shadow:
+    inset 0 0 0 3px rgb(255 241 211 / 36%),
+    0 -2px 7px rgb(77 51 25 / 16%);
+}
+
+.cabinet-power {
+  position: absolute;
+  display: grid;
+  left: calc(clamp(92px, 9.4vw, 178px) * -1 + 22px);
+  gap: 9px;
+  justify-items: center;
+  color: var(--cabinet-ink);
+  font-family: var(--font-pixel);
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+}
+
+.cabinet-power i {
+  display: block;
+  width: 19px;
+  height: 19px;
+  border: 4px solid #ffcfb9;
+  border-radius: 50%;
+  background: var(--phosphor-red);
+  box-shadow:
+    0 0 10px var(--phosphor-red),
+    inset 0 0 3px #fff;
+}
+
+.cabinet-control-slot {
+  min-width: 0;
+  grid-column: 2;
+}
+
+.control-deck {
+  display: flex;
+  min-width: 0;
+  padding: 10px clamp(16px, 2.4vw, 38px) 12px;
+  align-items: center;
+  justify-content: space-around;
+  gap: clamp(12px, 2vw, 34px);
+}
+
+.control-group {
+  display: grid;
+  gap: 8px;
+  justify-items: center;
+}
+
+.control-group + .control-group {
+  position: relative;
+}
+
+.control-group + .control-group::before {
+  position: absolute;
+  top: -5px;
+  bottom: -8px;
+  left: calc(clamp(12px, 2vw, 34px) * -0.5);
+  width: 1px;
+  background: rgb(99 68 33 / 27%);
+  content: "";
+}
+
+.control-group-label {
+  color: var(--cabinet-ink);
+  font-family: var(--font-pixel);
+  font-size: clamp(0.58rem, 0.72vw, 0.72rem);
+  font-weight: 700;
+  letter-spacing: 0.11em;
+  white-space: nowrap;
+}
+
+.control-group-keys {
+  display: flex;
+  gap: 8px;
+}
+
+.cabinet-key {
+  display: inline-grid;
+  min-width: clamp(46px, 3.8vw, 58px);
+  height: clamp(44px, 5.8vh, 58px);
+  padding: 0 8px;
+  place-items: center;
+  border: 1px solid #5e6066;
+  border-radius: 7px;
+  color: #f8f1df;
+  background: linear-gradient(180deg, #3b3f49 0 11%, #20232b 82%);
+  box-shadow:
+    0 6px 0 #08090c,
+    0 8px 9px rgb(65 43 23 / 36%),
+    inset 0 1px 1px rgb(255 255 255 / 20%);
+  font-family: var(--font-mono);
+  font-size: clamp(1rem, 1.8vw, 1.55rem);
+  font-weight: 700;
+  line-height: 1;
+  text-decoration: none;
+}
+
+.cabinet-key.is-wide {
+  min-width: clamp(72px, 6vw, 94px);
+  font-size: clamp(0.68rem, 1vw, 0.88rem);
+}
+
+button.cabinet-key {
+  cursor: pointer;
+  transition:
+    translate 80ms ease,
+    box-shadow 80ms ease,
+    filter 120ms ease;
+}
+
+button.cabinet-key:hover:not(:disabled) {
+  filter: brightness(1.18);
+}
+
+button.cabinet-key:active:not(:disabled) {
+  translate: 0 5px;
+  box-shadow:
+    0 1px 0 #08090c,
+    inset 0 1px 1px rgb(255 255 255 / 16%);
+}
+
+button.cabinet-key:disabled {
+  cursor: not-allowed;
+  filter: saturate(0.35);
+  opacity: 0.42;
+}
+
+@media (max-height: 800px) {
+  .cabinet-display-section {
+    padding-top: 24px;
+    padding-bottom: 14px;
+  }
+
+  .cabinet-console {
+    min-height: 116px;
+  }
+
+  .control-deck {
+    padding-block: 7px 11px;
+  }
+
+  .control-group {
+    gap: 5px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  button.cabinet-key {
+    transition: none;
+  }
+}
