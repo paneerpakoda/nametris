@@ -5,6 +5,16 @@ import { describe, expect, it, vi } from "vitest";
 import { WelcomeScreen } from "./WelcomeScreen";
 
 describe("WelcomeScreen", () => {
+  it("presents onboarding inside the powered cabinet with a keyboard reference", () => {
+    render(<WelcomeScreen onStart={vi.fn()} />);
+
+    expect(
+      screen.getByRole("region", { name: "Nametris arcade cabinet" }),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("region", { name: "Welcome display" })).toBeInTheDocument();
+    expect(screen.getByText("SHIFT").tagName).toBe("KBD");
+  });
+
   it("starts HARSH when the optional field is empty", async () => {
     const user = userEvent.setup();
     const onStart = vi.fn();
