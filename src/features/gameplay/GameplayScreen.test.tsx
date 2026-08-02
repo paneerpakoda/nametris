@@ -95,9 +95,14 @@ describe("GameplayScreen", () => {
     expect(feedback).toHaveAttribute("data-kind", "earned");
     expect(
       screen.getByRole("grid", { name: "Normal Tetris board" }).parentElement,
+    ).not.toContainElement(feedback);
+    expect(
+      screen.getByRole("complementary", {
+        name: "Transfer bank and next piece",
+      }),
     ).toContainElement(feedback);
-    expect(screen.getByText("+1 TRANSFER!")).toBeVisible();
-    expect(screen.getByText("ROW CLEAR · BANK 1/3")).toBeVisible();
+    expect(screen.getByText("1 ROW CLEARED")).toBeVisible();
+    expect(screen.getByText("+1 TRANSFER · BANK 1/3")).toBeVisible();
   });
 
   it("announces that a full transfer bank cannot store another clear", () => {
@@ -130,9 +135,9 @@ describe("GameplayScreen", () => {
     expect(feedback).toHaveAttribute("data-kind", "wasted");
     expect(
       screen.getByRole("grid", { name: "Normal Tetris board" }).parentElement,
-    ).toContainElement(feedback);
-    expect(screen.getByText("1 TRANSFER LOST!")).toBeVisible();
-    expect(screen.getByText("BANK FULL · HIT SHIFT SOONER")).toBeVisible();
+    ).not.toContainElement(feedback);
+    expect(screen.getByText("1 ROW CLEARED")).toBeVisible();
+    expect(screen.getByText("TRANSFER LOST · BANK FULL · USE SHIFT")).toBeVisible();
   });
 
   it("pauses and resumes from real buttons", async () => {
@@ -298,6 +303,7 @@ describe("GameplayScreen", () => {
     );
     expect(screen.getByTestId("transfers")).toHaveTextContent("3 / 3");
     expect(screen.getByText("FULL")).toBeVisible();
+    expect(screen.getByText("SLOW ZONE · BANK FULL")).toBeVisible();
     expect(screen.getByText("TRANSFER BANK FULL · ROUTE A PIECE")).toBeVisible();
     expect(screen.getByText("Extra line clears cannot add transfers.")).toBeVisible();
   });

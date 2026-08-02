@@ -1,4 +1,4 @@
-import { useMemo, type CSSProperties, type ReactNode } from "react";
+import { useMemo, type CSSProperties } from "react";
 
 import { routeZoneVisibleRows } from "../../game/config/gameplay";
 import { HIDDEN_BOARD_ROWS, VISIBLE_BOARD_HEIGHT } from "../../game/engine/board";
@@ -9,7 +9,7 @@ interface BoardGridProps {
   readonly board: Board;
   readonly activePiece: ActivePiece;
   readonly ghostPiece: ActivePiece;
-  readonly children?: ReactNode;
+  readonly slowZoneActive?: boolean;
 }
 
 function cellKey(row: number, column: number): string {
@@ -20,7 +20,7 @@ export function BoardGrid({
   board,
   activePiece,
   ghostPiece,
-  children,
+  slowZoneActive = false,
 }: BoardGridProps) {
   const activeCells = useMemo(
     () =>
@@ -41,7 +41,8 @@ export function BoardGrid({
   return (
     <div className="board-frame">
       <div
-        className="board-grid"
+        className={`board-grid${slowZoneActive ? " is-slow-zone" : ""}`}
+        data-slow-zone={slowZoneActive || undefined}
         style={boardStyle}
         role="grid"
         aria-label="Normal Tetris board"
@@ -49,7 +50,9 @@ export function BoardGrid({
         aria-colcount={10}
       >
         <span className="transfer-route-zone" aria-hidden="true">
-          ROUTE ZONE · TOP {routeZoneVisibleRows} ROWS
+          {slowZoneActive
+            ? "SLOW ZONE · BANK FULL"
+            : `ROUTE ZONE · TOP ${routeZoneVisibleRows} ROWS`}
         </span>
         <span className="transfer-route-deadline" aria-hidden="true">
           <small>ROUTE DEADLINE</small>
@@ -76,7 +79,6 @@ export function BoardGrid({
           }),
         )}
       </div>
-      {children}
     </div>
   );
 }

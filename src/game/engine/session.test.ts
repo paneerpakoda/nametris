@@ -187,6 +187,44 @@ describe("normal-board session", () => {
     expect(ticked.activePiece.row).toBe(state.activePiece.row + 1);
   });
 
+  it("halves gravity in the route zone when all three transfers are stored", () => {
+    const state = {
+      ...createBoardSession(queue),
+      transferCount: 3,
+    };
+    const slowed = reduceBoardSession(state, {
+      type: "tick",
+      elapsedMilliseconds: 800,
+    });
+    const moved = reduceBoardSession(slowed, {
+      type: "tick",
+      elapsedMilliseconds: 800,
+    });
+
+    expect(slowed.activePiece.row).toBe(state.activePiece.row);
+    expect(slowed.gravityAccumulatorMilliseconds).toBe(400);
+    expect(slowed.activeMilliseconds).toBe(800);
+    expect(moved.activePiece.row).toBe(state.activePiece.row + 1);
+    expect(moved.activeMilliseconds).toBe(1_600);
+  });
+
+  it("restores normal gravity after a full-bank piece leaves the route zone", () => {
+    const state = {
+      ...createBoardSession(queue),
+      transferCount: 3,
+      activePiece: {
+        ...createBoardSession(queue).activePiece,
+        row: 9,
+      },
+    };
+    const ticked = reduceBoardSession(state, {
+      type: "tick",
+      elapsedMilliseconds: 800,
+    });
+
+    expect(ticked.activePiece.row).toBe(state.activePiece.row + 1);
+  });
+
   it("caps grounded lock-delay resets", () => {
     const grounded = {
       ...createBoardSession(queue),

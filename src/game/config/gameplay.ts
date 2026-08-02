@@ -5,6 +5,7 @@ export const lockResetLimit = 15;
 export const minimumGravityMilliseconds = 80;
 export const maximumTransferCount = 3;
 export const routeZoneVisibleRows = 7;
+export const fullBankSlowZoneGravityMultiplier = 0.5;
 
 export function getGravityMilliseconds(level: number): number {
   const interval = 800 * 0.85 ** Math.max(0, level - 1);

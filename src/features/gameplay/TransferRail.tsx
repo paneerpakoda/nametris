@@ -1,13 +1,21 @@
+import { ArrowRight } from "lucide-react";
+
 import { maximumTransferCount } from "../../game/config/gameplay";
 import type { PieceType } from "../../game/model/types";
 import { PiecePreview } from "./BoardGrid";
+import { LineClearFeedback, type LineClearFeedbackEvent } from "./LineClearFeedback";
 
 interface TransferRailProps {
   readonly nextPiece: PieceType;
   readonly transferCount: number;
+  readonly feedback?: LineClearFeedbackEvent | null;
 }
 
-export function TransferRail({ nextPiece, transferCount }: TransferRailProps) {
+export function TransferRail({
+  nextPiece,
+  transferCount,
+  feedback = null,
+}: TransferRailProps) {
   const isFull = transferCount >= maximumTransferCount;
 
   return (
@@ -21,9 +29,13 @@ export function TransferRail({ nextPiece, transferCount }: TransferRailProps) {
             key={index}
             aria-hidden="true"
           >
-            ➜
+            <ArrowRight aria-hidden="true" />
           </span>
         ))}
+      </div>
+
+      <div className="rail-feedback-slot" aria-hidden="true">
+        {feedback && <LineClearFeedback key={feedback.id} event={feedback} />}
       </div>
 
       <div

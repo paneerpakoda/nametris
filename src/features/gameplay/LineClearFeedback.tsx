@@ -15,20 +15,16 @@ interface LineClearFeedbackProps {
 export function LineClearFeedback({ event }: LineClearFeedbackProps) {
   const hasWaste = event.transfersWasted > 0;
   const kind = hasWaste ? "wasted" : "earned";
-  const title = hasWaste
-    ? `${event.transfersWasted} ${
-        event.transfersWasted === 1 ? "TRANSFER" : "TRANSFERS"
-      } LOST!`
-    : `+${event.transfersStored} ${
-        event.transfersStored === 1 ? "TRANSFER" : "TRANSFERS"
-      }!`;
+  const title = `${event.linesCleared} ${
+    event.linesCleared === 1 ? "ROW" : "ROWS"
+  } CLEARED`;
   const detail = hasWaste
     ? event.transfersStored > 0
-      ? `+${event.transfersStored} BANKED · ${maximumTransferCount}/${maximumTransferCount} · SHIFT SOONER`
-      : "BANK FULL · HIT SHIFT SOONER"
-    : `${event.linesCleared === 1 ? "ROW CLEAR" : `${event.linesCleared} ROWS CLEARED`} · BANK ${
-        event.bankCount
-      }/${maximumTransferCount}`;
+      ? `+${event.transfersStored} BANKED · ${event.transfersWasted} LOST · BANK FULL`
+      : `${event.transfersWasted === 1 ? "TRANSFER" : "TRANSFERS"} LOST · BANK FULL · USE SHIFT`
+    : `+${event.transfersStored} ${
+        event.transfersStored === 1 ? "TRANSFER" : "TRANSFERS"
+      } · BANK ${event.bankCount}/${maximumTransferCount}`;
 
   return (
     <div

@@ -23,7 +23,7 @@ const guidanceCopy: Readonly<
   },
   "transfer-cap": {
     title: "TRANSFER BANK FULL → BUILD YOUR NAME",
-    detail: `You can hold ${maximumTransferCount}. Extra line clears cannot add more.`,
+    detail: `Slow zone active above the blue line. Route with Shift; extra clears cannot bank.`,
   },
   stencil: {
     title: "STENCIL MODE → PLACE, TRIM, OR CANCEL",

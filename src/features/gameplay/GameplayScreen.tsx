@@ -25,7 +25,7 @@ import {
 import { BoardGrid } from "./BoardGrid";
 import { GameHelpDialog } from "./GameHelpDialog";
 import { GameSidebar } from "./GameSidebar";
-import { LineClearFeedback, type LineClearFeedbackEvent } from "./LineClearFeedback";
+import type { LineClearFeedbackEvent } from "./LineClearFeedback";
 import { RunGuidance } from "./RunGuidance";
 import { TransferRail } from "./TransferRail";
 import "../../styles/gameplay.css";
@@ -92,6 +92,7 @@ export function GameplayScreen({
   const pauseResumeRef = useRef<HTMLButtonElement>(null);
   const ghostPiece = getGhostPiece(state.board, state.activePiece);
   const canRoute = canRouteActivePiece(state);
+  const slowZoneActive = state.transferCount >= maximumTransferCount && canRoute;
   const canLock =
     state.stencilPiece !== null &&
     getStencilPieceProjection(state.stencil, state.stencilPiece).keptCellKeys.size > 0;
@@ -356,19 +357,14 @@ export function GameplayScreen({
               board={state.board}
               activePiece={state.activePiece}
               ghostPiece={ghostPiece}
-            >
-              {lineClearFeedback && (
-                <LineClearFeedback
-                  key={lineClearFeedback.id}
-                  event={lineClearFeedback}
-                />
-              )}
-            </BoardGrid>
+              slowZoneActive={slowZoneActive}
+            />
           </section>
 
           <TransferRail
             transferCount={state.transferCount}
             nextPiece={state.nextPiece}
+            feedback={lineClearFeedback}
           />
 
           <GameSidebar

@@ -1,4 +1,5 @@
 import {
+  fullBankSlowZoneGravityMultiplier,
   getGravityMilliseconds,
   lockDelayMilliseconds,
   lockResetLimit,
@@ -246,8 +247,12 @@ function tickPlayingSession(
   }
 
   const gravityMilliseconds = getGravityMilliseconds(state.level);
+  const gravityElapsed =
+    state.transferCount >= maximumTransferCount && canRouteActivePiece(state)
+      ? safeElapsed * fullBankSlowZoneGravityMultiplier
+      : safeElapsed;
   let gravityAccumulatorMilliseconds =
-    state.gravityAccumulatorMilliseconds + safeElapsed;
+    state.gravityAccumulatorMilliseconds + gravityElapsed;
   let activePiece = state.activePiece;
 
   while (gravityAccumulatorMilliseconds >= gravityMilliseconds) {
