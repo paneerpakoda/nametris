@@ -1,5 +1,7 @@
 import { useState } from "react";
 
+import { CabinetShell } from "../../components/CabinetShell";
+import { ControlDeck } from "../../components/ControlDeck";
 import type { RunResult } from "../../game/engine/result";
 import { RewardCard } from "../reward/RewardCard";
 import { copyResult, downloadRewardCard, shareResult } from "../reward/localActions";
@@ -37,39 +39,45 @@ export function SuccessScreen({ result, onPlayAgain, onNewName }: SuccessScreenP
   }
 
   return (
-    <main className="result-shell result-shell-success">
-      <div className="result-heading">
-        <p className="eyebrow">RUN COMPLETE</p>
-        <h1>YOU BUILT IT.</h1>
-      </div>
-      <RewardCard result={result} />
-      <div className="result-actions" aria-label="Result actions">
-        <button type="button" className="primary-button" onClick={onPlayAgain}>
-          Play again
-        </button>
-        <button type="button" className="secondary-button" onClick={onNewName}>
-          Try another name
-        </button>
-        <button
-          type="button"
-          className="secondary-button"
-          onClick={() => {
-            downloadRewardCard(result);
-            setActionStatus("Card downloaded locally.");
-          }}
-        >
-          Download card
-        </button>
-        <button type="button" className="secondary-button" onClick={handleCopy}>
-          Copy result
-        </button>
-        <button type="button" className="secondary-button" onClick={handleShare}>
-          Share
-        </button>
-      </div>
-      <p className="result-status" aria-live="polite">
-        {actionStatus}
-      </p>
-    </main>
+    <CabinetShell
+      screenLabel="Success display"
+      screenClassName="result-crt-screen"
+      controlDeck={<ControlDeck />}
+    >
+      <main className="result-shell result-shell-success">
+        <div className="result-heading">
+          <p className="eyebrow">RUN COMPLETE</p>
+          <h1>YOU BUILT IT.</h1>
+        </div>
+        <RewardCard result={result} />
+        <div className="result-actions" aria-label="Result actions">
+          <button type="button" className="primary-button" onClick={onPlayAgain}>
+            Play again
+          </button>
+          <button type="button" className="secondary-button" onClick={onNewName}>
+            Try another name
+          </button>
+          <button
+            type="button"
+            className="secondary-button"
+            onClick={() => {
+              downloadRewardCard(result);
+              setActionStatus("Card downloaded locally.");
+            }}
+          >
+            Download card
+          </button>
+          <button type="button" className="secondary-button" onClick={handleCopy}>
+            Copy result
+          </button>
+          <button type="button" className="secondary-button" onClick={handleShare}>
+            Share
+          </button>
+        </div>
+        <p className="result-status" aria-live="polite">
+          {actionStatus}
+        </p>
+      </main>
+    </CabinetShell>
   );
 }

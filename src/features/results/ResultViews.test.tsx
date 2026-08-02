@@ -36,6 +36,41 @@ const base = {
 } as const;
 
 describe("result views", () => {
+  it.each([
+    ["success", "Success display"],
+    ["loss", "Loss display"],
+  ] as const)("renders the %s view inside the shared cabinet", (view, displayLabel) => {
+    const result =
+      view === "success"
+        ? ({ ...base, outcome: "won", title: playerTitles.blockPoet } as RunResult)
+        : ({ ...base, outcome: "lost" } as LossResult);
+
+    render(
+      view === "success" ? (
+        <SuccessScreen
+          result={result as RunResult}
+          onPlayAgain={vi.fn()}
+          onNewName={vi.fn()}
+        />
+      ) : (
+        <LossScreen
+          result={result as LossResult}
+          onPlayAgain={vi.fn()}
+          onNewName={vi.fn()}
+        />
+      ),
+    );
+
+    expect(
+      screen.getByRole("region", { name: "Nametris arcade cabinet" }),
+    ).toBeVisible();
+    expect(screen.getByRole("region", { name: displayLabel })).toBeVisible();
+
+    const deck = screen.getByLabelText("Cabinet controls");
+    expect(deck.querySelectorAll("kbd")).toHaveLength(8);
+    expect(within(deck).queryAllByRole("button")).toHaveLength(0);
+  });
+
   it("keeps every result action outside the success card", () => {
     const result: RunResult = {
       ...base,
