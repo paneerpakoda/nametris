@@ -9,8 +9,11 @@ describe("ControlDeck", () => {
     render(<ControlDeck />);
 
     expect(screen.queryAllByRole("button")).toHaveLength(0);
-    expect(screen.getByText("SHIFT").tagName).toBe("KBD");
-    expect(screen.getByText("SPACE").tagName).toBe("KBD");
+    expect(screen.getByText("SHIFT").closest("kbd")).not.toBeNull();
+    expect(screen.getByText("SPACE").closest("kbd")).not.toBeNull();
+    expect(
+      screen.getByLabelText("Cabinet controls").querySelectorAll("svg.lucide"),
+    ).toHaveLength(8);
   });
 
   it("emits real keyboard inputs from the playing controls", async () => {

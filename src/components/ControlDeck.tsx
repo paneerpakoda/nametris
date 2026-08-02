@@ -1,3 +1,19 @@
+import {
+  ArrowDown,
+  ArrowLeft,
+  ArrowRight,
+  ArrowUp,
+  ChevronsDown,
+  CornerDownLeft,
+  Pause,
+  Play,
+  RotateCcw,
+  RotateCw,
+  Send,
+  X,
+  type LucideIcon,
+} from "lucide-react";
+
 import type { BoardPhase } from "../game/engine/session";
 
 interface ControlDeckProps {
@@ -11,6 +27,7 @@ interface DeckKey {
   readonly key: string;
   readonly legend: string;
   readonly label: string;
+  readonly icon: LucideIcon;
   readonly disabled?: boolean;
   readonly wide?: boolean;
 }
@@ -24,23 +41,36 @@ const referenceGroups: readonly DeckGroup[] = [
   {
     label: "MOVE",
     keys: [
-      { key: "ArrowLeft", legend: "←", label: "Move left" },
-      { key: "ArrowRight", legend: "→", label: "Move right" },
+      { key: "ArrowLeft", legend: "", label: "Move left", icon: ArrowLeft },
+      { key: "ArrowRight", legend: "", label: "Move right", icon: ArrowRight },
     ],
   },
   {
     label: "DROP",
-    keys: [{ key: "ArrowDown", legend: "↓", label: "Soft drop" }],
+    keys: [{ key: "ArrowDown", legend: "", label: "Soft drop", icon: ArrowDown }],
   },
   {
     label: "HARD DROP",
-    keys: [{ key: " ", legend: "SPACE", label: "Hard drop", wide: true }],
+    keys: [
+      {
+        key: " ",
+        legend: "SPACE",
+        label: "Hard drop",
+        icon: ChevronsDown,
+        wide: true,
+      },
+    ],
   },
   {
     label: "ROTATE",
     keys: [
-      { key: "z", legend: "Z", label: "Rotate counter-clockwise" },
-      { key: "x", legend: "X", label: "Rotate clockwise" },
+      {
+        key: "z",
+        legend: "Z",
+        label: "Rotate counter-clockwise",
+        icon: RotateCcw,
+      },
+      { key: "x", legend: "X", label: "Rotate clockwise", icon: RotateCw },
     ],
   },
   {
@@ -50,13 +80,14 @@ const referenceGroups: readonly DeckGroup[] = [
         key: "Shift",
         legend: "SHIFT",
         label: "Route piece to name",
+        icon: Send,
         wide: true,
       },
     ],
   },
   {
     label: "PAUSE",
-    keys: [{ key: "p", legend: "P", label: "Pause game" }],
+    keys: [{ key: "p", legend: "P", label: "Pause game", icon: Pause }],
   },
 ];
 
@@ -74,6 +105,7 @@ function getInteractiveGroups(
             key: "p",
             legend: "P",
             label: "Resume using cabinet key",
+            icon: Play,
           },
         ],
       },
@@ -85,17 +117,47 @@ function getInteractiveGroups(
       {
         label: "MOVE PIECE",
         keys: [
-          { key: "ArrowLeft", legend: "←", label: "Move piece left" },
-          { key: "ArrowUp", legend: "↑", label: "Move piece up" },
-          { key: "ArrowDown", legend: "↓", label: "Move piece down" },
-          { key: "ArrowRight", legend: "→", label: "Move piece right" },
+          {
+            key: "ArrowLeft",
+            legend: "",
+            label: "Move piece left",
+            icon: ArrowLeft,
+          },
+          {
+            key: "ArrowUp",
+            legend: "",
+            label: "Move piece up",
+            icon: ArrowUp,
+          },
+          {
+            key: "ArrowDown",
+            legend: "",
+            label: "Move piece down",
+            icon: ArrowDown,
+          },
+          {
+            key: "ArrowRight",
+            legend: "",
+            label: "Move piece right",
+            icon: ArrowRight,
+          },
         ],
       },
       {
         label: "ROTATE",
         keys: [
-          { key: "z", legend: "Z", label: "Rotate piece counter-clockwise" },
-          { key: "x", legend: "X", label: "Rotate piece clockwise" },
+          {
+            key: "z",
+            legend: "Z",
+            label: "Rotate piece counter-clockwise",
+            icon: RotateCcw,
+          },
+          {
+            key: "x",
+            legend: "X",
+            label: "Rotate piece clockwise",
+            icon: RotateCw,
+          },
         ],
       },
       {
@@ -105,6 +167,7 @@ function getInteractiveGroups(
             key: "Enter",
             legend: "ENTER",
             label: "Lock piece",
+            icon: CornerDownLeft,
             disabled: !canLock,
             wide: true,
           },
@@ -112,7 +175,14 @@ function getInteractiveGroups(
       },
       {
         label: "CANCEL",
-        keys: [{ key: "Escape", legend: "ESC", label: "Cancel placement" }],
+        keys: [
+          {
+            key: "Escape",
+            legend: "ESC",
+            label: "Cancel placement",
+            icon: X,
+          },
+        ],
       },
     ];
   }
@@ -150,7 +220,10 @@ export function ControlDeck({
                   className={`cabinet-key${deckKey.wide === true ? " is-wide" : ""}`}
                   key={deckKey.key}
                 >
-                  {deckKey.legend}
+                  <deckKey.icon className="cabinet-key-icon" aria-hidden="true" />
+                  {deckKey.legend !== "" && (
+                    <span className="cabinet-key-legend">{deckKey.legend}</span>
+                  )}
                 </kbd>
               ) : (
                 <button
@@ -161,7 +234,10 @@ export function ControlDeck({
                   disabled={deckKey.disabled}
                   onClick={() => onInput(deckKey.key)}
                 >
-                  {deckKey.legend}
+                  <deckKey.icon className="cabinet-key-icon" aria-hidden="true" />
+                  {deckKey.legend !== "" && (
+                    <span className="cabinet-key-legend">{deckKey.legend}</span>
+                  )}
                 </button>
               ),
             )}

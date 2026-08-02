@@ -1,20 +1,20 @@
 @import "tailwindcss" source("../");
 
 :root {
-  font-family: "Space Mono", "Courier New", monospace;
-  color: #ede6d3;
+  font-family: "IBM Plex Mono", "Courier New", monospace;
+  color: #fff5dc;
   background: #161714;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   --background: #161714;
   --surface: #10120f;
   --surface-high: #1c201b;
-  --text: #ede6d3;
-  --muted: #a89980;
+  --text: #fff5dc;
+  --muted: #c7baa1;
   --violet: #b261db;
   --cyan: #3c9ef5;
   --lime: #f5c546;
-  --danger: #e9523d;
+  --danger: #ff6b54;
   --focus: #ffd85c;
   --cabinet-ivory: #f0d3a7;
   --cabinet-plastic: #d6b88c;
@@ -25,14 +25,14 @@
   --cabinet-console-border: rgb(102 69 31 / 63%);
   --crt-black: #080b09;
   --crt-surface: #10140f;
-  --crt-text: #ede6d3;
-  --crt-muted: #958a76;
+  --crt-text: #fff5dc;
+  --crt-muted: #c7baa1;
   --crt-border: #15130f;
-  --phosphor-red: #ec4b37;
-  --phosphor-amber: #f3a232;
-  --route-blue: #328fe5;
-  --font-pixel: "Pixelify Sans", "Courier New", monospace;
-  --font-mono: "Space Mono", "Courier New", monospace;
+  --phosphor-red: #ff6b54;
+  --phosphor-amber: #ffc45d;
+  --route-blue: #57b1ff;
+  --font-pixel: "Silkscreen", "Courier New", monospace;
+  --font-mono: "IBM Plex Mono", "Courier New", monospace;
   --radius-large: 14px;
   --radius-medium: 7px;
   --shadow-glow: 0 0 28px rgb(236 75 55 / 16%);
