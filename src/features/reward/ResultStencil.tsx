@@ -17,8 +17,21 @@ export function ResultStencil({
 }: ResultStencilProps) {
   const filled = new Map(stencil.filledCells);
   const mask = new Set(stencil.mask);
+  const gap = 2;
+  const maximumWidth = 620;
+  const maximumHeight = 98;
+  const cellSize = Math.max(
+    3,
+    Math.min(
+      14,
+      (maximumWidth - (stencil.columns - 1) * gap) / stencil.columns,
+      (maximumHeight - (stencil.rows - 1) * gap) / stencil.rows,
+    ),
+  );
   const style = {
     "--result-columns": stencil.columns,
+    "--result-rows": stencil.rows,
+    "--result-cell-size": `${cellSize.toFixed(2)}px`,
   } as CSSProperties;
 
   return (

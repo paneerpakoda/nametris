@@ -218,7 +218,7 @@
 .control-group-label {
   color: var(--cabinet-ink);
   font-family: var(--font-pixel);
-  font-size: clamp(0.58rem, 0.65vw, 0.65rem);
+  font-size: clamp(0.65rem, 0.7vw, 0.68rem);
   font-weight: 700;
   letter-spacing: 0.11em;
   white-space: nowrap;
@@ -265,7 +265,7 @@
 }
 
 .cabinet-key-legend {
-  font-size: 0.58rem;
+  font-size: 0.64rem;
   letter-spacing: 0.02em;
 }
 

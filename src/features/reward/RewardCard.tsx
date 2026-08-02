@@ -68,28 +68,38 @@ export function RewardCard({ result, reducedMotion }: RewardCardProps) {
       onFocus={resetCard}
     >
       <div className="reward-shine" aria-hidden="true" />
-      <div className="reward-brand-lockup">
-        <NametrisMark compact />
-        <p className="reward-brand">NAMETRIS</p>
+      <header className="reward-card-header">
+        <div className="reward-brand-lockup">
+          <NametrisMark compact />
+          <p className="reward-brand">NAMETRIS</p>
+        </div>
+        <p className="reward-badge">{badge}</p>
+      </header>
+      <div className="reward-name-lockup">
+        <span>NAME BUILT</span>
+        <h2>{result.name}</h2>
       </div>
-      <h2>{result.name}</h2>
       <ResultStencil
         name={result.name}
         displayPercent={result.displayPercent}
         stencil={result.stencil}
       />
-      <p className="reward-title">{result.title}</p>
-      <p className="reward-badge">{badge}</p>
-      <dl className="reward-metrics">
-        <div>
-          <dt>Score</dt>
-          <dd>{result.score.toLocaleString()}</dd>
+      <footer className="reward-card-footer">
+        <div className="reward-award">
+          <span>PLAYER TITLE</span>
+          <p className="reward-title">{result.title}</p>
         </div>
-        <div>
-          <dt>Active time</dt>
-          <dd>{formatActiveTime(result.activeMilliseconds)}</dd>
-        </div>
-      </dl>
+        <dl className="reward-metrics">
+          <div>
+            <dt>Score</dt>
+            <dd>{result.score.toLocaleString()}</dd>
+          </div>
+          <div>
+            <dt>Active time</dt>
+            <dd>{formatActiveTime(result.activeMilliseconds)}</dd>
+          </div>
+        </dl>
+      </footer>
     </motion.article>
   );
 }

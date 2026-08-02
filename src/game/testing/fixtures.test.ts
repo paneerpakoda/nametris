@@ -7,6 +7,14 @@ import { createE2EFixture } from "./fixtures";
 const baseSession = createBoardSession(["O", "I", "T", "J", "L"]);
 
 describe("deterministic browser fixtures", () => {
+  it("provides a one-line clear for non-blocking feedback coverage", () => {
+    const fixture = createE2EFixture(baseSession, "line-clear-ready");
+    const cleared = reduceBoardSession(fixture, { type: "hard-drop" });
+
+    expect(cleared.linesCleared).toBe(fixture.linesCleared + 1);
+    expect(cleared.transferCount).toBe(1);
+  });
+
   it("exposes a full transfer bank for visual coverage", () => {
     const fixture = createE2EFixture(baseSession, "transfer-full");
 
@@ -34,6 +42,16 @@ describe("deterministic browser fixtures", () => {
     expect(fixture.phase).toBe("playing");
     expect(continued.phase).toBe("playing");
     expect(finished.phase).toBe("won");
+  });
+
+  it("preserves a real seven-row name stencil for result-card visuals", () => {
+    const fixture = createE2EFixture(baseSession, "eighty-real");
+    const completion = getStencilCompletion(fixture.stencil);
+
+    expect(fixture.stencil.rows).toBe(7);
+    expect(fixture.stencil.columns).toBeGreaterThan(20);
+    expect(completion.ratio).toBeGreaterThanOrEqual(0.8);
+    expect(fixture.canFinish).toBe(true);
   });
 
   it("auto-finishes the perfect-ready fixture after one legal lock", () => {

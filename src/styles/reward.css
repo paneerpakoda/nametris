@@ -35,14 +35,16 @@
 }
 
 .reward-card {
-  --card-red: #f04434;
+  --card-red: var(--phosphor-red);
   position: relative;
   isolation: isolate;
   display: grid;
-  width: min(700px, 78%);
-  height: clamp(260px, 39vh, 340px);
-  min-height: 0;
-  padding: clamp(15px, 2.2vh, 24px) clamp(26px, 3vw, 42px) 18px;
+  width: min(760px, 84%);
+  min-height: clamp(286px, 40vh, 344px);
+  padding: clamp(17px, 2.2vh, 24px) clamp(26px, 3vw, 42px) 20px;
+  grid-template-rows: auto auto minmax(84px, 1fr) auto;
+  align-items: center;
+  gap: clamp(7px, 1.1vh, 11px);
   overflow: hidden;
   border: 2px solid var(--card-red);
   border-radius: 10px;
@@ -104,7 +106,7 @@
 .reward-brand-lockup {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: start;
   gap: 9px;
 }
 
@@ -112,16 +114,40 @@
   margin: 0;
   color: var(--phosphor-red);
   font-family: var(--font-pixel);
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   font-weight: 800;
   letter-spacing: 0.24em;
 }
 
+.reward-card-header {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  border-bottom: 1px solid rgb(240 68 52 / 25%);
+  padding-bottom: 8px;
+}
+
+.reward-name-lockup {
+  display: grid;
+  gap: 2px;
+}
+
+.reward-name-lockup > span,
+.reward-award > span {
+  color: var(--crt-muted);
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+}
+
 .reward-card h2 {
-  margin: 4px 0 6px;
+  margin: 0;
   color: var(--crt-text);
   font-family: var(--font-pixel);
-  font-size: clamp(1.9rem, 5.3vh, 3.5rem);
+  font-size: clamp(1.65rem, 4.3vh, 2.9rem);
   font-weight: 700;
   letter-spacing: 0.12em;
   line-height: 0.88;
@@ -130,16 +156,17 @@
 
 .result-stencil {
   display: grid;
-  width: min(560px, 100%);
-  max-height: 74px;
-  margin: 0 auto 6px;
-  grid-template-columns: repeat(var(--result-columns), minmax(0, 1fr));
-  gap: 2px;
+  width: max-content;
+  max-width: 100%;
+  margin: 0 auto;
+  grid-template-columns: repeat(var(--result-columns), var(--result-cell-size));
+  grid-template-rows: repeat(var(--result-rows), var(--result-cell-size));
+  gap: var(--result-gap, 2px);
 }
 
 .result-stencil span {
-  min-width: 0;
-  aspect-ratio: 1;
+  width: var(--result-cell-size);
+  height: var(--result-cell-size);
 }
 
 .result-stencil span[data-mask]:not([data-filled]) {
@@ -153,49 +180,67 @@
 }
 
 .reward-title {
-  margin: 0 0 5px;
+  margin: 2px 0 0;
   color: var(--phosphor-amber);
   font-family: var(--font-pixel);
-  font-size: clamp(1.15rem, 2.6vh, 1.75rem);
+  font-size: clamp(0.82rem, 1.8vh, 1.08rem);
   font-weight: 700;
   letter-spacing: 0.05em;
 }
 
 .reward-badge {
+  flex: 0 0 auto;
   width: fit-content;
-  margin: 0 auto 8px;
+  margin: 0;
   padding: 5px 12px;
   border: 1px solid rgb(240 68 52 / 72%);
   border-radius: 4px;
   color: var(--phosphor-red);
   background: rgb(240 68 52 / 7%);
   font-family: var(--font-mono);
-  font-size: 0.64rem;
+  font-size: 0.68rem;
   font-weight: 700;
   letter-spacing: 0.08em;
+}
+
+.reward-card-footer {
+  display: grid;
+  width: 100%;
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 0.72fr);
+  align-items: end;
+  gap: 28px;
+  border-top: 1px solid rgb(240 68 52 / 25%);
+  padding-top: 9px;
+  text-align: left;
+}
+
+.reward-award {
+  min-width: 0;
 }
 
 .reward-metrics {
   display: grid;
   width: 100%;
-  margin: auto 0 0;
+  margin: 0;
   grid-template-columns: repeat(2, 1fr);
 }
 
 .reward-metrics div {
   display: grid;
+  justify-items: end;
   gap: 1px;
 }
 
 .reward-metrics div + div {
   border-left: 1px solid rgb(240 68 52 / 22%);
+  padding-left: 14px;
 }
 
 .reward-metrics dt,
 .loss-metrics dt {
   color: var(--crt-muted);
   font-family: var(--font-pixel);
-  font-size: 0.62rem;
+  font-size: 0.64rem;
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -206,7 +251,7 @@
   margin: 0;
   color: var(--crt-text);
   font-family: var(--font-mono);
-  font-size: 1.08rem;
+  font-size: 1.05rem;
   font-weight: 700;
 }
 
@@ -233,7 +278,7 @@
   min-height: 1.2em;
   margin: -4px 0 0;
   color: var(--crt-muted);
-  font-size: 0.68rem;
+  font-size: 0.74rem;
 }
 
 .loss-card {
@@ -290,7 +335,7 @@
   max-width: 500px;
   margin: 8px 0 2px;
   color: var(--crt-muted);
-  font-size: 0.72rem;
+  font-size: 0.78rem;
   line-height: 1.45;
 }
 
@@ -302,10 +347,9 @@
 }
 
 .loss-stencil {
-  width: min(470px, calc(var(--result-columns) * 12px));
-  max-height: 64px;
+  --result-gap: 1px;
+  width: max-content;
   margin: 6px auto;
-  gap: 1px;
 }
 
 .loss-metrics {
@@ -340,21 +384,17 @@
   }
 
   .reward-card {
-    width: min(660px, 74%);
-    height: 260px;
-    padding-block: 13px 14px;
+    width: min(720px, 82%);
+    min-height: 286px;
+    padding-block: 13px 15px;
   }
 
   .reward-card h2 {
-    font-size: 2rem;
-  }
-
-  .result-stencil {
-    max-height: 58px;
+    font-size: 1.7rem;
   }
 
   .reward-title {
-    font-size: 1.1rem;
+    font-size: 0.84rem;
   }
 
   .loss-card {

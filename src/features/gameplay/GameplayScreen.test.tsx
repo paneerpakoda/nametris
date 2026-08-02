@@ -303,7 +303,9 @@ describe("GameplayScreen", () => {
     );
     expect(screen.getByTestId("transfers")).toHaveTextContent("3 / 3");
     expect(screen.getByText("FULL")).toBeVisible();
-    expect(screen.getByText("SLOW ZONE · BANK FULL")).toBeVisible();
+    expect(screen.getByTestId("route-zone-label")).toHaveTextContent(
+      /SLOW ZONE\s*FULL BANK · 50%/,
+    );
     expect(screen.getByText("TRANSFER BANK FULL · ROUTE A PIECE")).toBeVisible();
     expect(screen.getByText("Extra line clears cannot add transfers.")).toBeVisible();
   });

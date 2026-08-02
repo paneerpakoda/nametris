@@ -39,7 +39,7 @@ interface GameplayScreenProps {
 }
 
 const clockResolutionMilliseconds = 50;
-const lineClearFeedbackDurationMilliseconds = 2_000;
+const lineClearFeedbackDurationMilliseconds = 3_500;
 type HardDropImpact = "idle" | "a" | "b";
 
 type GameplayAction =

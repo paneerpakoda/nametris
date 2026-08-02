@@ -4,7 +4,13 @@ import { createStencilState } from "../engine/stencil";
 import { maximumTransferCount } from "../config/gameplay";
 
 export type E2EFixtureKind =
-  "route-return" | "transfer-full" | "eighty" | "perfect-ready" | "topout-eighty";
+  | "route-return"
+  | "line-clear-ready"
+  | "transfer-full"
+  | "eighty"
+  | "eighty-real"
+  | "perfect-ready"
+  | "topout-eighty";
 
 function progressStencil(filledCount: number) {
   const mask = new Set(Array.from({ length: 20 }, (_, index) => `0:${index}`));
@@ -13,6 +19,15 @@ function progressStencil(filledCount: number) {
     filledCells: new Map(
       Array.from({ length: filledCount }, (_, index) => [`0:${index}`, "I" as const]),
     ),
+  };
+}
+
+function progressRealStencil(state: BoardSession) {
+  const mask = Array.from(state.stencil.mask);
+  const filledCount = Math.ceil(mask.length * 0.8);
+  return {
+    ...state.stencil,
+    filledCells: new Map(mask.slice(0, filledCount).map((key) => [key, "I" as const])),
   };
 }
 
@@ -33,6 +48,24 @@ export function createE2EFixture(
   const base = resetPlacement(state);
 
   switch (kind) {
+    case "line-clear-ready": {
+      const board = base.board.map((row, rowIndex) =>
+        row.map((cell, columnIndex) =>
+          rowIndex === BOARD_HEIGHT - 1 && columnIndex !== 5 ? "J" : cell,
+        ),
+      );
+      return {
+        ...base,
+        board,
+        activePiece: {
+          type: "I",
+          rotation: 1,
+          row: 0,
+          column: 3,
+        },
+        transferCount: 0,
+      };
+    }
     case "transfer-full":
       return {
         ...base,
@@ -67,6 +100,12 @@ export function createE2EFixture(
         ...base,
         canFinish: true,
         stencil: progressStencil(16),
+      };
+    case "eighty-real":
+      return {
+        ...base,
+        canFinish: true,
+        stencil: progressRealStencil(base),
       };
     case "perfect-ready":
       return {

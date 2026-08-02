@@ -12,7 +12,7 @@ describe("WelcomeScreen", () => {
       screen.getByRole("region", { name: "Nametris arcade cabinet" }),
     ).toBeInTheDocument();
     expect(screen.getByRole("region", { name: "Welcome display" })).toBeInTheDocument();
-    expect(screen.getByText("SHIFT").tagName).toBe("KBD");
+    expect(screen.getByText("SHIFT").closest("kbd")).not.toBeNull();
   });
 
   it("starts HARSH when the optional field is empty", async () => {

@@ -40,6 +40,18 @@ export function BoardGrid({
 
   return (
     <div className="board-frame">
+      <span
+        className={`transfer-route-zone${slowZoneActive ? " is-slow-zone" : ""}`}
+        data-testid="route-zone-label"
+        aria-hidden="true"
+      >
+        <strong>{slowZoneActive ? "SLOW ZONE" : "ROUTE ZONE"}</strong>
+        <small>
+          {slowZoneActive
+            ? "FULL BANK · 50%"
+            : `TOP ${routeZoneVisibleRows} ROWS · SHIFT`}
+        </small>
+      </span>
       <div
         className={`board-grid${slowZoneActive ? " is-slow-zone" : ""}`}
         data-slow-zone={slowZoneActive || undefined}
@@ -49,11 +61,6 @@ export function BoardGrid({
         aria-rowcount={VISIBLE_BOARD_HEIGHT}
         aria-colcount={10}
       >
-        <span className="transfer-route-zone" aria-hidden="true">
-          {slowZoneActive
-            ? "SLOW ZONE · BANK FULL"
-            : `ROUTE ZONE · TOP ${routeZoneVisibleRows} ROWS`}
-        </span>
         <span className="transfer-route-deadline" aria-hidden="true">
           <small>ROUTE DEADLINE</small>
         </span>

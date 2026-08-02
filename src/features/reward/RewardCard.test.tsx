@@ -59,4 +59,32 @@ describe("RewardCard", () => {
     expect(card).toHaveAttribute("data-motion", "static");
     expect(card).toHaveStyle({ "--shine-x": "50%", "--shine-y": "50%" });
   });
+
+  it("sizes a full seven-row name stencil in both dimensions", () => {
+    const mask = Array.from({ length: 7 * 29 }, (_, index) => {
+      const row = Math.floor(index / 29);
+      const column = index % 29;
+      return `${row}:${column}`;
+    });
+    const largeResult = {
+      ...result,
+      stencilCellsFilled: mask.length,
+      stencil: {
+        rows: 7,
+        columns: 29,
+        mask,
+        filledCells: mask.map((key) => [key, "I"] as const),
+      },
+    } satisfies RunResult;
+
+    render(<RewardCard result={largeResult} reducedMotion />);
+    const stencil = screen.getByRole("img", {
+      name: "HARSH block composition at 100%",
+    });
+
+    expect(stencil).toHaveStyle({
+      "--result-columns": "29",
+      "--result-rows": "7",
+    });
+  });
 });

@@ -45,7 +45,6 @@ async function expectCabinetScreenshot(page: Page, name: string) {
   }));
 
   expect(documentSize).toEqual(viewport);
-  await page.screenshot({ animations: "allow", fullPage: false });
   await expect(page).toHaveScreenshot(name, { fullPage: false });
 }
 
@@ -60,6 +59,24 @@ test("normal gameplay cabinet", async ({ page }) => {
   await expectCabinetScreenshot(page, "gameplay-normal.png");
 });
 
+test("non-blocking line-clear receipt cabinet", async ({ page }) => {
+  await startRun(page);
+  await loadFixture(page, "line-clear-ready");
+  await page.getByRole("button", { name: "Hard drop" }).click();
+  const feedback = page.getByTestId("line-clear-feedback");
+  await expect(feedback.getByText("1 ROW CLEARED")).toBeVisible();
+  await expect(feedback.getByText("+1 TRANSFER · BANK 1/3")).toBeVisible();
+
+  const boardBox = await page.locator(".board-frame").boundingBox();
+  const feedbackBox = await feedback.boundingBox();
+  expect(boardBox).not.toBeNull();
+  expect(feedbackBox).not.toBeNull();
+  expect(feedbackBox?.x).toBeGreaterThanOrEqual(
+    (boardBox?.x ?? 0) + (boardBox?.width ?? 0),
+  );
+  await expectCabinetScreenshot(page, "gameplay-line-clear-feedback.png");
+});
+
 test("transfer-ready cabinet", async ({ page }) => {
   await startRun(page);
   await loadFixture(page, "route-return");
@@ -72,6 +89,16 @@ test("full transfer bank cabinet", async ({ page }) => {
   await startRun(page);
   await loadFixture(page, "transfer-full");
   await expect(page.getByTestId("transfers")).toHaveText("3 / 3");
+  await expect(page.getByTestId("route-zone-label")).toContainText("SLOW ZONE");
+  await expect(page.getByTestId("route-zone-label")).toContainText("FULL BANK");
+  await expect(page.getByTestId("route-zone-label")).toContainText("50%");
+  const zoneLabelBox = await page.getByTestId("route-zone-label").boundingBox();
+  const boardGridBox = await page.locator(".board-grid").boundingBox();
+  expect(zoneLabelBox).not.toBeNull();
+  expect(boardGridBox).not.toBeNull();
+  expect((zoneLabelBox?.y ?? 0) + (zoneLabelBox?.height ?? 0)).toBeLessThanOrEqual(
+    boardGridBox?.y ?? 0,
+  );
   await expect(page.getByText("TRANSFER BANK FULL → BUILD YOUR NAME")).toBeVisible();
   await expectCabinetScreenshot(page, "gameplay-transfer-full.png");
 });
@@ -103,7 +130,7 @@ test("help dialog cabinet", async ({ page }) => {
 
 test("success cabinet", async ({ page }) => {
   await startRun(page);
-  await loadFixture(page, "eighty");
+  await loadFixture(page, "eighty-real");
   await page.getByRole("button", { name: /FINISH NAME/ }).click();
   await waitForDisplay(page, "Success display");
   await expectCabinetScreenshot(page, "success.png");
@@ -112,7 +139,7 @@ test("success cabinet", async ({ page }) => {
 test("loss cabinet", async ({ page }) => {
   await startRun(page);
   await loadFixture(page, "topout-eighty");
-  await page.getByRole("button", { name: "Hard drop" }).click();
+  await page.keyboard.press("Space");
   await waitForDisplay(page, "Loss display");
   await expectCabinetScreenshot(page, "loss.png");
 });
