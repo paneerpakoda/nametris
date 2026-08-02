@@ -8,6 +8,38 @@ import { BOARD_HEIGHT } from "../../game/engine/board";
 import { GameplayScreen } from "./GameplayScreen";
 
 describe("GameplayScreen", () => {
+  it("renders the game inside the cabinet with a live three-arrow transfer rail", () => {
+    const initialSession = {
+      ...createBoardSession(["O", "I", "T"]),
+      transferCount: 2,
+    };
+
+    render(<GameplayScreen initialSession={initialSession} />);
+
+    expect(
+      screen.getByRole("region", { name: "Nametris arcade cabinet" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("region", { name: "Gameplay display" }),
+    ).toBeInTheDocument();
+    expect(screen.getAllByTestId("transfer-arrow")).toHaveLength(3);
+    expect(
+      screen.getAllByTestId("transfer-arrow").map((arrow) => arrow.dataset.status),
+    ).toEqual(["stored", "stored", "empty"]);
+  });
+
+  it("hard drops through the cabinet deck and restores game focus", async () => {
+    const user = userEvent.setup();
+    render(<GameplayScreen seed={7} />);
+    const game = screen.getByRole("application", { name: "Nametris game" });
+
+    await user.click(screen.getByRole("button", { name: "Hard drop" }));
+
+    expect(Number(screen.getByTestId("score").textContent)).toBeGreaterThan(0);
+    expect(game).toHaveAttribute("data-impact", "a");
+    await waitFor(() => expect(game).toHaveFocus());
+  });
+
   it("hard drops the active piece and retriggers a subtle surface impact", () => {
     render(<GameplayScreen seed={7} />);
     const game = screen.getByRole("application", { name: "Nametris game" });

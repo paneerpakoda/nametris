@@ -1,15 +1,19 @@
 import { useEffect, useMemo, useReducer, useRef, useState } from "react";
 
+import { CabinetShell } from "../../components/CabinetShell";
+import { ControlDeck } from "../../components/ControlDeck";
 import { NametrisMark } from "../../components/NametrisMark";
 import { maximumTransferCount } from "../../game/config/gameplay";
 import { createPieceQueue, createSeededRandom } from "../../game/engine/bag";
 import {
+  canRouteActivePiece,
   createGameSession,
   getGhostPiece,
   reduceBoardSession,
   type BoardAction,
   type BoardSession,
 } from "../../game/engine/session";
+import { getStencilPieceProjection } from "../../game/engine/stencil";
 import { getGameAction } from "../../game/runtime/input";
 import { createE2EFixture, type E2EFixtureKind } from "../../game/testing/fixtures";
 import {
@@ -18,11 +22,12 @@ import {
   type LossResult,
   type RunResult,
 } from "../../game/engine/result";
-import { BoardGrid, PiecePreview } from "./BoardGrid";
+import { BoardGrid } from "./BoardGrid";
 import { GameHelpDialog } from "./GameHelpDialog";
 import { GameSidebar } from "./GameSidebar";
 import { LineClearFeedback, type LineClearFeedbackEvent } from "./LineClearFeedback";
 import { RunGuidance } from "./RunGuidance";
+import { TransferRail } from "./TransferRail";
 import "../../styles/gameplay.css";
 
 interface GameplayScreenProps {
@@ -85,6 +90,10 @@ export function GameplayScreen({
   const [hardDropImpact, setHardDropImpact] = useState<HardDropImpact>("idle");
   const [helpOpen, setHelpOpen] = useState(false);
   const ghostPiece = getGhostPiece(state.board, state.activePiece);
+  const canRoute = canRouteActivePiece(state);
+  const canLock =
+    state.stencilPiece !== null &&
+    getStencilPieceProjection(state.stencil, state.stencilPiece).keptCellKeys.size > 0;
 
   useEffect(() => {
     gameRef.current?.focus();
@@ -227,15 +236,9 @@ export function GameplayScreen({
     return () => document.removeEventListener("visibilitychange", handleVisibility);
   }, []);
 
-  function handleKeyDown(event: React.KeyboardEvent<HTMLDivElement>) {
-    const action = getGameAction(event.key, state.phase);
-
-    if (action === null) {
-      return;
-    }
-
+  function performPlayerAction(action: BoardAction, isRepeat = false) {
     if (
-      event.repeat &&
+      isRepeat &&
       [
         "hard-drop",
         "rotate",
@@ -250,11 +253,29 @@ export function GameplayScreen({
       return;
     }
 
-    event.preventDefault();
     if (action.type === "hard-drop") {
       setHardDropImpact((current) => (current === "a" ? "b" : "a"));
     }
     dispatch(action);
+  }
+
+  function handleKeyDown(event: React.KeyboardEvent<HTMLDivElement>) {
+    const action = getGameAction(event.key, state.phase);
+
+    if (action === null) {
+      return;
+    }
+
+    event.preventDefault();
+    performPlayerAction(action, event.repeat);
+  }
+
+  function handleCabinetInput(key: string) {
+    const action = getGameAction(key, state.phase);
+    if (action !== null) {
+      performPlayerAction(action);
+    }
+    window.requestAnimationFrame(() => gameRef.current?.focus());
   }
 
   function openHelp() {
@@ -268,109 +289,118 @@ export function GameplayScreen({
     window.requestAnimationFrame(() => gameRef.current?.focus());
   }
 
-  return (
-    <main className="game-shell">
-      <header className="game-header">
-        <div className="game-title-lockup">
-          <NametrisMark compact />
-          <div>
-            <p className="eyebrow">NAMETRIS</p>
-            <h1>BUILD THE NAME</h1>
-          </div>
-        </div>
-        <RunGuidance
-          state={state}
-          onDismiss={() => window.requestAnimationFrame(() => gameRef.current?.focus())}
-        />
-        {state.phase === "playing" && (
-          <button
-            type="button"
-            className="secondary-button"
-            onClick={() => dispatch({ type: "pause", reason: "player" })}
-            aria-label="Pause game"
-          >
-            PAUSE
-          </button>
-        )}
-      </header>
+  const controlDeck = (
+    <ControlDeck
+      phase={state.phase}
+      canRoute={canRoute}
+      canLock={canLock}
+      onInput={helpOpen ? undefined : handleCabinetInput}
+    />
+  );
 
-      <div
-        ref={gameRef}
-        className={
-          hardDropImpact === "idle"
-            ? "game-surface"
-            : `game-surface is-hard-drop-impact-${hardDropImpact}`
-        }
-        data-impact={hardDropImpact}
-        role="application"
-        aria-label="Nametris game"
-        tabIndex={0}
-        onKeyDown={handleKeyDown}
-      >
-        <section className="board-panel" aria-labelledby="normal-board-title">
-          <div className="panel-heading">
-            <div>
+  return (
+    <CabinetShell
+      screenLabel="Gameplay display"
+      controlDeck={controlDeck}
+      screenClassName="game-cabinet-screen"
+    >
+      <main className="game-shell">
+        <header className="game-header">
+          <div className="game-title-lockup">
+            <NametrisMark compact />
+            <h1>NAMETRIS</h1>
+          </div>
+          <RunGuidance
+            state={state}
+            onDismiss={() =>
+              window.requestAnimationFrame(() => gameRef.current?.focus())
+            }
+          />
+          <span className="game-mode-label">
+            {state.phase === "placing-stencil" ? "NAME ROUTING" : "CLEAR / BUILD"}
+          </span>
+        </header>
+
+        <div
+          ref={gameRef}
+          className={
+            hardDropImpact === "idle"
+              ? "game-surface"
+              : `game-surface is-hard-drop-impact-${hardDropImpact}`
+          }
+          data-impact={hardDropImpact}
+          role="application"
+          aria-label="Nametris game"
+          tabIndex={0}
+          onKeyDown={handleKeyDown}
+        >
+          <section className="board-panel" aria-labelledby="normal-board-title">
+            <div className="panel-heading">
               <p className="panel-kicker">01 / CLEAR LINES</p>
               <h2 id="normal-board-title">TETRIS BOARD</h2>
             </div>
-            <div className="next-piece">
-              <span>NEXT</span>
-              <PiecePreview type={state.nextPiece} />
-            </div>
-          </div>
-          <BoardGrid
-            board={state.board}
-            activePiece={state.activePiece}
-            ghostPiece={ghostPiece}
-          >
-            {lineClearFeedback && (
-              <LineClearFeedback key={lineClearFeedback.id} event={lineClearFeedback} />
-            )}
-          </BoardGrid>
-        </section>
-
-        <GameSidebar
-          state={state}
-          onRoute={() => dispatch({ type: "route-to-stencil" })}
-          onStencilLock={() => dispatch({ type: "stencil-lock" })}
-          onStencilCancel={() => dispatch({ type: "stencil-cancel" })}
-          onFinish={() => dispatch({ type: "finish-run" })}
-          onHelp={openHelp}
-        />
-
-        {helpOpen && <GameHelpDialog onClose={closeHelp} />}
-
-        {state.phase === "paused" && !helpOpen && (
-          <div className="game-overlay" role="dialog" aria-modal="true">
-            <p className="eyebrow">TAKE A BREATH</p>
-            <h2>Game paused</h2>
-            <p>
-              {state.pauseReason === "hidden"
-                ? "The tab was hidden. Resume when you are ready."
-                : "Your stack is waiting."}
-            </p>
-            <button
-              type="button"
-              className="primary-button compact"
-              onClick={() => dispatch({ type: "resume" })}
+            <BoardGrid
+              board={state.board}
+              activePiece={state.activePiece}
+              ghostPiece={ghostPiece}
             >
-              Resume game
-            </button>
-          </div>
-        )}
+              {lineClearFeedback && (
+                <LineClearFeedback
+                  key={lineClearFeedback.id}
+                  event={lineClearFeedback}
+                />
+              )}
+            </BoardGrid>
+          </section>
 
-        {state.phase === "lost" && (
-          <div className="game-overlay" role="alert">
-            <p className="eyebrow">STACK OVERFLOW</p>
-            <h2>Run over</h2>
-            <p>Final score: {state.score.toLocaleString()}</p>
-          </div>
-        )}
-      </div>
+          <TransferRail
+            transferCount={state.transferCount}
+            nextPiece={state.nextPiece}
+          />
 
-      <p className="sr-only" role="status" aria-live="polite">
-        {announcement}
-      </p>
-    </main>
+          <GameSidebar
+            state={state}
+            onRoute={() => handleCabinetInput("Shift")}
+            onStencilLock={() => handleCabinetInput("Enter")}
+            onStencilCancel={() => handleCabinetInput("Escape")}
+            onFinish={() => performPlayerAction({ type: "finish-run" })}
+            onHelp={openHelp}
+          />
+
+          {helpOpen && <GameHelpDialog onClose={closeHelp} />}
+
+          {state.phase === "paused" && !helpOpen && (
+            <div className="game-overlay" role="dialog" aria-modal="true">
+              <p className="eyebrow">TAKE A BREATH</p>
+              <h2>Game paused</h2>
+              <p>
+                {state.pauseReason === "hidden"
+                  ? "The tab was hidden. Resume when you are ready."
+                  : "Your stack is waiting."}
+              </p>
+              <button
+                type="button"
+                className="primary-button compact"
+                onClick={() => handleCabinetInput("p")}
+              >
+                Resume game
+              </button>
+            </div>
+          )}
+
+          {state.phase === "lost" && (
+            <div className="game-overlay" role="alert">
+              <p className="eyebrow">STACK OVERFLOW</p>
+              <h2>Run over</h2>
+              <p>Final score: {state.score.toLocaleString()}</p>
+            </div>
+          )}
+        </div>
+
+        <p className="sr-only" role="status" aria-live="polite">
+          {announcement}
+        </p>
+      </main>
+    </CabinetShell>
   );
 }
