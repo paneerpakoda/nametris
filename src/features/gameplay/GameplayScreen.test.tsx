@@ -146,6 +146,28 @@ describe("GameplayScreen", () => {
     expect(screen.queryByText("Game paused")).not.toBeInTheDocument();
   });
 
+  it("traps pause focus and restores the game after a keyboard resume", async () => {
+    const user = userEvent.setup();
+    render(<GameplayScreen seed={7} />);
+    const game = screen.getByRole("application", { name: "Nametris game" });
+
+    await user.click(screen.getByRole("button", { name: "Pause game" }));
+    const resume = screen.getByRole("button", { name: "Resume game" });
+    expect(screen.getByRole("dialog", { name: "Game paused" })).toContainElement(
+      resume,
+    );
+    await waitFor(() => expect(resume).toHaveFocus());
+
+    await user.tab();
+    expect(resume).toHaveFocus();
+
+    await user.keyboard("p");
+    await waitFor(() =>
+      expect(screen.queryByText("Game paused")).not.toBeInTheDocument(),
+    );
+    await waitFor(() => expect(game).toHaveFocus());
+  });
+
   it("pauses for controls help and resumes the exact placement mode", async () => {
     const user = userEvent.setup();
     const initialSession = {

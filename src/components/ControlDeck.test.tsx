@@ -62,6 +62,19 @@ describe("ControlDeck", () => {
     expect(screen.queryByRole("button", { name: "Hard drop" })).not.toBeInTheDocument();
   });
 
+  it("disables locking when placement would keep no cells", () => {
+    render(
+      <ControlDeck
+        phase="placing-stencil"
+        canRoute={false}
+        canLock={false}
+        onInput={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByRole("button", { name: "Lock piece" })).toBeDisabled();
+  });
+
   it("offers a resume key while paused", async () => {
     const user = userEvent.setup();
     const onInput = vi.fn();

@@ -89,6 +89,7 @@ export function GameplayScreen({
   const lineClearFeedbackSequenceRef = useRef(0);
   const [hardDropImpact, setHardDropImpact] = useState<HardDropImpact>("idle");
   const [helpOpen, setHelpOpen] = useState(false);
+  const pauseResumeRef = useRef<HTMLButtonElement>(null);
   const ghostPiece = getGhostPiece(state.board, state.activePiece);
   const canRoute = canRouteActivePiece(state);
   const canLock =
@@ -98,6 +99,15 @@ export function GameplayScreen({
   useEffect(() => {
     gameRef.current?.focus();
   }, []);
+
+  useEffect(() => {
+    if (state.phase !== "paused" || helpOpen) {
+      return;
+    }
+
+    const frame = window.requestAnimationFrame(() => pauseResumeRef.current?.focus());
+    return () => window.cancelAnimationFrame(frame);
+  }, [helpOpen, state.phase]);
 
   useEffect(() => {
     if (import.meta.env.VITE_NAMETRIS_E2E !== "true") {
@@ -268,6 +278,9 @@ export function GameplayScreen({
 
     event.preventDefault();
     performPlayerAction(action, event.repeat);
+    if (action.type === "resume") {
+      window.requestAnimationFrame(() => gameRef.current?.focus());
+    }
   }
 
   function handleCabinetInput(key: string) {
@@ -370,15 +383,28 @@ export function GameplayScreen({
           {helpOpen && <GameHelpDialog onClose={closeHelp} />}
 
           {state.phase === "paused" && !helpOpen && (
-            <div className="game-overlay" role="dialog" aria-modal="true">
+            <div
+              className="game-overlay"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="pause-dialog-title"
+              onKeyDown={(event) => {
+                if (event.key === "Tab") {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  pauseResumeRef.current?.focus();
+                }
+              }}
+            >
               <p className="eyebrow">TAKE A BREATH</p>
-              <h2>Game paused</h2>
+              <h2 id="pause-dialog-title">Game paused</h2>
               <p>
                 {state.pauseReason === "hidden"
                   ? "The tab was hidden. Resume when you are ready."
                   : "Your stack is waiting."}
               </p>
               <button
+                ref={pauseResumeRef}
                 type="button"
                 className="primary-button compact"
                 onClick={() => handleCabinetInput("p")}

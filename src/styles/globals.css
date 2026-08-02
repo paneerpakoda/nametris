@@ -20,10 +20,14 @@
   --cabinet-plastic: #d6b88c;
   --cabinet-highlight: #ffedcb;
   --cabinet-ink: #49341c;
+  --cabinet-border: #ffedcb;
+  --cabinet-bezel-border: rgb(100 68 32 / 58%);
+  --cabinet-console-border: rgb(102 69 31 / 63%);
   --crt-black: #080b09;
   --crt-surface: #10140f;
   --crt-text: #ede6d3;
   --crt-muted: #958a76;
+  --crt-border: #15130f;
   --phosphor-red: #ec4b37;
   --phosphor-amber: #f3a232;
   --route-blue: #328fe5;
