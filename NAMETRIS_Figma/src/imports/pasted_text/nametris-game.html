@@ -1,0 +1,250 @@
+Build a lightweight, functional desktop web game called NAMETRIS.
+
+This should be a genuinely playable prototype, not a static mockup. Keep the code and feature set intentionally small. Focus on proving the core game loop: play Tetris, clear lines, earn opportunities to place blocks into the player’s name, and fill at least 80% of that name.
+
+PRODUCT CONCEPT
+
+The screen has two areas:
+
+1. A normal Tetris board on the left.
+2. A block-letter stencil of the player’s name on the right.
+
+Clearing rows on the Tetris board earns transfer credits. The player can spend a credit to use the current Tetris piece as a stamp for filling the name stencil.
+
+A player wins when at least 80% of their name stencil is filled. They lose if the Tetris blocks reach the top first.
+
+This is a lightweight proof of concept, not a production-ready game.
+
+INITIAL SCREEN
+
+Create a simple welcome screen containing:
+
+- NAMETRIS title
+- Short description: “Clear lines. Collect blocks. Build your name.”
+- Optional name input
+- Default name: HARSH
+- Accept 2–10 uppercase English letters
+- Automatically convert valid input to uppercase
+- Use HARSH when the player leaves the field empty
+- Start Game button
+- Short privacy note: “Your name stays in this game and is never uploaded.”
+- Compact keyboard-control summary
+
+Do not store the name or send it anywhere.
+
+GAME LAYOUT
+
+Design for a fixed desktop viewport around 1440 × 900.
+
+Use a centered two-column layout:
+
+LEFT COLUMN
+- 10 × 20 Tetris board
+- Next-piece preview
+- Score
+- Rows cleared
+- Available transfer credits
+
+RIGHT COLUMN
+- Player’s name in a low-resolution 5 × 7 pixel-style block font
+- Completion percentage
+- Clear empty, filled, and active-preview states
+- Brief stencil controls
+
+Place Pause and Restart buttons in a compact header.
+
+TETRIS MECHANICS
+
+Implement only the essential mechanics:
+
+- Seven standard Tetris piece shapes: I, O, T, S, Z, J, and L
+- Random piece generation
+- Constant falling speed
+- Move left and right
+- Soft drop
+- Hard drop
+- Clockwise rotation
+- Prevent movement through walls or existing blocks
+- Lock pieces when they reach the bottom or another block
+- Clear completed rows
+- End the game when a new piece cannot enter the board
+
+Do not implement:
+
+- Piece hold
+- Advanced wall kicks
+- Combos
+- Special spins
+- Multiple levels
+- Increasing speed
+- Multiplayer
+- Saved games
+- Mobile controls
+- Touch gestures
+- Audio
+- Leaderboards
+- Accounts
+- Backend services
+
+CONTROLS
+
+Normal Tetris board:
+
+- Left Arrow or A: move left
+- Right Arrow or D: move right
+- Down Arrow or S: soft drop
+- Up Arrow or X: rotate clockwise
+- Space: hard drop
+- N: send the current piece to the name stencil when a transfer is available
+- P: pause
+
+For this prototype, allow N to route the active piece at any point before it locks. Do not build a timed routing window.
+
+TRANSFER SYSTEM
+
+- Start each game with zero transfer credits.
+- Every cleared row earns one transfer credit.
+- Clearing multiple rows at once earns one credit per row.
+- Pressing N with at least one credit pauses the Tetris board and enters name-placement mode.
+- Use the same piece shape that was active on the Tetris board.
+- Spend the credit only after a valid name placement.
+- Canceling the placement returns the same piece to the Tetris board and does not spend a credit.
+- Pressing N without a credit should produce a brief visual hint instead of doing nothing silently.
+
+NAME STENCIL
+
+Create a complete 5 × 7 bitmap alphabet for A–Z so the entered name can be rendered dynamically.
+
+Use a simplified “piece stamping” rule instead of requiring the whole piece to fit inside the letters:
+
+- The player moves the four-square Tetris piece over the name grid.
+- Only squares overlapping empty letter cells become permanently filled.
+- Squares outside the letters are shown as translucent previews and disappear after placement.
+- A placement is valid when it fills at least one new letter cell.
+- Already-filled letter cells cannot be filled again.
+- Invalid placements do not spend a transfer.
+- This simplification is intentional; do not add a tileability solver.
+
+Name-placement controls:
+
+- Arrow keys or WASD: move in four directions
+- X or Up Arrow: rotate
+- Enter or Space: place
+- Escape: cancel and return to Tetris
+
+Show valid previews in a bright color and invalid previews in red or with a clear crossed pattern.
+
+COMPLETION
+
+Calculate:
+
+filled letter cells ÷ total letter cells × 100
+
+- Display the rounded-down percentage.
+- Win immediately when the exact completion reaches at least 80%.
+- Do not implement the optional push toward 100% in this lightweight version.
+- Show a short block-filling celebration followed by a result overlay.
+- The result overlay contains:
+  - “NAME COMPLETE”
+  - Player’s block-built name
+  - Completion percentage
+  - Score
+  - Rows cleared
+  - Playtime
+  - Play Again button
+  - Try Another Name button
+
+Do not implement the shiny reward card, player titles, badges, downloads, sharing, or hover effects.
+
+SCORING AND TIMER
+
+Keep scoring intentionally simple:
+
+- 100 points for every cleared row
+- Multiple cleared rows award 100 points each
+- No combo, level, speed, or placement bonuses
+
+Show active playtime in MM:SS format.
+
+Pause the timer when:
+
+- The player pauses manually
+- The browser tab is hidden
+- The welcome, win, or loss overlay is open
+
+The timer should continue during name-placement mode.
+
+LOSS CONDITION
+
+The player loses when the Tetris board reaches the top before the name reaches 80%.
+
+Show a simple GAME OVER overlay containing:
+
+- Final completion percentage
+- Score
+- Playtime
+- Play Again button
+- Try Another Name button
+
+VISUAL DIRECTION
+
+Use a polished modern-retro arcade style:
+
+- Dark navy or charcoal background
+- Crisp pixel-inspired title typography
+- Brightly colored Tetris pieces
+- Subtle grid lines
+- Empty name cells shown as dim outlined squares
+- Filled name cells shown with colorful block textures
+- Clear contrast between the two boards
+- Minimal glow used only for active or successful states
+- Compact HUD panels
+- No stock photography or external images
+- No excessive gradients, glass effects, or decorative animation
+
+The Tetris board should be visually dominant, while the name stencil should still feel like the main objective.
+
+TECHNICAL CONSTRAINTS
+
+- Use React with straightforward component state
+- Use TypeScript if supported by the generated project
+- Use CSS Grid or regular DOM elements for both boards
+- Do not use canvas
+- Do not use a game engine
+- Do not add a backend
+- Do not make API requests
+- Avoid unnecessary external packages
+- Keep game rules separate from visual components where practical
+- Prevent game-control keys from scrolling the page
+- Pause safely when the window loses focus
+- Ensure Restart completely resets all game state
+- Make sure the generated project builds and runs without errors
+
+Suggested components:
+
+- App
+- WelcomeScreen
+- GameScreen
+- TetrisBoard
+- NameStencil
+- GameHUD
+- ResultOverlay
+
+ACCEPTANCE CHECKS
+
+Before considering the prototype complete, verify:
+
+1. The player can enter a name or start with HARSH.
+2. Tetris pieces fall, move, rotate, lock, and clear rows.
+3. Every cleared row awards one transfer credit.
+4. Pressing N with a credit opens name-placement mode.
+5. A valid placement fills name cells and spends one credit.
+6. Canceling returns the piece and preserves the credit.
+7. The name completion percentage updates correctly.
+8. Reaching 80% produces a win.
+9. Reaching the top produces a loss.
+10. Pause and Restart work correctly.
+11. No name or game data is stored remotely.
+12. The complete loop is playable using only the keyboard.
+
+Prioritize a stable, understandable game loop over feature richness. Do not proactively add features excluded above.
