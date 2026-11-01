@@ -36,6 +36,20 @@
   --radius-large: 14px;
   --radius-medium: 7px;
   --shadow-glow: 0 0 28px rgb(236 75 55 / 16%);
+  --chrome: 140px;
+  --side: clamp(300px, 42vw, 670px);
+  --cell: clamp(
+    14px,
+    min((100dvh - var(--chrome)) / 20, (100vw - var(--side)) / 10),
+    36px
+  );
+}
+
+@media (max-width: 699px) {
+  :root {
+    --chrome: 374px;
+    --side: 96px;
+  }
 }
 
 * {
@@ -43,15 +57,17 @@
 }
 
 html {
-  min-width: 1280px;
+  min-width: 0;
   min-height: 100%;
   background: var(--background);
+  overflow-x: clip;
 }
 
 body {
-  min-width: 1280px;
-  min-height: 100vh;
+  min-width: 0;
+  min-height: 100dvh;
   margin: 0;
+  overflow-x: clip;
 }
 
 button,
@@ -120,7 +136,7 @@ summary:focus-visible {
     0 2px 0 #05060b,
     inset 0 1px 0 rgb(255 255 255 / 12%);
   font-family: var(--font-mono);
-  font-size: 0.64rem;
+  font-size: 0.6875rem;
   font-weight: 900;
   line-height: 1;
 }
@@ -181,7 +197,7 @@ h1 {
   border: 1px solid #ff8b78;
   border-radius: var(--radius-medium);
   color: #fff8e9;
-  background: var(--phosphor-red);
+  background: #b93a28;
   box-shadow:
     0 5px 0 #7f2118,
     0 0 20px rgb(236 75 55 / 23%),
@@ -194,7 +210,7 @@ h1 {
 }
 
 .primary-button:hover {
-  filter: brightness(1.08);
+  background: #c4402c;
 }
 
 .primary-button:active:not(:disabled) {

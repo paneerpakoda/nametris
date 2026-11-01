@@ -94,13 +94,13 @@ describe("GameplayScreen", () => {
     const feedback = screen.getByTestId("line-clear-feedback");
     expect(feedback).toHaveAttribute("data-kind", "earned");
     expect(
-      screen.getByRole("grid", { name: "Normal Tetris board" }).parentElement,
-    ).not.toContainElement(feedback);
+      screen.getByRole("grid", { name: "Normal Tetris board" }).closest(".board-panel"),
+    ).toContainElement(feedback);
     expect(
       screen.getByRole("complementary", {
         name: "Name pieces and next piece",
       }),
-    ).toContainElement(feedback);
+    ).not.toContainElement(feedback);
     expect(screen.getByText("1 ROW CLEARED")).toBeVisible();
     expect(screen.getByText("+1 NAME PIECE · 1/3")).toBeVisible();
   });
@@ -134,7 +134,12 @@ describe("GameplayScreen", () => {
     const feedback = screen.getByTestId("line-clear-feedback");
     expect(feedback).toHaveAttribute("data-kind", "wasted");
     expect(
-      screen.getByRole("grid", { name: "Normal Tetris board" }).parentElement,
+      screen.getByRole("grid", { name: "Normal Tetris board" }).closest(".board-panel"),
+    ).toContainElement(feedback);
+    expect(
+      screen.getByRole("complementary", {
+        name: "Name pieces and next piece",
+      }),
     ).not.toContainElement(feedback);
     expect(screen.getByText("1 ROW CLEARED")).toBeVisible();
     expect(screen.getByText("NAME PIECE LOST · FULL · USE SHIFT")).toBeVisible();

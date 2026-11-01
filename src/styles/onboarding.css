@@ -94,7 +94,7 @@
 .field-help,
 .field-error,
 .welcome-form .privacy-note {
-  font-size: clamp(0.68rem, 0.82vw, 0.78rem);
+  font-size: clamp(0.6875rem, 0.82vw, 0.78rem);
   line-height: 1.45;
 }
 

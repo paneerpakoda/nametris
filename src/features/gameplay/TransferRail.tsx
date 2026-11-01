@@ -3,18 +3,17 @@ import { ArrowRight } from "lucide-react";
 import { maximumTransferCount } from "../../game/config/gameplay";
 import type { PieceType } from "../../game/model/types";
 import { PiecePreview } from "./BoardGrid";
-import { LineClearFeedback, type LineClearFeedbackEvent } from "./LineClearFeedback";
 
 interface TransferRailProps {
   readonly nextPiece: PieceType;
   readonly transferCount: number;
-  readonly feedback?: LineClearFeedbackEvent | null;
+  readonly onTouchSend?: () => void;
 }
 
 export function TransferRail({
   nextPiece,
   transferCount,
-  feedback = null,
+  onTouchSend,
 }: TransferRailProps) {
   const isFull = transferCount >= maximumTransferCount;
 
@@ -34,9 +33,20 @@ export function TransferRail({
         ))}
       </div>
 
-      <div className="rail-feedback-slot" aria-hidden="true">
-        {feedback && <LineClearFeedback key={feedback.id} event={feedback} />}
-      </div>
+      {onTouchSend !== undefined && (
+        <button
+          type="button"
+          className="touch-only touch-send"
+          aria-label="Touch send"
+          onPointerDown={(event) => {
+            event.preventDefault();
+            onTouchSend();
+          }}
+          onContextMenu={(event) => event.preventDefault()}
+        >
+          Send
+        </button>
+      )}
 
       <div
         className={`rail-transfer-metric${isFull ? " is-transfer-full" : ""}`}

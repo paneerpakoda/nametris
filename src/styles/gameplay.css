@@ -5,11 +5,12 @@
 }
 
 .game-shell {
+  position: relative;
   display: grid;
   height: 100%;
   min-height: 0;
   padding: clamp(10px, 1.5vh, 16px) clamp(14px, 1.6vw, 24px);
-  grid-template-rows: auto minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr) auto;
   gap: clamp(7px, 1.1vh, 12px);
   overflow: hidden;
 }
@@ -67,7 +68,7 @@
 
 .run-guidance > span {
   color: currentcolor;
-  font-size: 0.68rem;
+  font-size: 0.6875rem;
 }
 
 .run-guidance div {
@@ -110,10 +111,7 @@
   display: grid;
   min-width: 0;
   min-height: 0;
-  grid-template-columns: minmax(238px, 0.78fr) minmax(112px, 0.35fr) minmax(
-      500px,
-      1.72fr
-    );
+  grid-template-columns: max-content minmax(72px, 104px) minmax(0, 1fr);
   gap: clamp(10px, 1.25vw, 18px);
   outline: none;
 }
@@ -182,6 +180,7 @@
 }
 
 .board-panel {
+  position: relative;
   display: grid;
   padding: clamp(8px, 1.25vh, 13px);
   grid-template-rows: auto minmax(0, 1fr);
@@ -201,7 +200,7 @@
   margin: 0 0 2px;
   color: var(--phosphor-red);
   font-family: var(--font-pixel);
-  font-size: 0.68rem;
+  font-size: 0.6875rem;
   font-weight: 700;
   letter-spacing: 0.12em;
 }
@@ -216,14 +215,15 @@
 }
 
 .board-frame {
-  --board-cell: clamp(19px, 2.72vh, 26px);
+  --board-cell: var(--cell);
   position: relative;
   width: max-content;
   max-width: 100%;
   margin: 0 auto;
   padding: 5px;
   overflow: hidden;
-  border: 1px solid rgb(236 75 55 / 43%);
+  border: 2px solid #ec4b37cc;
+  touch-action: none;
   background: #060806;
   box-shadow:
     0 0 14px rgb(236 75 55 / 7%),
@@ -233,8 +233,10 @@
 .board-grid {
   position: relative;
   display: grid;
-  width: calc(var(--board-cell) * 10);
-  grid-template-columns: repeat(10, var(--board-cell));
+  width: calc(var(--cell) * 10);
+  height: calc(var(--cell) * 20);
+  grid-template-columns: repeat(10, var(--cell));
+  grid-template-rows: repeat(20, var(--cell));
   border-top: 1px solid rgb(237 230 211 / 9%);
   border-left: 1px solid rgb(237 230 211 / 9%);
 }
@@ -258,7 +260,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 6px;
-  border: 1px solid rgb(87 177 255 / 48%);
+  border: 1px solid rgb(87 177 255 / 60%);
   pointer-events: none;
   color: var(--route-blue);
   background: rgb(6 15 22 / 88%);
@@ -270,7 +272,7 @@
 
 .transfer-route-zone strong {
   flex: 0 0 auto;
-  font-size: 0.52rem;
+  font-size: 0.6875rem;
   white-space: nowrap;
 }
 
@@ -278,7 +280,7 @@
   overflow: hidden;
   color: var(--crt-text);
   font-family: var(--font-mono);
-  font-size: 0.48rem;
+  font-size: 0.6875rem;
   font-weight: 700;
   text-align: right;
   text-overflow: ellipsis;
@@ -303,14 +305,15 @@
   color: #f4f9ff;
   background: #145d9e;
   font-family: var(--font-pixel);
-  font-size: 0.48rem;
+  font-size: 0.6875rem;
   font-weight: 700;
   letter-spacing: 0.05em;
 }
 
 .board-cell {
-  width: var(--board-cell);
-  aspect-ratio: 1;
+  width: var(--cell);
+  height: var(--cell);
+  aspect-ratio: auto;
   border-right: 1px solid rgb(237 230 211 / 9%);
   border-bottom: 1px solid rgb(237 230 211 / 9%);
   background: rgb(255 255 255 / 1.5%);
@@ -353,7 +356,7 @@
 }
 
 .board-cell.is-ghost {
-  border: 1px dashed rgb(237 230 211 / 38%);
+  border: 1px dashed rgb(237 230 211 / 50%);
   background: rgb(237 230 211 / 5%);
 }
 
@@ -416,7 +419,7 @@
 .line-clear-feedback strong {
   color: currentcolor;
   font-family: var(--font-pixel);
-  font-size: 0.63rem;
+  font-size: 0.6875rem;
   font-weight: 700;
   letter-spacing: 0.06em;
   line-height: 1;
@@ -426,7 +429,7 @@
 
 .line-clear-feedback small {
   color: var(--crt-text);
-  font-size: 0.57rem;
+  font-size: 0.6875rem;
   font-weight: 700;
   letter-spacing: 0.02em;
   line-height: 1.25;
@@ -501,7 +504,7 @@
 .rail-transfer-metric > span,
 .rail-next-piece > span {
   font-family: var(--font-pixel);
-  font-size: 0.65rem;
+  font-size: 0.6875rem;
   font-weight: 700;
   letter-spacing: 0.08em;
 }
@@ -524,7 +527,7 @@
   border-radius: 2px;
   color: var(--phosphor-red);
   font-family: var(--font-pixel);
-  font-size: 0.58rem;
+  font-size: 0.6875rem;
   font-style: normal;
   letter-spacing: 0.07em;
 }
@@ -575,7 +578,7 @@
   justify-content: space-between;
   color: var(--phosphor-red);
   font-family: var(--font-pixel);
-  font-size: 0.65rem;
+  font-size: 0.6875rem;
   font-weight: 700;
   letter-spacing: 0.12em;
 }
@@ -588,7 +591,7 @@
   background: rgb(236 75 55 / 6%);
   cursor: pointer;
   font-family: var(--font-pixel);
-  font-size: 0.62rem;
+  font-size: 0.6875rem;
   font-weight: 700;
   letter-spacing: 0.06em;
 }
@@ -646,7 +649,7 @@
   left: 50%;
   color: var(--phosphor-amber);
   font-family: var(--font-pixel);
-  font-size: 0.55rem;
+  font-size: 0.6875rem;
   font-weight: 700;
   transform: translateX(-50%);
 }
@@ -656,7 +659,7 @@
   margin-top: 4px;
   color: var(--phosphor-amber);
   font-family: var(--font-pixel);
-  font-size: 0.58rem;
+  font-size: 0.6875rem;
   font-weight: 700;
   letter-spacing: 0.08em;
 }
@@ -680,13 +683,13 @@
 
 .transfer-cap-notice strong {
   font-family: var(--font-pixel);
-  font-size: 0.6rem;
+  font-size: 0.6875rem;
   letter-spacing: 0.05em;
 }
 
 .transfer-cap-notice span {
   color: var(--crt-text);
-  font-size: 0.62rem;
+  font-size: 0.6875rem;
 }
 
 .stencil-frame {
@@ -721,7 +724,7 @@
 }
 
 .stencil-cell[data-status="open"] {
-  border: 1px solid rgb(255 107 84 / 42%);
+  border: 1px solid #ff6b54b3;
   background: rgb(255 107 84 / 5%);
 }
 
@@ -808,14 +811,14 @@
 .placement-guidance p {
   color: var(--phosphor-amber);
   font-family: var(--font-pixel);
-  font-size: 0.64rem;
+  font-size: 0.6875rem;
   font-weight: 700;
   letter-spacing: 0.04em;
 }
 
 .placement-guidance small {
   color: var(--crt-muted);
-  font-size: 0.62rem;
+  font-size: 0.6875rem;
 }
 
 .stencil-action-buttons {
@@ -833,7 +836,7 @@
   background: rgb(236 75 55 / 8%);
   cursor: pointer;
   font-family: var(--font-pixel);
-  font-size: 0.64rem;
+  font-size: 0.6875rem;
   font-weight: 700;
   letter-spacing: 0.05em;
 }
@@ -874,7 +877,7 @@
 
 .metric span {
   color: var(--crt-muted);
-  font-size: 0.68rem;
+  font-size: 0.6875rem;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -1091,10 +1094,6 @@
     min-height: 32px;
   }
 
-  .board-frame {
-    --board-cell: 19px;
-  }
-
   .transfer-rail {
     gap: 8px;
   }
@@ -1135,6 +1134,160 @@
 
   .help-resume {
     margin-top: 12px;
+  }
+}
+
+.board-feedback {
+  position: absolute;
+  z-index: 6;
+  bottom: 12%;
+  left: 50%;
+  width: min(100%, calc(var(--cell) * 10));
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.touch-only,
+button.touch-only {
+  display: none;
+}
+
+.touch-pad {
+  display: grid;
+  grid-template-columns: auto auto;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  touch-action: none;
+}
+
+.touch-pad-move,
+.touch-pad-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.touch-key,
+.touch-send,
+.touch-pause {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #ff8b78;
+  border-radius: 8px;
+  color: #fff8e9;
+  background: #b93a28;
+  font-family: var(--font-pixel);
+  font-size: 0.6875rem;
+  touch-action: none;
+}
+
+.touch-key {
+  width: 56px;
+  height: 56px;
+}
+
+.touch-key.is-hard-drop,
+.touch-key.is-lock {
+  width: 136px;
+  height: 56px;
+}
+
+.touch-key.is-rotate,
+.touch-key.is-cancel {
+  width: 64px;
+  height: 56px;
+}
+
+.touch-send {
+  width: 84px;
+  height: 48px;
+}
+
+.touch-pause {
+  width: 44px;
+  height: 44px;
+}
+
+@media (hover: none) and (pointer: coarse) {
+  .touch-only {
+    display: block;
+  }
+
+  button.touch-only {
+    display: inline-flex;
+  }
+}
+
+@media (max-width: 699px) {
+  .game-header,
+  .game-surface {
+    display: contents;
+  }
+
+  .game-shell {
+    grid-template-columns: minmax(0, 1fr) 96px;
+    grid-template-areas:
+      "title mode"
+      "name name"
+      "coach coach"
+      "board rail"
+      "touch touch";
+    grid-template-rows: auto minmax(0, 150px) auto minmax(0, 1fr) auto;
+  }
+
+  .game-title-lockup,
+  .game-mode-label {
+    grid-area: title;
+  }
+
+  .game-title-lockup {
+    justify-self: start;
+    align-self: center;
+  }
+
+  .game-mode-label {
+    justify-self: end;
+  }
+
+  .touch-pause {
+    grid-area: mode;
+    justify-self: end;
+  }
+
+  .run-guidance {
+    grid-area: coach;
+    width: 100%;
+  }
+
+  .game-sidebar {
+    grid-area: name;
+    max-height: 150px;
+    overflow: auto;
+  }
+
+  .board-panel {
+    grid-area: board;
+    min-width: 0;
+  }
+
+  .transfer-rail {
+    grid-area: rail;
+    width: auto;
+  }
+
+  .game-shell > .touch-only {
+    grid-area: touch;
+  }
+
+  .game-overlay,
+  .help-overlay,
+  .how-it-works-overlay,
+  .finish-prompt,
+  .finish-banner {
+    grid-area: 1 / 1 / -1 / -1;
   }
 }
 

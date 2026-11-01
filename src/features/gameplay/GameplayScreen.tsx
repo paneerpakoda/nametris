@@ -2,6 +2,7 @@ import { useEffect, useMemo, useReducer, useRef, useState } from "react";
 
 import { CabinetShell } from "../../components/CabinetShell";
 import { ControlDeck } from "../../components/ControlDeck";
+import { TouchPad } from "../../components/TouchPad";
 import { NametrisMark } from "../../components/NametrisMark";
 import { maximumTransferCount } from "../../game/config/gameplay";
 import { createPieceQueue, createSeededRandom } from "../../game/engine/bag";
@@ -26,7 +27,7 @@ import { HowItWorks } from "../onboarding/HowItWorks";
 import { BoardGrid } from "./BoardGrid";
 import { GameHelpDialog } from "./GameHelpDialog";
 import { GameSidebar } from "./GameSidebar";
-import type { LineClearFeedbackEvent } from "./LineClearFeedback";
+import { LineClearFeedback, type LineClearFeedbackEvent } from "./LineClearFeedback";
 import { RunGuidance } from "./RunGuidance";
 import { TransferRail } from "./TransferRail";
 import "../../styles/gameplay.css";
@@ -489,6 +490,17 @@ export function GameplayScreen({
           <span className="game-mode-label">
             {state.phase === "placing-stencil" ? "YOUR NAME" : "CLEAR / BUILD"}
           </span>
+          <button
+            type="button"
+            className="touch-only touch-pause"
+            aria-label={state.phase === "paused" ? "Touch resume" : "Touch pause"}
+            onPointerDown={(event) => {
+              event.preventDefault();
+              handleCabinetInput("p");
+            }}
+          >
+            {state.phase === "paused" ? "Resume" : "Pause"}
+          </button>
         </header>
 
         <div
@@ -520,12 +532,25 @@ export function GameplayScreen({
                   : null
               }
             />
+            {lineClearFeedback !== null && (
+              <div className="board-feedback">
+                <LineClearFeedback
+                  key={lineClearFeedback.id}
+                  event={lineClearFeedback}
+                />
+              </div>
+            )}
           </section>
 
           <TransferRail
             transferCount={state.transferCount}
             nextPiece={state.nextPiece}
-            feedback={lineClearFeedback}
+            onTouchSend={() => {
+              if (helpOpen || howItWorksOpen || restartConfirm || finishPromptOpen) {
+                return;
+              }
+              handleCabinetInput("Shift");
+            }}
           />
 
           <GameSidebar
@@ -679,6 +704,18 @@ export function GameplayScreen({
               <p>Final score: {state.score.toLocaleString()}</p>
             </div>
           )}
+        </div>
+
+        <div className="touch-only">
+          <TouchPad
+            phase={state.phase}
+            onInput={(key) => {
+              if (helpOpen || howItWorksOpen || restartConfirm || finishPromptOpen) {
+                return;
+              }
+              handleCabinetInput(key);
+            }}
+          />
         </div>
 
         <p className="sr-only" role="status" aria-live="polite">

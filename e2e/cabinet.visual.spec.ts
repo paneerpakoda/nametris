@@ -75,8 +75,9 @@ test("non-blocking line-clear receipt cabinet", async ({ page }) => {
   const feedbackBox = await feedback.boundingBox();
   expect(boardBox).not.toBeNull();
   expect(feedbackBox).not.toBeNull();
-  expect(feedbackBox?.x).toBeGreaterThanOrEqual(
-    (boardBox?.x ?? 0) + (boardBox?.width ?? 0),
+  expect(feedbackBox?.x).toBeGreaterThanOrEqual(boardBox?.x ?? 0);
+  expect((feedbackBox?.x ?? 0) + (feedbackBox?.width ?? 0)).toBeLessThanOrEqual(
+    (boardBox?.x ?? 0) + (boardBox?.width ?? 0) + 1,
   );
   await expectCabinetScreenshot(page, "gameplay-line-clear-feedback.png");
 });
