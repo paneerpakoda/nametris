@@ -14,6 +14,7 @@ interface StencilPanelProps {
   readonly onFinish: () => void;
   readonly emptySendNotice?: boolean;
   readonly emptySendFlash?: boolean;
+  readonly popKeys?: ReadonlySet<string>;
 }
 
 export function StencilPanel({
@@ -24,6 +25,7 @@ export function StencilPanel({
   onFinish,
   emptySendNotice = false,
   emptySendFlash = false,
+  popKeys,
 }: StencilPanelProps) {
   const completion = getStencilCompletion(state.stencil);
   const isPlacing = state.phase === "placing-stencil";
@@ -92,6 +94,7 @@ export function StencilPanel({
         name={state.name}
         stencil={state.stencil}
         activePiece={state.stencilPiece}
+        popKeys={popKeys}
       />
 
       {isPlacing ? (

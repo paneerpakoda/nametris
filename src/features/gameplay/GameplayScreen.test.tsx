@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
@@ -103,6 +103,14 @@ describe("GameplayScreen", () => {
     ).not.toContainElement(feedback);
     expect(screen.getByText("1 ROW CLEARED")).toBeVisible();
     expect(screen.getByText("+1 NAME PIECE · 1/3")).toBeVisible();
+    expect(screen.getByTestId("score-delta")).toHaveTextContent(
+      `+${screen.getByTestId("score").textContent}`,
+    );
+    expect(screen.getByTestId("cleared-row")).toBeInTheDocument();
+    expect(screen.getByTestId("name-piece-token")).toBeInTheDocument();
+    expect(document.querySelector(".board-frame")).toHaveClass("is-clear-pulse");
+    expect(document.querySelector(".metric.is-score-pop")).toBeTruthy();
+    expect(document.querySelector(".board-cell.is-drop-trail")).toBeTruthy();
   });
 
   it("announces that a full transfer bank cannot store another clear", () => {
@@ -492,6 +500,98 @@ describe("GameplayScreen", () => {
     const leaving = new Event("beforeunload", { cancelable: true });
     window.dispatchEvent(leaving);
     expect(leaving.defaultPrevented).toBe(false);
+  });
+
+  it("does not warn that a fresh piece is too high", () => {
+    render(<GameplayScreen seed={7} />);
+
+    expect(screen.queryByTestId("too-high")).not.toBeInTheDocument();
+  });
+
+  it("warns when the ghost would lock in the top two rows", () => {
+    const session = createBoardSession(["T", "O", "I"]);
+    const board = session.board.map((row, rowIndex) =>
+      row.map(() => (rowIndex === 4 ? "J" : null)),
+    );
+
+    render(
+      <GameplayScreen
+        initialSession={{
+          ...session,
+          board,
+          activePiece: { type: "T", rotation: 0, row: 2, column: 3 },
+        }}
+      />,
+    );
+
+    expect(screen.getByTestId("too-high")).toHaveTextContent("TOO HIGH");
+    expect(document.querySelector(".too-high-wash")).toBeTruthy();
+  });
+
+  it("pops the name cells that just locked", () => {
+    const initialSession = {
+      ...createBoardSession(["O", "I", "T", "J"]),
+      transferCount: 1,
+      stencil: createStencilState(new Set(["0:0", "0:1", "1:0", "1:1"]), 2, 2),
+    };
+
+    render(<GameplayScreen initialSession={initialSession} />);
+    const game = screen.getByRole("application", { name: "Nametris game" });
+    fireEvent.keyDown(game, { key: "Shift" });
+    fireEvent.keyDown(game, { key: "Enter" });
+
+    expect(
+      screen.getAllByTestId("stencil-cell").some((cell) => cell.dataset.pop === "new"),
+    ).toBe(true);
+  });
+
+  it("flashes a soft lock and then drops the row message", () => {
+    vi.useFakeTimers();
+    const session = createBoardSession(["O", "I", "T"]);
+    render(
+      <GameplayScreen
+        initialSession={{
+          ...session,
+          activePiece: { type: "O", rotation: 0, row: 20, column: 3 },
+          lockAccumulatorMilliseconds: 499,
+        }}
+      />,
+    );
+
+    act(() => {
+      vi.advanceTimersByTime(50);
+    });
+
+    expect(document.querySelector(".board-cell.is-lock-flash")).not.toBeNull();
+    expect(document.querySelector(".board-cell.is-drop-trail")).toBeNull();
+
+    const clearSession = createBoardSession(["I", "O", "T"]);
+    const board = clearSession.board.map((row, rowIndex) =>
+      row.map((cell, columnIndex) =>
+        rowIndex === BOARD_HEIGHT - 1 && columnIndex !== 5 ? "J" : cell,
+      ),
+    );
+    render(
+      <GameplayScreen
+        initialSession={{
+          ...clearSession,
+          board,
+          activePiece: { type: "I", rotation: 1, row: 0, column: 3 },
+        }}
+      />,
+    );
+    const games = screen.getAllByRole("application");
+    const clearingGame = games[1];
+    expect(clearingGame).toBeDefined();
+    fireEvent.keyDown(clearingGame as HTMLElement, { key: " " });
+    expect(screen.getAllByText("1 ROW CLEARED").length).toBeGreaterThan(0);
+
+    act(() => {
+      vi.advanceTimersByTime(900);
+    });
+
+    expect(screen.queryByText("1 ROW CLEARED")).not.toBeInTheDocument();
+    vi.useRealTimers();
   });
 
   it("does not move the piece while help is open", async () => {

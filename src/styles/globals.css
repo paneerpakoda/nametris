@@ -220,6 +220,17 @@ h1 {
     0 0 14px rgb(236 75 55 / 18%);
 }
 
+@keyframes color-flash {
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  40% {
+    opacity: 0.45;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -227,6 +238,12 @@ h1 {
     scroll-behavior: auto !important;
     transition-duration: 0.01ms !important;
     animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+
+  .color-flash {
+    animation-name: color-flash !important;
+    animation-duration: 150ms !important;
     animation-iteration-count: 1 !important;
   }
 }

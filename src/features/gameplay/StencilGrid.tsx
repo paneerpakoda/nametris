@@ -12,9 +12,10 @@ interface StencilGridProps {
   readonly name: string;
   readonly stencil: StencilState;
   readonly activePiece: ActivePiece | null;
+  readonly popKeys?: ReadonlySet<string>;
 }
 
-export function StencilGrid({ name, stencil, activePiece }: StencilGridProps) {
+export function StencilGrid({ name, stencil, activePiece, popKeys }: StencilGridProps) {
   const activeCells = useMemo(
     () =>
       new Set(
@@ -69,8 +70,11 @@ export function StencilGrid({ name, stencil, activePiece }: StencilGridProps) {
               aria-label={`Name outline row ${row + 1}, column ${column + 1}, ${
                 status === "preview-lost" ? "lost" : status
               }`}
-              className="stencil-cell"
+              className={
+                popKeys?.has(key) ? "stencil-cell is-pop color-flash" : "stencil-cell"
+              }
               data-testid="stencil-cell"
+              data-pop={popKeys?.has(key) ? "new" : undefined}
               data-status={status}
               data-piece={lockedPiece ?? (isPreview ? activePiece?.type : undefined)}
             />

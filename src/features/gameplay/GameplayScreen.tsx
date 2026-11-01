@@ -28,6 +28,19 @@ import { BoardGrid } from "./BoardGrid";
 import { GameHelpDialog } from "./GameHelpDialog";
 import { GameSidebar } from "./GameSidebar";
 import { LineClearFeedback, type LineClearFeedbackEvent } from "./LineClearFeedback";
+import {
+  addedFilledKeys,
+  clearedVisibleRows,
+  ghostLocksTooHigh,
+  hardDropTrailKeys,
+  lineClearReducedMilliseconds,
+  lineClearVisibleMilliseconds,
+  namePopMilliseconds,
+  pieceCellKeys,
+  prefersReducedMotion,
+  softLockFlashMilliseconds,
+  hardDropTrailMilliseconds,
+} from "./motion";
 import { RunGuidance } from "./RunGuidance";
 import { TransferRail } from "./TransferRail";
 import "../../styles/gameplay.css";
@@ -43,8 +56,19 @@ interface GameplayScreenProps {
 }
 
 const clockResolutionMilliseconds = 50;
-const lineClearFeedbackDurationMilliseconds = 3_500;
 type HardDropImpact = "idle" | "a" | "b";
+
+interface ClearFx {
+  readonly id: number;
+  readonly rows: readonly number[];
+  readonly scoreDelta: number;
+  readonly showToken: boolean;
+}
+
+interface CellFlash {
+  readonly id: number;
+  readonly keys: ReadonlySet<string>;
+}
 
 type GameplayAction =
   | BoardAction
@@ -94,6 +118,21 @@ export function GameplayScreen({
     useState<LineClearFeedbackEvent | null>(null);
   const lineClearFeedbackSequenceRef = useRef(0);
   const [hardDropImpact, setHardDropImpact] = useState<HardDropImpact>("idle");
+  const [clearFx, setClearFx] = useState<ClearFx | null>(null);
+  const [lockFlash, setLockFlash] = useState<CellFlash | null>(null);
+  const [dropTrail, setDropTrail] = useState<CellFlash | null>(null);
+  const [popKeys, setPopKeys] = useState<ReadonlySet<string>>(() => new Set());
+  const motionSnapshot = useRef({
+    board: state.board,
+    piece: state.activePiece,
+    score: state.score,
+    queueLength: state.pieceQueue.length,
+    filled: new Set(state.stencil.filledCells.keys()),
+    linesCleared: state.linesCleared,
+    transferCount: state.transferCount,
+  });
+  const pendingHardDrop = useRef(false);
+  const motionId = useRef(0);
   const [helpOpen, setHelpOpen] = useState(false);
   const [howItWorksOpen, setHowItWorksOpen] = useState(false);
   const [coachReplay, setCoachReplay] = useState(0);
@@ -107,6 +146,13 @@ export function GameplayScreen({
   const onWindowKeyRef = useRef<(event: KeyboardEvent) => void>(() => undefined);
   const handledKeys = useRef(new WeakSet<Event>());
   const ghostPiece = getGhostPiece(state.board, state.activePiece);
+  const tooHigh =
+    (state.phase === "playing" || state.phase === "placing-stencil") &&
+    ghostLocksTooHigh(ghostPiece);
+  const tokenRow =
+    clearFx !== null && clearFx.showToken && !prefersReducedMotion()
+      ? (clearFx.rows.at(-1) ?? null)
+      : null;
   const canRoute = canRouteActivePiece(state);
   const slowZoneActive = state.transferCount >= maximumTransferCount && canRoute;
   const canLock =
@@ -262,11 +308,97 @@ export function GameplayScreen({
     }
 
     const timeout = window.setTimeout(
-      () => setLineClearFeedback(null),
-      lineClearFeedbackDurationMilliseconds,
+      () => {
+        setLineClearFeedback(null);
+        setClearFx(null);
+      },
+      prefersReducedMotion()
+        ? lineClearReducedMilliseconds
+        : lineClearVisibleMilliseconds,
     );
     return () => window.clearTimeout(timeout);
   }, [lineClearFeedback]);
+
+  useEffect(() => {
+    const previous = motionSnapshot.current;
+    const hardDrop = pendingHardDrop.current;
+    const queueShrunk = state.pieceQueue.length < previous.queueLength;
+
+    if (state.linesCleared > previous.linesCleared) {
+      const lockedPiece = hardDrop
+        ? getGhostPiece(previous.board, previous.piece)
+        : previous.piece;
+      motionId.current += 1;
+      setClearFx({
+        id: motionId.current,
+        rows: clearedVisibleRows(previous.board, lockedPiece),
+        scoreDelta: state.score - previous.score,
+        showToken: state.transferCount > previous.transferCount,
+      });
+    }
+
+    if (queueShrunk) {
+      motionId.current += 1;
+      if (hardDrop) {
+        const ghost = getGhostPiece(previous.board, previous.piece);
+        setDropTrail({
+          id: motionId.current,
+          keys: new Set(hardDropTrailKeys(previous.piece, ghost.row)),
+        });
+      } else {
+        setLockFlash({
+          id: motionId.current,
+          keys: new Set(pieceCellKeys(previous.piece)),
+        });
+      }
+    }
+
+    const filled = addedFilledKeys(previous.filled, state.stencil.filledCells);
+    if (filled.length > 0) {
+      setPopKeys(new Set(filled));
+    }
+
+    pendingHardDrop.current = false;
+    motionSnapshot.current = {
+      board: state.board,
+      piece: state.activePiece,
+      score: state.score,
+      queueLength: state.pieceQueue.length,
+      filled: new Set(state.stencil.filledCells.keys()),
+      linesCleared: state.linesCleared,
+      transferCount: state.transferCount,
+    };
+  }, [state]);
+
+  useEffect(() => {
+    if (lockFlash === null) {
+      return;
+    }
+    const timeout = window.setTimeout(
+      () => setLockFlash(null),
+      softLockFlashMilliseconds,
+    );
+    return () => window.clearTimeout(timeout);
+  }, [lockFlash]);
+
+  useEffect(() => {
+    if (dropTrail === null) {
+      return;
+    }
+    const timeout = window.setTimeout(
+      () => setDropTrail(null),
+      hardDropTrailMilliseconds,
+    );
+    return () => window.clearTimeout(timeout);
+  }, [dropTrail]);
+
+  useEffect(() => {
+    if (popKeys.size === 0) {
+      return;
+    }
+    const timeout = window.setTimeout(() => setPopKeys(new Set()), namePopMilliseconds);
+    return () => window.clearTimeout(timeout);
+  }, [popKeys]);
 
   useEffect(() => {
     if (state.phase !== "playing" && state.phase !== "placing-stencil") {
@@ -315,6 +447,7 @@ export function GameplayScreen({
     }
 
     if (action.type === "hard-drop") {
+      pendingHardDrop.current = true;
       setHardDropImpact((current) => (current === "a" ? "b" : "a"));
     }
     if (action.type === "route-to-stencil" && state.transferCount === 0) {
@@ -531,13 +664,28 @@ export function GameplayScreen({
                   ? state.freezeRemainingMilliseconds
                   : null
               }
+              clearedRows={clearFx?.rows ?? []}
+              clearing={clearFx !== null && clearFx.rows.length > 0}
+              lockFlashKeys={lockFlash?.keys}
+              lockFlashId={lockFlash?.id}
+              trailKeys={dropTrail?.keys}
+              trailId={dropTrail?.id}
+              tooHigh={tooHigh}
+              tokenRow={tokenRow}
             />
-            {lineClearFeedback !== null && (
+            {(lineClearFeedback !== null || clearFx !== null) && (
               <div className="board-feedback">
-                <LineClearFeedback
-                  key={lineClearFeedback.id}
-                  event={lineClearFeedback}
-                />
+                {clearFx !== null && (
+                  <em className="score-delta" data-testid="score-delta">
+                    +{clearFx.scoreDelta}
+                  </em>
+                )}
+                {lineClearFeedback !== null && (
+                  <LineClearFeedback
+                    key={lineClearFeedback.id}
+                    event={lineClearFeedback}
+                  />
+                )}
               </div>
             )}
           </section>
@@ -562,6 +710,8 @@ export function GameplayScreen({
             onHelp={openHelp}
             emptySendNotice={emptySendId !== 0}
             emptySendFlash={emptySendFlash}
+            scorePop={clearFx !== null}
+            popKeys={popKeys}
           />
 
           {state.canFinish && state.phase !== "won" && state.phase !== "lost" && (
