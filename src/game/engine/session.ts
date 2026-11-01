@@ -1,4 +1,5 @@
 import {
+  FREEZE_BUDGET_MS,
   fullBankSlowZoneGravityMultiplier,
   getGravityMilliseconds,
   lockDelayMilliseconds,
@@ -61,6 +62,7 @@ export interface BoardSession {
   readonly gravityAccumulatorMilliseconds: number;
   readonly lockAccumulatorMilliseconds: number;
   readonly lockResetCount: number;
+  readonly freezeRemainingMilliseconds: number;
 }
 
 export type BoardAction =
@@ -136,6 +138,7 @@ export function createGameSession(
     gravityAccumulatorMilliseconds: 0,
     lockAccumulatorMilliseconds: 0,
     lockResetCount: 0,
+    freezeRemainingMilliseconds: FREEZE_BUDGET_MS,
   };
 }
 
@@ -208,6 +211,7 @@ function lockActivePiece(state: BoardSession, extraScore = 0): BoardSession {
     gravityAccumulatorMilliseconds: 0,
     lockAccumulatorMilliseconds: 0,
     lockResetCount: 0,
+    freezeRemainingMilliseconds: FREEZE_BUDGET_MS,
   };
 }
 
@@ -293,15 +297,33 @@ function reduceStencilPlacement(
   }
 
   switch (action.type) {
-    case "tick":
-      return {
+    case "tick": {
+      const elapsed = Math.max(0, action.elapsedMilliseconds);
+      const spent = Math.min(state.freezeRemainingMilliseconds, elapsed);
+      const timed = {
         ...state,
+        freezeRemainingMilliseconds: state.freezeRemainingMilliseconds - spent,
         activeMilliseconds: addActiveMilliseconds(
           state.activeMilliseconds,
-          action.elapsedMilliseconds,
+          elapsed,
           true,
         ),
       };
+
+      if (timed.freezeRemainingMilliseconds > 0) {
+        return timed;
+      }
+
+      const playing = {
+        ...timed,
+        phase: "playing" as const,
+        pausedPhase: null,
+        stencilPiece: null,
+        freezeRemainingMilliseconds: 0,
+      };
+      const leftover = elapsed - spent;
+      return leftover > 0 ? tickPlayingSession(playing, leftover) : playing;
+    }
     case "stencil-move":
       return {
         ...state,
@@ -351,6 +373,7 @@ function reduceStencilPlacement(
         gravityAccumulatorMilliseconds: 0,
         lockAccumulatorMilliseconds: 0,
         lockResetCount: 0,
+        freezeRemainingMilliseconds: FREEZE_BUDGET_MS,
       };
     }
     default:
@@ -385,8 +408,9 @@ export function reduceBoardSession(
   }
 
   if (action.type === "finish-run") {
-    return state.phase === "playing" && state.canFinish
-      ? { ...state, phase: "won" }
+    return (state.phase === "playing" || state.phase === "placing-stencil") &&
+      state.canFinish
+      ? { ...state, phase: "won", stencilPiece: null }
       : state;
   }
 
@@ -400,7 +424,7 @@ export function reduceBoardSession(
 
   switch (action.type) {
     case "route-to-stencil":
-      return canRouteActivePiece(state)
+      return canRouteActivePiece(state) && state.freezeRemainingMilliseconds > 0
         ? {
             ...state,
             phase: "placing-stencil",

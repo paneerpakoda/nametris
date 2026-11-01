@@ -232,7 +232,10 @@ export function ControlDeck({
                   key={deckKey.key}
                   aria-label={deckKey.label}
                   disabled={deckKey.disabled}
-                  onClick={() => onInput(deckKey.key)}
+                  onClick={(event) => {
+                    event.currentTarget.blur();
+                    onInput(deckKey.key);
+                  }}
                 >
                   <deckKey.icon className="cabinet-key-icon" aria-hidden="true" />
                   {deckKey.legend !== "" && (

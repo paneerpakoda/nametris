@@ -3,10 +3,11 @@ import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
 import { howItWorksSeenKey } from "../features/onboarding/howItWorksStorage";
+import { playerNameKey } from "../features/onboarding/playerNameStorage";
 import { App } from "./App";
 
 describe("player-name privacy boundary", () => {
-  it("keeps a custom name out of storage, URLs, logs, and requests", async () => {
+  it("stores only the name string and keeps it out of URLs, logs, and requests", async () => {
     const user = userEvent.setup();
     const storageWrite = vi.spyOn(Storage.prototype, "setItem");
     const pushState = vi.spyOn(history, "pushState");
@@ -27,11 +28,14 @@ describe("player-name privacy boundary", () => {
     ).toBeInTheDocument();
     const storedKeys = storageWrite.mock.calls.map(([key]) => key);
     if (storedKeys.length > 0) {
-      expect(storedKeys).toEqual([howItWorksSeenKey]);
+      expect([...storedKeys].sort()).toEqual([howItWorksSeenKey, playerNameKey].sort());
     }
     expect(localStorage.getItem(howItWorksSeenKey)).toBe("1");
-    expect(localStorage.getItem("nametris.playerName")).toBeNull();
-    expect(localStorage.length).toBe(1);
+    expect(localStorage.getItem(playerNameKey)).toBe("PRIVATE");
+    expect(localStorage.length).toBe(2);
+    for (let index = 0; index < localStorage.length; index += 1) {
+      expect([howItWorksSeenKey, playerNameKey]).toContain(localStorage.key(index));
+    }
     expect(pushState).not.toHaveBeenCalled();
     expect(replaceState).not.toHaveBeenCalled();
     expect(xhrOpen).not.toHaveBeenCalled();

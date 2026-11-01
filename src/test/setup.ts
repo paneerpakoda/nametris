@@ -43,4 +43,7 @@ if (browserStorage === null) {
 afterEach(() => {
   cleanup();
   window.localStorage.clear();
+  if (window.location.pathname !== "/" || window.location.search !== "") {
+    window.history.replaceState(null, "", "/");
+  }
 });

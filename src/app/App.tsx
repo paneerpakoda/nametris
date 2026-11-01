@@ -6,10 +6,15 @@ import {
   hasSeenHowItWorks,
   markHowItWorksSeen,
 } from "../features/onboarding/howItWorksStorage";
+import {
+  readStoredPlayerName,
+  storePlayerName,
+} from "../features/onboarding/playerNameStorage";
 import { WelcomeScreen } from "../features/onboarding/WelcomeScreen";
 import { LossScreen } from "../features/results/LossScreen";
 import { SuccessScreen } from "../features/results/SuccessScreen";
 import type { LossResult, RunResult } from "../game/engine/result";
+import { createRunSeed } from "../game/runtime/seed";
 
 interface AppProps {
   readonly initialOutcome?: RunResult | LossResult;
@@ -23,10 +28,16 @@ export function App({ initialOutcome }: AppProps) {
     initialOutcome ?? null,
   );
   const [runNumber, setRunNumber] = useState(0);
+  const [seed, setSeed] = useState(() => createRunSeed(window.location.search));
   const [showIntro, setShowIntro] = useState(false);
 
-  function playAgain() {
+  function nextSeed() {
+    setSeed(createRunSeed(window.location.search));
     setRunNumber((current) => current + 1);
+  }
+
+  function playAgain() {
+    nextSeed();
     setOutcome(null);
   }
 
@@ -67,16 +78,20 @@ export function App({ initialOutcome }: AppProps) {
       <GameplayScreen
         key={runNumber}
         name={sessionName}
-        seed={20_260_730 + runNumber}
+        seed={seed}
         onWon={setOutcome}
         onLost={setOutcome}
+        onRestart={nextSeed}
+        onNewName={() => setSessionName(null)}
       />
     );
   }
 
   return (
     <WelcomeScreen
+      initialName={readStoredPlayerName()}
       onStart={(name) => {
+        storePlayerName(name);
         setOutcome(null);
         setSessionName(name);
         setShowIntro(!hasSeenHowItWorks());

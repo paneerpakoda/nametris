@@ -37,6 +37,8 @@ interface GameplayScreenProps {
   readonly initialSession?: BoardSession;
   readonly onWon?: (result: RunResult) => void;
   readonly onLost?: (result: LossResult) => void;
+  readonly onRestart?: () => void;
+  readonly onNewName?: () => void;
 }
 
 const clockResolutionMilliseconds = 50;
@@ -69,6 +71,8 @@ export function GameplayScreen({
   initialSession,
   onWon,
   onLost,
+  onRestart,
+  onNewName,
 }: GameplayScreenProps) {
   const queue = useMemo(() => createPieceQueue(createSeededRandom(seed), 100), [seed]);
   const startingSession = useMemo(
@@ -94,26 +98,65 @@ export function GameplayScreen({
   const [coachReplay, setCoachReplay] = useState(0);
   const [emptySendId, setEmptySendId] = useState(0);
   const [emptySendFlash, setEmptySendFlash] = useState(false);
+  const [finishPromptDismissed, setFinishPromptDismissed] = useState(false);
+  const [restartConfirm, setRestartConfirm] = useState(false);
   const pauseResumeRef = useRef<HTMLButtonElement>(null);
+  const confirmYesRef = useRef<HTMLButtonElement>(null);
+  const pauseMenuRef = useRef<HTMLDivElement>(null);
+  const onWindowKeyRef = useRef<(event: KeyboardEvent) => void>(() => undefined);
+  const handledKeys = useRef(new WeakSet<Event>());
   const ghostPiece = getGhostPiece(state.board, state.activePiece);
   const canRoute = canRouteActivePiece(state);
   const slowZoneActive = state.transferCount >= maximumTransferCount && canRoute;
   const canLock =
     state.stencilPiece !== null &&
     getStencilPieceProjection(state.stencil, state.stencilPiece).keptCellKeys.size > 0;
+  const finishPromptOpen =
+    state.canFinish &&
+    !finishPromptDismissed &&
+    (state.phase === "playing" || state.phase === "placing-stencil") &&
+    !helpOpen &&
+    !howItWorksOpen;
 
   useEffect(() => {
     gameRef.current?.focus();
   }, []);
 
   useEffect(() => {
-    if (state.phase !== "paused" || helpOpen) {
+    if (state.phase !== "paused" || helpOpen || howItWorksOpen) {
       return;
     }
 
-    const frame = window.requestAnimationFrame(() => pauseResumeRef.current?.focus());
+    const frame = window.requestAnimationFrame(() => {
+      (restartConfirm ? confirmYesRef : pauseResumeRef).current?.focus();
+    });
     return () => window.cancelAnimationFrame(frame);
-  }, [helpOpen, state.phase]);
+  }, [helpOpen, howItWorksOpen, restartConfirm, state.phase]);
+
+  useEffect(() => {
+    const listener = (event: KeyboardEvent) => {
+      onWindowKeyRef.current(event);
+    };
+    window.addEventListener("keydown", listener, true);
+    return () => window.removeEventListener("keydown", listener, true);
+  }, []);
+
+  useEffect(() => {
+    const runInProgress =
+      state.phase === "playing" ||
+      state.phase === "placing-stencil" ||
+      state.phase === "paused";
+    if (!runInProgress) {
+      return;
+    }
+
+    const warnBeforeUnload = (event: BeforeUnloadEvent) => {
+      event.preventDefault();
+      event.returnValue = "";
+    };
+    window.addEventListener("beforeunload", warnBeforeUnload);
+    return () => window.removeEventListener("beforeunload", warnBeforeUnload);
+  }, [state.phase]);
 
   useEffect(() => {
     if (import.meta.env.VITE_NAMETRIS_E2E !== "true") {
@@ -299,13 +342,58 @@ export function GameplayScreen({
     };
   }, [emptySendId]);
 
-  function handleKeyDown(event: React.KeyboardEvent<HTMLDivElement>) {
+  function handleWindowKey(event: KeyboardEvent) {
+    if (handledKeys.current.has(event)) {
+      return;
+    }
+    handledKeys.current.add(event);
+
     if (helpOpen || howItWorksOpen) {
       return;
     }
 
-    const action = getGameAction(event.key, state.phase);
+    if (restartConfirm) {
+      if (event.key === "Escape" || event.key.toLowerCase() === "p") {
+        event.preventDefault();
+        event.stopPropagation();
+        setRestartConfirm(false);
+        dispatch({ type: "resume" });
+        window.requestAnimationFrame(() => gameRef.current?.focus());
+      }
+      return;
+    }
 
+    if (state.phase === "paused") {
+      if (event.key === "Escape" || event.key.toLowerCase() === "p") {
+        event.preventDefault();
+        event.stopPropagation();
+        dispatch({ type: "resume" });
+        window.requestAnimationFrame(() => gameRef.current?.focus());
+      }
+      return;
+    }
+
+    if (finishPromptOpen) {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        event.stopPropagation();
+        dispatch({ type: "finish-run" });
+        return;
+      }
+      if (event.key === "Escape") {
+        event.preventDefault();
+        event.stopPropagation();
+        setFinishPromptDismissed(true);
+        return;
+      }
+      const promptedAction = getGameAction(event.key, state.phase);
+      if (promptedAction?.type !== "hard-drop" && promptedAction?.type !== "pause") {
+        event.preventDefault();
+        return;
+      }
+    }
+
+    const action = getGameAction(event.key, state.phase);
     if (action === null) {
       return;
     }
@@ -317,12 +405,46 @@ export function GameplayScreen({
     }
   }
 
+  useEffect(() => {
+    onWindowKeyRef.current = handleWindowKey;
+  });
+
+  function handleKeyDown(event: React.KeyboardEvent<HTMLDivElement>) {
+    handleWindowKey(event.nativeEvent);
+  }
+
   function handleCabinetInput(key: string) {
+    if (document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
     const action = getGameAction(key, state.phase);
     if (action !== null) {
       performPlayerAction(action);
     }
     window.requestAnimationFrame(() => gameRef.current?.focus());
+  }
+
+  function trapPauseTab(event: React.KeyboardEvent<HTMLDivElement>) {
+    if (event.key !== "Tab") {
+      return;
+    }
+
+    const buttons = [
+      ...(pauseMenuRef.current?.querySelectorAll<HTMLButtonElement>("button") ?? []),
+    ];
+    const first = buttons[0];
+    const last = buttons[buttons.length - 1];
+    if (first === undefined || last === undefined) {
+      return;
+    }
+
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
   }
 
   function openHelp() {
@@ -392,6 +514,11 @@ export function GameplayScreen({
               activePiece={state.activePiece}
               ghostPiece={ghostPiece}
               slowZoneActive={slowZoneActive}
+              freezeRemaining={
+                state.phase === "placing-stencil"
+                  ? state.freezeRemainingMilliseconds
+                  : null
+              }
             />
           </section>
 
@@ -411,6 +538,39 @@ export function GameplayScreen({
             emptySendNotice={emptySendId !== 0}
             emptySendFlash={emptySendFlash}
           />
+
+          {state.canFinish && state.phase !== "won" && state.phase !== "lost" && (
+            <p className="finish-banner" data-testid="finish-banner">
+              80% reached
+            </p>
+          )}
+
+          {finishPromptOpen && (
+            <div
+              className="finish-prompt"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="finish-prompt-title"
+            >
+              <h2 id="finish-prompt-title">80% reached</h2>
+              <div className="overlay-actions">
+                <button
+                  type="button"
+                  className="primary-button compact"
+                  onClick={() => dispatch({ type: "finish-run" })}
+                >
+                  Finish now · Enter
+                </button>
+                <button
+                  type="button"
+                  className="secondary-button"
+                  onClick={() => setFinishPromptDismissed(true)}
+                >
+                  Play on · Esc
+                </button>
+              </div>
+            </div>
+          )}
 
           {helpOpen && (
             <GameHelpDialog
@@ -443,29 +603,72 @@ export function GameplayScreen({
               role="dialog"
               aria-modal="true"
               aria-labelledby="pause-dialog-title"
-              onKeyDown={(event) => {
-                if (event.key === "Tab") {
-                  event.preventDefault();
-                  event.stopPropagation();
-                  pauseResumeRef.current?.focus();
-                }
-              }}
+              onKeyDown={trapPauseTab}
             >
               <p className="eyebrow">TAKE A BREATH</p>
-              <h2 id="pause-dialog-title">Game paused</h2>
-              <p>
-                {state.pauseReason === "hidden"
-                  ? "The tab was hidden. Resume when you are ready."
-                  : "Your stack is waiting."}
-              </p>
-              <button
-                ref={pauseResumeRef}
-                type="button"
-                className="primary-button compact"
-                onClick={() => handleCabinetInput("p")}
-              >
-                Resume game
-              </button>
+              {restartConfirm ? (
+                <>
+                  <h2 id="pause-dialog-title">End this run and start again?</h2>
+                  <div className="overlay-actions" ref={pauseMenuRef}>
+                    <button
+                      ref={confirmYesRef}
+                      type="button"
+                      className="primary-button compact"
+                      onClick={() => onRestart?.()}
+                    >
+                      Yes
+                    </button>
+                    <button
+                      type="button"
+                      className="secondary-button"
+                      onClick={() => setRestartConfirm(false)}
+                    >
+                      No
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <h2 id="pause-dialog-title">Game paused</h2>
+                  <p>
+                    {state.pauseReason === "hidden"
+                      ? "The tab was hidden. Resume when you are ready."
+                      : "Your stack is waiting."}
+                  </p>
+                  <p data-testid="run-seed">Seed {seed}</p>
+                  <div className="overlay-actions" ref={pauseMenuRef}>
+                    <button
+                      ref={pauseResumeRef}
+                      type="button"
+                      className="primary-button compact"
+                      onClick={() => handleCabinetInput("p")}
+                    >
+                      Resume game
+                    </button>
+                    <button
+                      type="button"
+                      className="secondary-button"
+                      onClick={() => setRestartConfirm(true)}
+                    >
+                      Restart run
+                    </button>
+                    <button
+                      type="button"
+                      className="secondary-button"
+                      onClick={() => onNewName?.()}
+                    >
+                      New name
+                    </button>
+                    <button
+                      type="button"
+                      className="secondary-button"
+                      onClick={openHelp}
+                    >
+                      How to play
+                    </button>
+                  </div>
+                </>
+              )}
             </div>
           )}
 

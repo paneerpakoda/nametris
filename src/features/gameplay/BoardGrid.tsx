@@ -1,6 +1,6 @@
 import { useMemo, type CSSProperties } from "react";
 
-import { routeZoneVisibleRows } from "../../game/config/gameplay";
+import { FREEZE_BUDGET_MS, routeZoneVisibleRows } from "../../game/config/gameplay";
 import { HIDDEN_BOARD_ROWS, VISIBLE_BOARD_HEIGHT } from "../../game/engine/board";
 import { getPieceCells } from "../../game/engine/pieces";
 import type { ActivePiece, Board, PieceType } from "../../game/model/types";
@@ -10,6 +10,7 @@ interface BoardGridProps {
   readonly activePiece: ActivePiece;
   readonly ghostPiece: ActivePiece;
   readonly slowZoneActive?: boolean;
+  readonly freezeRemaining?: number | null;
 }
 
 function cellKey(row: number, column: number): string {
@@ -21,6 +22,7 @@ export function BoardGrid({
   activePiece,
   ghostPiece,
   slowZoneActive = false,
+  freezeRemaining = null,
 }: BoardGridProps) {
   const activeCells = useMemo(
     () =>
@@ -64,6 +66,25 @@ export function BoardGrid({
         <span className="transfer-route-deadline" aria-hidden="true">
           <small>SEND LINE</small>
         </span>
+        {freezeRemaining !== null && (
+          <div
+            className="freeze-budget"
+            role="meter"
+            aria-label="Think time"
+            aria-valuemin={0}
+            aria-valuemax={FREEZE_BUDGET_MS}
+            aria-valuenow={Math.max(0, freezeRemaining)}
+            style={{
+              top: `calc(${Math.max(0, activePiece.row - HIDDEN_BOARD_ROWS)} * var(--board-cell))`,
+            }}
+          >
+            <span
+              style={{
+                width: `${Math.max(0, Math.min(100, (freezeRemaining / FREEZE_BUDGET_MS) * 100))}%`,
+              }}
+            />
+          </div>
+        )}
         {board.slice(HIDDEN_BOARD_ROWS).map((row, visibleRow) =>
           row.map((lockedPiece, column) => {
             const boardRow = visibleRow + HIDDEN_BOARD_ROWS;

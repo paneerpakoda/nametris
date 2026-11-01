@@ -93,7 +93,7 @@ test("completes onboarding, pause, finish, and replay with keyboard input", asyn
   const resume = page.getByRole("button", { name: "Resume game" });
   await expect(resume).toBeFocused();
   await page.keyboard.press("Tab");
-  await expect(resume).toBeFocused();
+  await expect(page.getByRole("button", { name: "Restart run" })).toBeFocused();
   await page.keyboard.press("p");
   await expect(game).toBeFocused();
 

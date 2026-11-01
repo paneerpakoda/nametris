@@ -164,7 +164,11 @@ describe("GameplayScreen", () => {
     await waitFor(() => expect(resume).toHaveFocus());
 
     await user.tab();
+    expect(screen.getByRole("button", { name: "Restart run" })).toHaveFocus();
+    await user.tab({ shift: true });
     expect(resume).toHaveFocus();
+    await user.tab({ shift: true });
+    expect(screen.getByRole("button", { name: "How to play" })).toHaveFocus();
 
     await user.keyboard("p");
     await waitFor(() =>
@@ -331,7 +335,10 @@ describe("GameplayScreen", () => {
     expect(
       screen.getByRole("progressbar", { name: "Name completion" }),
     ).toHaveAttribute("aria-valuetext", "80% complete. Finish unlocks at 80%.");
+    expect(screen.getByRole("dialog", { name: "80% reached" })).toBeInTheDocument();
 
+    fireEvent.keyDown(game, { key: "ArrowDown" });
+    expect(screen.getByTestId("score").textContent).toBe("0");
     fireEvent.keyDown(game, { key: " " });
     expect(Number(screen.getByTestId("score").textContent)).toBeGreaterThan(0);
     expect(finish).toBeEnabled();
@@ -351,5 +358,145 @@ describe("GameplayScreen", () => {
       "No name pieces yet. Clear a row first.",
     );
     expect(screen.getByTestId("empty-send-notice")).toHaveClass("is-flash");
+  });
+
+  it("finishes from the 80% prompt, including while placing a name piece", async () => {
+    const onWon = vi.fn();
+    const mask = new Set(Array.from({ length: 20 }, (_, index) => `0:${index}`));
+    const initialSession = {
+      ...createBoardSession(["O", "I", "T", "J"]),
+      canFinish: true,
+      transferCount: 1,
+      stencil: {
+        ...createStencilState(mask, 1, 20),
+        filledCells: new Map(
+          Array.from({ length: 16 }, (_, index) => [`0:${index}`, "I"] as const),
+        ),
+      },
+    };
+
+    render(
+      <GameplayScreen
+        initialSession={{
+          ...initialSession,
+          phase: "placing-stencil",
+          stencilPiece: { type: "O", row: 0, column: 0, rotation: 0 },
+        }}
+        onWon={onWon}
+      />,
+    );
+    expect(screen.getByText("PLACE THE O")).toBeInTheDocument();
+    expect(screen.getByTestId("finish-banner")).toHaveTextContent("80% reached");
+
+    fireEvent.keyDown(window, { key: "Enter" });
+
+    await waitFor(() => expect(onWon).toHaveBeenCalledOnce());
+    expect(onWon.mock.calls[0]?.[0]).toMatchObject({ displayPercent: 80 });
+    expect(screen.getByTestId("transfers")).toHaveTextContent("1");
+  });
+
+  it("lets the player keep going after 80% and leaves the banner up", () => {
+    const onWon = vi.fn();
+    const initialSession = {
+      ...createBoardSession(["O", "I", "T", "J"]),
+      canFinish: true,
+    };
+
+    render(<GameplayScreen initialSession={initialSession} onWon={onWon} />);
+    fireEvent.keyDown(window, { key: "Escape" });
+
+    expect(
+      screen.queryByRole("dialog", { name: "80% reached" }),
+    ).not.toBeInTheDocument();
+    expect(screen.getByTestId("finish-banner")).toBeInTheDocument();
+    expect(onWon).not.toHaveBeenCalled();
+    expect(screen.getByRole("button", { name: "FINISH NAME · 0%" })).toBeEnabled();
+  });
+
+  it("shows the remaining think time beside the piece", () => {
+    const initialSession = {
+      ...createBoardSession(["O", "I", "T", "J"]),
+      transferCount: 1,
+    };
+
+    render(<GameplayScreen initialSession={initialSession} />);
+    fireEvent.keyDown(screen.getByRole("application"), { key: "Shift" });
+
+    const meter = screen.getByRole("meter", { name: "Think time" });
+    expect(meter).toHaveAttribute("aria-valuemax", "5000");
+    expect(Number(meter.getAttribute("aria-valuenow"))).toBeGreaterThan(0);
+    expect(Number(meter.getAttribute("aria-valuenow"))).toBeLessThanOrEqual(5000);
+  });
+
+  it("asks before restarting, resumes on Escape, and can leave for a new name", async () => {
+    const user = userEvent.setup();
+    const onRestart = vi.fn();
+    const onNewName = vi.fn();
+    render(
+      <GameplayScreen seed={20260730} onRestart={onRestart} onNewName={onNewName} />,
+    );
+
+    await user.click(screen.getByRole("button", { name: "Pause game" }));
+    expect(screen.getByTestId("run-seed")).toHaveTextContent("Seed 20260730");
+    await user.click(screen.getByRole("button", { name: "Restart run" }));
+    expect(
+      screen.getByRole("dialog", { name: "End this run and start again?" }),
+    ).toBeVisible();
+
+    fireEvent.keyDown(window, { key: "Escape" });
+    expect(screen.queryByText("Game paused")).not.toBeInTheDocument();
+    expect(onRestart).not.toHaveBeenCalled();
+
+    await user.click(screen.getByRole("button", { name: "Pause game" }));
+    await user.click(screen.getByRole("button", { name: "Restart run" }));
+    await user.click(screen.getByRole("button", { name: "No" }));
+    expect(screen.getByRole("dialog", { name: "Game paused" })).toBeVisible();
+    await user.click(screen.getByRole("button", { name: "How to play" }));
+    expect(screen.getByRole("dialog", { name: "How to play Nametris" })).toBeVisible();
+    await user.click(screen.getByRole("button", { name: "Resume game" }));
+
+    await user.click(screen.getByRole("button", { name: "Pause game" }));
+    await user.click(screen.getByRole("button", { name: "Restart run" }));
+    await user.click(screen.getByRole("button", { name: "Yes" }));
+    expect(onRestart).toHaveBeenCalledOnce();
+    fireEvent.keyDown(window, { key: "Escape" });
+
+    await user.click(screen.getByRole("button", { name: "Pause game" }));
+    await user.click(screen.getByRole("button", { name: "New name" }));
+    expect(onNewName).toHaveBeenCalledOnce();
+  });
+
+  it("keeps moving when a cabinet button has focus and warns before unload", () => {
+    render(<GameplayScreen seed={7} />);
+    screen.getByRole("button", { name: "Move left" }).focus();
+    fireEvent.keyDown(window, { key: "ArrowDown" });
+    expect(screen.getByTestId("score").textContent).toBe("1");
+
+    const leaving = new Event("beforeunload", { cancelable: true });
+    window.dispatchEvent(leaving);
+    expect(leaving.defaultPrevented).toBe(true);
+  });
+
+  it("does not warn before unload after the run is over", () => {
+    render(
+      <GameplayScreen
+        initialSession={{ ...createBoardSession(["O", "I"]), phase: "lost" }}
+      />,
+    );
+
+    const leaving = new Event("beforeunload", { cancelable: true });
+    window.dispatchEvent(leaving);
+    expect(leaving.defaultPrevented).toBe(false);
+  });
+
+  it("does not move the piece while help is open", async () => {
+    const user = userEvent.setup();
+    render(<GameplayScreen seed={7} />);
+
+    await user.click(screen.getByRole("button", { name: "Open controls help" }));
+    fireEvent.keyDown(window, { key: "ArrowDown" });
+
+    expect(screen.getByTestId("score").textContent).toBe("0");
+    expect(screen.getByRole("dialog", { name: "How to play Nametris" })).toBeVisible();
   });
 });

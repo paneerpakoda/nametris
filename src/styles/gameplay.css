@@ -906,6 +906,73 @@
   text-align: center;
 }
 
+.finish-banner {
+  position: absolute;
+  z-index: 4;
+  top: 8px;
+  left: 8px;
+  margin: 0;
+  padding: 4px 8px;
+  border: 1px solid rgb(255 196 93 / 80%);
+  color: #fff4d6;
+  background: rgb(42 30 8 / 92%);
+  font-family: var(--font-pixel);
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  pointer-events: none;
+}
+
+.finish-prompt {
+  position: absolute;
+  z-index: 8;
+  top: 34%;
+  left: 12px;
+  display: grid;
+  width: min(240px, 42%);
+  padding: 12px;
+  gap: 8px;
+  border: 2px solid #ffc45d;
+  border-radius: 6px;
+  background: rgb(8 11 9 / 94%);
+  text-align: center;
+}
+
+.finish-prompt h2 {
+  margin: 0;
+  color: var(--crt-text);
+  font-family: var(--font-pixel);
+  font-size: 0.9rem;
+}
+
+.overlay-actions {
+  display: grid;
+  width: min(280px, 100%);
+  justify-items: stretch;
+  gap: 8px;
+}
+
+.overlay-actions .primary-button,
+.overlay-actions .secondary-button {
+  width: 100%;
+  margin-top: 0;
+}
+
+.freeze-budget {
+  position: absolute;
+  z-index: 3;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: rgb(237 230 211 / 16%);
+  pointer-events: none;
+}
+
+.freeze-budget span {
+  display: block;
+  height: 100%;
+  background: #ffc45d;
+}
+
 .game-overlay h2 {
   margin: 0;
   color: var(--crt-text);
