@@ -1,84 +1,79 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 
-import { maximumTransferCount } from "../../game/config/gameplay";
 import type { BoardSession } from "../../game/engine/session";
-
-type GuidanceKind = "line-clear" | "transfer" | "transfer-cap" | "stencil";
 
 interface RunGuidanceProps {
   readonly state: BoardSession;
+  readonly replayKey?: number;
   readonly onDismiss?: () => void;
 }
 
-const guidanceCopy: Readonly<
-  Record<GuidanceKind, { readonly title: string; readonly detail: string }>
-> = {
-  "line-clear": {
-    title: "CLEAR LINES → EARN TRANSFERS",
-    detail: `Every completed row earns one route. Bank up to ${maximumTransferCount}.`,
-  },
-  transfer: {
-    title: "TRANSFER READY → ROUTE WITH SHIFT",
-    detail: "Press Shift before the active piece crosses the cyan route deadline.",
-  },
-  "transfer-cap": {
-    title: "TRANSFER BANK FULL → BUILD YOUR NAME",
-    detail: `Slow zone active above the blue line. Route with Shift; extra clears cannot bank.`,
-  },
-  stencil: {
-    title: "STENCIL MODE → PLACE, TRIM, OR CANCEL",
-    detail: "Move and rotate freely. Outside cells are trimmed when you lock.",
-  },
-};
+const coachLines = [
+  "Fill a row to clear it. Each clear gives you a name piece.",
+  "You earned a name piece. Press Shift while the piece is still above the blue line.",
+  "Move it onto your name and press Enter. Parts outside the outline are lost. Esc keeps the piece.",
+  "Fill 80% of your name to win.",
+] as const;
 
-export function RunGuidance({ state, onDismiss }: RunGuidanceProps) {
-  const shown = useRef(new Set<GuidanceKind>());
-  const [visibleHint, setVisibleHint] = useState<GuidanceKind | null>(null);
+const goalStep = 3;
+
+export function RunGuidance({ state, replayKey = 0, onDismiss }: RunGuidanceProps) {
+  const [reached, setReached] = useState(0);
+  const [hidden, setHidden] = useState(false);
+  const [seenReplay, setSeenReplay] = useState(replayKey);
+  const replayChanged = seenReplay !== replayKey;
+
+  if (replayChanged) {
+    setSeenReplay(replayKey);
+    setReached(0);
+    setHidden(false);
+  }
+
+  const progress = replayChanged ? 0 : reached;
+  const showingHidden = replayChanged ? false : hidden;
+  let step = progress;
+
+  if (!showingHidden && progress < goalStep) {
+    if (state.phase === "placing-stencil") {
+      step = 2;
+    } else if (progress >= 2) {
+      step = goalStep;
+    } else if (state.transferCount > 0 && progress < 1) {
+      step = 1;
+    }
+  }
+
+  if (!replayChanged && !showingHidden && step !== reached) {
+    setReached(step);
+  }
 
   useEffect(() => {
-    let nextHint: GuidanceKind | null = null;
-    if (state.phase === "placing-stencil") {
-      nextHint = "stencil";
-    } else if (state.transferCount >= maximumTransferCount) {
-      nextHint = "transfer-cap";
-    } else if (state.transferCount > 0 && state.successfulStencilLocks === 0) {
-      nextHint = "transfer";
-    } else if (state.linesCleared === 0) {
-      nextHint = "line-clear";
+    if (showingHidden || step !== goalStep) {
+      return;
     }
 
-    if (nextHint !== null && !shown.current.has(nextHint)) {
-      shown.current.add(nextHint);
-      setVisibleHint(nextHint);
-    }
-  }, [
-    state.linesCleared,
-    state.phase,
-    state.successfulStencilLocks,
-    state.transferCount,
-  ]);
+    const timeout = window.setTimeout(() => setHidden(true), 2_800);
+    return () => window.clearTimeout(timeout);
+  }, [showingHidden, step]);
 
-  if (visibleHint === null) {
+  if (showingHidden) {
     return null;
   }
 
-  const copy = guidanceCopy[visibleHint];
+  const line = coachLines[step];
+  if (line === undefined) {
+    return null;
+  }
+
   return (
-    <aside
-      className="run-guidance"
-      aria-label="Current guidance"
-      data-kind={visibleHint}
-    >
+    <aside className="run-guidance" aria-label="Current guidance" data-step={step}>
       <span aria-hidden="true">◆</span>
-      <div>
-        <strong>{copy.title}</strong>
-        <small>{copy.detail}</small>
-      </div>
+      <p>{line}</p>
       <button
         type="button"
         aria-label="Dismiss guidance"
         onClick={() => {
-          setVisibleHint(null);
+          setHidden(true);
           onDismiss?.();
         }}
       >

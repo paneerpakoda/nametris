@@ -12,6 +12,8 @@ interface StencilPanelProps {
   readonly onLock: () => void;
   readonly onCancel: () => void;
   readonly onFinish: () => void;
+  readonly emptySendNotice?: boolean;
+  readonly emptySendFlash?: boolean;
 }
 
 export function StencilPanel({
@@ -20,6 +22,8 @@ export function StencilPanel({
   onLock,
   onCancel,
   onFinish,
+  emptySendNotice = false,
+  emptySendFlash = false,
 }: StencilPanelProps) {
   const completion = getStencilCompletion(state.stencil);
   const isPlacing = state.phase === "placing-stencil";
@@ -28,7 +32,7 @@ export function StencilPanel({
       ? null
       : getStencilPieceProjection(state.stencil, state.stencilPiece);
   const keptCellCount = projection?.keptCellKeys.size ?? 0;
-  const trimmedCellCount = projection?.trimmedCellKeys.size ?? 0;
+  const lostCellCount = projection?.trimmedCellKeys.size ?? 0;
   const canLock = keptCellCount > 0;
   const canRoute = canRouteActivePiece(state);
   const transferBankIsFull = state.transferCount >= maximumTransferCount;
@@ -50,7 +54,7 @@ export function StencilPanel({
               ? "NAME COMPLETE"
               : isPlacing
                 ? `PLACE THE ${state.stencilPiece?.type ?? "PIECE"}`
-                : "NAME STENCIL"}
+                : "NAME OUTLINE"}
           </h2>
           {state.canFinish && state.phase !== "won" && (
             <span className="finish-ready-badge">◆ FINISH UNLOCKED</span>
@@ -79,8 +83,8 @@ export function StencilPanel({
 
       {transferBankIsFull && state.phase === "playing" && (
         <div className="transfer-cap-notice" role="note">
-          <strong>TRANSFER BANK FULL · ROUTE A PIECE</strong>
-          <span>Extra line clears cannot add transfers.</span>
+          <strong>NAME PIECES FULL · SEND ONE</strong>
+          <span>Extra line clears cannot add name pieces.</span>
         </div>
       )}
 
@@ -93,10 +97,8 @@ export function StencilPanel({
       {isPlacing ? (
         <div className="stencil-actions">
           <div className="placement-guidance" aria-live="polite">
-            <p>{`${keptCellCount} ${
-              keptCellCount === 1 ? "CELL" : "CELLS"
-            } KEPT · ${trimmedCellCount} TRIMMED`}</p>
-            <small>Outside or occupied cells disappear when you lock.</small>
+            <p>{`${keptCellCount} kept, ${lostCellCount} lost`}</p>
+            <small>Parts outside the outline are lost.</small>
           </div>
           <div className="stencil-action-buttons">
             <button type="button" className="secondary-button" onClick={onCancel}>
@@ -108,16 +110,26 @@ export function StencilPanel({
               onClick={onLock}
               disabled={!canLock}
             >
-              {trimmedCellCount > 0 ? "LOCK & TRIM · ENTER" : "LOCK · ENTER"}
+              LOCK · ENTER
             </button>
           </div>
         </div>
       ) : (
         <div className="stencil-actions">
           <p>
-            Spend one transfer while any part of the piece is above the board’s route
-            deadline. Bank up to {maximumTransferCount}. Finish unlocks at 80%.
+            Send a name piece while any part of it is still above the send line. You can
+            hold up to {maximumTransferCount}. Finish at 80%.
           </p>
+          {emptySendNotice && (
+            <p
+              className={
+                emptySendFlash ? "empty-send-notice is-flash" : "empty-send-notice"
+              }
+              data-testid="empty-send-notice"
+            >
+              No name pieces yet. Clear a row first.
+            </p>
+          )}
           <div className="stencil-action-buttons">
             {state.canFinish && state.phase === "playing" && (
               <button
@@ -132,15 +144,21 @@ export function StencilPanel({
               <button
                 type="button"
                 className="route-button"
-                aria-label={`Route ${state.activePiece.type} to stencil`}
+                aria-label={
+                  state.transferCount === 0
+                    ? "Clear a row first"
+                    : canRoute
+                      ? `Send ${state.activePiece.type}`
+                      : "Past the send line"
+                }
                 onClick={onRoute}
-                disabled={!canRoute}
+                disabled={state.transferCount > 0 && !canRoute}
               >
                 {state.transferCount === 0
-                  ? "EARN A TRANSFER"
+                  ? "Clear a row first"
                   : canRoute
-                    ? `ROUTE ${state.activePiece.type} · SHIFT`
-                    : "ROUTE WINDOW PASSED"}
+                    ? "SEND · SHIFT"
+                    : "PAST THE SEND LINE"}
               </button>
             )}
           </div>

@@ -9,6 +9,8 @@ interface GameSidebarProps {
   readonly onStencilCancel: () => void;
   readonly onFinish: () => void;
   readonly onHelp: () => void;
+  readonly emptySendNotice?: boolean;
+  readonly emptySendFlash?: boolean;
 }
 
 export function GameSidebar({
@@ -18,6 +20,8 @@ export function GameSidebar({
   onStencilCancel,
   onFinish,
   onHelp,
+  emptySendNotice = false,
+  emptySendFlash = false,
 }: GameSidebarProps) {
   return (
     <aside className="game-sidebar">
@@ -39,6 +43,8 @@ export function GameSidebar({
         onLock={onStencilLock}
         onCancel={onStencilCancel}
         onFinish={onFinish}
+        emptySendNotice={emptySendNotice}
+        emptySendFlash={emptySendFlash}
       />
 
       <section className="metric-strip" aria-label="Game metrics">

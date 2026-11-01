@@ -89,7 +89,7 @@ describe("GameplayScreen", () => {
 
     expect(screen.getByTestId("transfers")).toHaveTextContent("1");
     expect(screen.getByRole("status")).toHaveTextContent(
-      "1 line cleared. 1 transfer earned.",
+      "1 line cleared. 1 name piece earned.",
     );
     const feedback = screen.getByTestId("line-clear-feedback");
     expect(feedback).toHaveAttribute("data-kind", "earned");
@@ -98,11 +98,11 @@ describe("GameplayScreen", () => {
     ).not.toContainElement(feedback);
     expect(
       screen.getByRole("complementary", {
-        name: "Transfer bank and next piece",
+        name: "Name pieces and next piece",
       }),
     ).toContainElement(feedback);
     expect(screen.getByText("1 ROW CLEARED")).toBeVisible();
-    expect(screen.getByText("+1 TRANSFER · BANK 1/3")).toBeVisible();
+    expect(screen.getByText("+1 NAME PIECE · 1/3")).toBeVisible();
   });
 
   it("announces that a full transfer bank cannot store another clear", () => {
@@ -129,7 +129,7 @@ describe("GameplayScreen", () => {
 
     expect(screen.getByTestId("transfers")).toHaveTextContent("3 / 3");
     expect(screen.getByRole("status")).toHaveTextContent(
-      "1 line cleared. 1 transfer wasted because the bank was already full at 3. Use Shift before your next clear.",
+      "1 line cleared. 1 name piece lost because you already have 3. Use Shift before your next clear.",
     );
     const feedback = screen.getByTestId("line-clear-feedback");
     expect(feedback).toHaveAttribute("data-kind", "wasted");
@@ -137,7 +137,7 @@ describe("GameplayScreen", () => {
       screen.getByRole("grid", { name: "Normal Tetris board" }).parentElement,
     ).not.toContainElement(feedback);
     expect(screen.getByText("1 ROW CLEARED")).toBeVisible();
-    expect(screen.getByText("TRANSFER LOST · BANK FULL · USE SHIFT")).toBeVisible();
+    expect(screen.getByText("NAME PIECE LOST · FULL · USE SHIFT")).toBeVisible();
   });
 
   it("pauses and resumes from real buttons", async () => {
@@ -210,7 +210,7 @@ describe("GameplayScreen", () => {
 
     expect(screen.getByText("PLACE THE O")).toBeInTheDocument();
     expect(
-      screen.getByRole("grid", { name: "Name stencil for HARSH" }),
+      screen.getByRole("grid", { name: "Name outline for HARSH" }),
     ).toBeInTheDocument();
 
     fireEvent.keyDown(game, { key: "Enter" });
@@ -219,7 +219,7 @@ describe("GameplayScreen", () => {
     expect(screen.getByTestId("transfers")).toHaveTextContent("0");
   });
 
-  it("locks the usable part of a piece and explains what will be trimmed", () => {
+  it("locks the usable part of a piece and explains what will be lost", () => {
     const initialSession = {
       ...createBoardSession(["O", "I", "T", "J"]),
       transferCount: 1,
@@ -231,8 +231,8 @@ describe("GameplayScreen", () => {
 
     fireEvent.keyDown(game, { key: "Shift" });
 
-    expect(screen.getByText("1 CELL KEPT · 3 TRIMMED")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "LOCK & TRIM · ENTER" })).toBeEnabled();
+    expect(screen.getByText("1 kept, 3 lost")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "LOCK · ENTER" })).toBeEnabled();
 
     fireEvent.keyDown(game, { key: "Enter" });
 
@@ -282,7 +282,7 @@ describe("GameplayScreen", () => {
     };
 
     render(<GameplayScreen initialSession={initialSession} />);
-    const routeButton = screen.getByRole("button", { name: "Route O to stencil" });
+    const routeButton = screen.getByRole("button", { name: "Send O" });
 
     expect(routeButton).toBeEnabled();
     await user.click(routeButton);
@@ -306,8 +306,8 @@ describe("GameplayScreen", () => {
     expect(screen.getByTestId("route-zone-label")).toHaveTextContent(
       /SLOW ZONE\s*FULL BANK · 50%/,
     );
-    expect(screen.getByText("TRANSFER BANK FULL · ROUTE A PIECE")).toBeVisible();
-    expect(screen.getByText("Extra line clears cannot add transfers.")).toBeVisible();
+    expect(screen.getByText("NAME PIECES FULL · SEND ONE")).toBeVisible();
+    expect(screen.getByText("Extra line clears cannot add name pieces.")).toBeVisible();
   });
 
   it("enables finish at exact 80% without interrupting board input", async () => {
@@ -339,5 +339,17 @@ describe("GameplayScreen", () => {
     await user.click(finish);
     await waitFor(() => expect(onWon).toHaveBeenCalledOnce());
     expect(onWon.mock.calls[0]?.[0]).toMatchObject({ displayPercent: 80 });
+  });
+
+  it("explains Shift when there are no name pieces yet", () => {
+    render(<GameplayScreen seed={7} />);
+
+    expect(screen.getByRole("button", { name: "Clear a row first" })).toBeEnabled();
+    fireEvent.keyDown(screen.getByRole("application"), { key: "Shift" });
+
+    expect(screen.getByTestId("empty-send-notice")).toHaveTextContent(
+      "No name pieces yet. Clear a row first.",
+    );
+    expect(screen.getByTestId("empty-send-notice")).toHaveClass("is-flash");
   });
 });

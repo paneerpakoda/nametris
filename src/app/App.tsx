@@ -1,6 +1,11 @@
 import { useState } from "react";
 
 import { GameplayScreen } from "../features/gameplay/GameplayScreen";
+import { HowItWorks } from "../features/onboarding/HowItWorks";
+import {
+  hasSeenHowItWorks,
+  markHowItWorksSeen,
+} from "../features/onboarding/howItWorksStorage";
 import { WelcomeScreen } from "../features/onboarding/WelcomeScreen";
 import { LossScreen } from "../features/results/LossScreen";
 import { SuccessScreen } from "../features/results/SuccessScreen";
@@ -18,6 +23,7 @@ export function App({ initialOutcome }: AppProps) {
     initialOutcome ?? null,
   );
   const [runNumber, setRunNumber] = useState(0);
+  const [showIntro, setShowIntro] = useState(false);
 
   function playAgain() {
     setRunNumber((current) => current + 1);
@@ -45,6 +51,17 @@ export function App({ initialOutcome }: AppProps) {
     );
   }
 
+  if (sessionName !== null && showIntro) {
+    return (
+      <HowItWorks
+        onDone={() => {
+          markHowItWorksSeen();
+          setShowIntro(false);
+        }}
+      />
+    );
+  }
+
   if (sessionName !== null) {
     return (
       <GameplayScreen
@@ -62,6 +79,7 @@ export function App({ initialOutcome }: AppProps) {
       onStart={(name) => {
         setOutcome(null);
         setSessionName(name);
+        setShowIntro(!hasSeenHowItWorks());
       }}
     />
   );

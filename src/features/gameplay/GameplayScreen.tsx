@@ -22,6 +22,7 @@ import {
   type LossResult,
   type RunResult,
 } from "../../game/engine/result";
+import { HowItWorks } from "../onboarding/HowItWorks";
 import { BoardGrid } from "./BoardGrid";
 import { GameHelpDialog } from "./GameHelpDialog";
 import { GameSidebar } from "./GameSidebar";
@@ -89,6 +90,10 @@ export function GameplayScreen({
   const lineClearFeedbackSequenceRef = useRef(0);
   const [hardDropImpact, setHardDropImpact] = useState<HardDropImpact>("idle");
   const [helpOpen, setHelpOpen] = useState(false);
+  const [howItWorksOpen, setHowItWorksOpen] = useState(false);
+  const [coachReplay, setCoachReplay] = useState(0);
+  const [emptySendId, setEmptySendId] = useState(0);
+  const [emptySendFlash, setEmptySendFlash] = useState(false);
   const pauseResumeRef = useRef<HTMLButtonElement>(null);
   const ghostPiece = getGhostPiece(state.board, state.activePiece);
   const canRoute = canRouteActivePiece(state);
@@ -153,32 +158,33 @@ export function GameplayScreen({
         bankCount: state.transferCount,
       });
 
+      const pieceWord = (amount: number) =>
+        amount === 1 ? "name piece" : "name pieces";
+
       if (transfersWasted > 0) {
         const linePhrase = `${count} ${count === 1 ? "line" : "lines"} cleared.`;
-        const wastedPhrase = `${transfersWasted} ${
-          transfersWasted === 1 ? "transfer" : "transfers"
-        } wasted`;
+        const wastedPhrase = `${transfersWasted} ${pieceWord(transfersWasted)} lost`;
 
         if (transfersStored > 0) {
           setAnnouncement(
-            `${linePhrase} ${transfersStored} ${
-              transfersStored === 1 ? "transfer" : "transfers"
-            } earned and stored. ${wastedPhrase} because the bank reached ${maximumTransferCount}. Use Shift before your next clear.`,
+            `${linePhrase} ${transfersStored} ${pieceWord(
+              transfersStored,
+            )} earned and stored. ${wastedPhrase} because you already have ${maximumTransferCount}. Use Shift before your next clear.`,
           );
         } else {
           setAnnouncement(
-            `${linePhrase} ${wastedPhrase} because the bank was already full at ${maximumTransferCount}. Use Shift before your next clear.`,
+            `${linePhrase} ${wastedPhrase} because you already have ${maximumTransferCount}. Use Shift before your next clear.`,
           );
         }
       } else {
         const fullBankPrompt =
           state.transferCount === maximumTransferCount
-            ? ` Transfer bank full at ${maximumTransferCount}. Use Shift before clearing more.`
+            ? ` You have ${maximumTransferCount} name pieces. Use Shift before clearing more.`
             : "";
         setAnnouncement(
-          `${count} ${count === 1 ? "line" : "lines"} cleared. ${transfersStored} ${
-            transfersStored === 1 ? "transfer" : "transfers"
-          } earned.${fullBankPrompt}`,
+          `${count} ${count === 1 ? "line" : "lines"} cleared. ${transfersStored} ${pieceWord(
+            transfersStored,
+          )} earned.${fullBankPrompt}`,
         );
       }
     } else if (state.canFinish && !previous.canFinish) {
@@ -267,10 +273,37 @@ export function GameplayScreen({
     if (action.type === "hard-drop") {
       setHardDropImpact((current) => (current === "a" ? "b" : "a"));
     }
+    if (action.type === "route-to-stencil" && state.transferCount === 0) {
+      setEmptySendId((current) => current + 1);
+      setEmptySendFlash(
+        !(
+          typeof window.matchMedia === "function" &&
+          window.matchMedia("(prefers-reduced-motion: reduce)").matches
+        ),
+      );
+      setAnnouncement("No name pieces yet. Clear a row first.");
+    }
     dispatch(action);
   }
 
+  useEffect(() => {
+    if (emptySendId === 0) {
+      return;
+    }
+
+    const flashTimer = window.setTimeout(() => setEmptySendFlash(false), 150);
+    const hideTimer = window.setTimeout(() => setEmptySendId(0), 1_500);
+    return () => {
+      window.clearTimeout(flashTimer);
+      window.clearTimeout(hideTimer);
+    };
+  }, [emptySendId]);
+
   function handleKeyDown(event: React.KeyboardEvent<HTMLDivElement>) {
+    if (helpOpen || howItWorksOpen) {
+      return;
+    }
+
     const action = getGameAction(event.key, state.phase);
 
     if (action === null) {
@@ -306,7 +339,7 @@ export function GameplayScreen({
   const controlDeck = (
     <ControlDeck
       phase={state.phase}
-      canRoute={canRoute}
+      canRoute={state.transferCount === 0 || canRoute}
       canLock={canLock}
       onInput={helpOpen ? undefined : handleCabinetInput}
     />
@@ -326,12 +359,13 @@ export function GameplayScreen({
           </div>
           <RunGuidance
             state={state}
+            replayKey={coachReplay}
             onDismiss={() =>
               window.requestAnimationFrame(() => gameRef.current?.focus())
             }
           />
           <span className="game-mode-label">
-            {state.phase === "placing-stencil" ? "NAME ROUTING" : "CLEAR / BUILD"}
+            {state.phase === "placing-stencil" ? "YOUR NAME" : "CLEAR / BUILD"}
           </span>
         </header>
 
@@ -374,11 +408,36 @@ export function GameplayScreen({
             onStencilCancel={() => handleCabinetInput("Escape")}
             onFinish={() => performPlayerAction({ type: "finish-run" })}
             onHelp={openHelp}
+            emptySendNotice={emptySendId !== 0}
+            emptySendFlash={emptySendFlash}
           />
 
-          {helpOpen && <GameHelpDialog onClose={closeHelp} />}
+          {helpOpen && (
+            <GameHelpDialog
+              onClose={closeHelp}
+              onShowHowItWorks={() => {
+                setHelpOpen(false);
+                setHowItWorksOpen(true);
+              }}
+              onShowHints={() => {
+                setCoachReplay((current) => current + 1);
+                closeHelp();
+              }}
+            />
+          )}
 
-          {state.phase === "paused" && !helpOpen && (
+          {howItWorksOpen && (
+            <HowItWorks
+              overlay
+              onDone={() => {
+                setHowItWorksOpen(false);
+                dispatch({ type: "resume" });
+                window.requestAnimationFrame(() => gameRef.current?.focus());
+              }}
+            />
+          )}
+
+          {state.phase === "paused" && !helpOpen && !howItWorksOpen && (
             <div
               className="game-overlay"
               role="dialog"

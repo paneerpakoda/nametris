@@ -20,7 +20,9 @@ async function openWelcome(page: Page) {
 
 async function startRun(page: Page) {
   await openWelcome(page);
+  await page.getByLabel("Your name").fill("JO");
   await page.getByRole("button", { name: "Start building" }).click();
+  await page.getByRole("button", { name: "Skip" }).click();
   await waitForDisplay(page, "Gameplay display");
   await page.waitForFunction(() => window.__NAMETRIS_E2E__ !== undefined);
 }
@@ -55,7 +57,9 @@ test("welcome cabinet", async ({ page }) => {
 
 test("normal gameplay cabinet", async ({ page }) => {
   await startRun(page);
-  await expect(page.getByText("CLEAR LINES → EARN TRANSFERS")).toBeVisible();
+  await expect(
+    page.getByText("Fill a row to clear it. Each clear gives you a name piece."),
+  ).toBeVisible();
   await expectCabinetScreenshot(page, "gameplay-normal.png");
 });
 
@@ -65,7 +69,7 @@ test("non-blocking line-clear receipt cabinet", async ({ page }) => {
   await page.getByRole("button", { name: "Hard drop" }).click();
   const feedback = page.getByTestId("line-clear-feedback");
   await expect(feedback.getByText("1 ROW CLEARED")).toBeVisible();
-  await expect(feedback.getByText("+1 TRANSFER · BANK 1/3")).toBeVisible();
+  await expect(feedback.getByText("+1 NAME PIECE · 1/3")).toBeVisible();
 
   const boardBox = await page.locator(".board-frame").boundingBox();
   const feedbackBox = await feedback.boundingBox();
@@ -81,7 +85,11 @@ test("transfer-ready cabinet", async ({ page }) => {
   await startRun(page);
   await loadFixture(page, "route-return");
   await expect(page.getByTestId("transfers")).toHaveText("1 / 3");
-  await expect(page.getByText("TRANSFER READY → ROUTE WITH SHIFT")).toBeVisible();
+  await expect(
+    page.getByText(
+      "You earned a name piece. Press Shift while the piece is still above the blue line.",
+    ),
+  ).toBeVisible();
   await expectCabinetScreenshot(page, "gameplay-transfer-ready.png");
 });
 
@@ -99,15 +107,19 @@ test("full transfer bank cabinet", async ({ page }) => {
   expect((zoneLabelBox?.y ?? 0) + (zoneLabelBox?.height ?? 0)).toBeLessThanOrEqual(
     boardGridBox?.y ?? 0,
   );
-  await expect(page.getByText("TRANSFER BANK FULL → BUILD YOUR NAME")).toBeVisible();
+  await expect(page.getByText("NAME PIECES FULL · SEND ONE")).toBeVisible();
   await expectCabinetScreenshot(page, "gameplay-transfer-full.png");
 });
 
 test("stencil placement cabinet", async ({ page }) => {
   await startRun(page);
   await loadFixture(page, "route-return");
-  await page.getByRole("button", { name: "Route piece to name" }).click();
-  await expect(page.getByText("STENCIL MODE → PLACE, TRIM, OR CANCEL")).toBeVisible();
+  await page.getByRole("button", { name: "Send" }).click();
+  await expect(
+    page.getByText(
+      "Move it onto your name and press Enter. Parts outside the outline are lost. Esc keeps the piece.",
+    ),
+  ).toBeVisible();
   await expect(page.getByRole("heading", { name: "PLACE THE O" })).toBeVisible();
   await expectCabinetScreenshot(page, "gameplay-stencil-placement.png");
 });

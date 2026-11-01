@@ -44,11 +44,17 @@ describe("App", () => {
     expect(screen.getByText("Your name stays on this device.")).toBeInTheDocument();
   });
 
-  it("starts a playable board from the welcome action", async () => {
+  it("shows how it works on the first start, then a playable board", async () => {
     const user = userEvent.setup();
     render(<App />);
 
+    await user.type(screen.getByLabelText("Your name"), "JO");
     await user.click(screen.getByRole("button", { name: "Start building" }));
+    expect(
+      screen.getByRole("heading", { name: "Fill your name to 80% to win." }),
+    ).toBeVisible();
+
+    await user.click(screen.getByRole("button", { name: "Skip" }));
 
     expect(
       screen.getByRole("grid", { name: "Normal Tetris board" }),
@@ -62,7 +68,7 @@ describe("App", () => {
     await user.click(screen.getByRole("button", { name: "Play again" }));
 
     expect(
-      screen.getByRole("grid", { name: "Name stencil for HARSH" }),
+      screen.getByRole("grid", { name: "Name outline for HARSH" }),
     ).toBeInTheDocument();
   });
 
@@ -73,6 +79,6 @@ describe("App", () => {
     await user.click(screen.getByRole("button", { name: "Try another name" }));
 
     expect(screen.getByRole("heading", { name: "NAMETRIS" })).toBeInTheDocument();
-    expect(screen.getByLabelText("Your name (optional)")).toHaveValue("");
+    expect(screen.getByLabelText("Your name")).toHaveValue("");
   });
 });

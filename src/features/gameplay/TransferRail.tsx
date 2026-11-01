@@ -19,8 +19,8 @@ export function TransferRail({
   const isFull = transferCount >= maximumTransferCount;
 
   return (
-    <aside className="transfer-rail" aria-label="Transfer bank and next piece">
-      <div className="transfer-arrows" aria-label={`${transferCount} transfers stored`}>
+    <aside className="transfer-rail" aria-label="Name pieces and next piece">
+      <div className="transfer-arrows" aria-label={`${transferCount} name pieces`}>
         {Array.from({ length: maximumTransferCount }, (_, index) => (
           <span
             className="transfer-arrow"
@@ -42,11 +42,11 @@ export function TransferRail({
         className={`rail-transfer-metric${isFull ? " is-transfer-full" : ""}`}
         data-testid="transfer-metric"
         data-status={isFull ? "full" : "available"}
-        aria-label={`Transfers: ${transferCount} of ${maximumTransferCount}${
-          isFull ? ". Bank full; route a piece." : ""
+        aria-label={`Name pieces: ${transferCount} of ${maximumTransferCount}${
+          isFull ? ". Send one." : ""
         }`}
       >
-        <span>TRANSFERS</span>
+        <span>NAME PIECES</span>
         <strong data-testid="transfers">
           {transferCount} <small>/ {maximumTransferCount}</small>
         </strong>

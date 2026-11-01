@@ -45,7 +45,7 @@ export function BoardGrid({
         data-testid="route-zone-label"
         aria-hidden="true"
       >
-        <strong>{slowZoneActive ? "SLOW ZONE" : "ROUTE ZONE"}</strong>
+        <strong>{slowZoneActive ? "SLOW ZONE" : "SEND ZONE"}</strong>
         <small>
           {slowZoneActive
             ? "FULL BANK · 50%"
@@ -62,7 +62,7 @@ export function BoardGrid({
         aria-colcount={10}
       >
         <span className="transfer-route-deadline" aria-hidden="true">
-          <small>ROUTE DEADLINE</small>
+          <small>SEND LINE</small>
         </span>
         {board.slice(HIDDEN_BOARD_ROWS).map((row, visibleRow) =>
           row.map((lockedPiece, column) => {

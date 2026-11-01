@@ -2,6 +2,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
+import { howItWorksSeenKey } from "../features/onboarding/howItWorksStorage";
 import { App } from "./App";
 
 describe("player-name privacy boundary", () => {
@@ -17,13 +18,20 @@ describe("player-name privacy boundary", () => {
     const consoleError = vi.spyOn(console, "error").mockImplementation(() => undefined);
 
     render(<App />);
-    await user.type(screen.getByLabelText("Your name (optional)"), "Private");
+    await user.type(screen.getByLabelText("Your name"), "Private");
     await user.click(screen.getByRole("button", { name: "Start building" }));
+    await user.click(screen.getByRole("button", { name: "Skip" }));
 
     expect(
-      screen.getByRole("grid", { name: "Name stencil for PRIVATE" }),
+      screen.getByRole("grid", { name: "Name outline for PRIVATE" }),
     ).toBeInTheDocument();
-    expect(storageWrite).not.toHaveBeenCalled();
+    const storedKeys = storageWrite.mock.calls.map(([key]) => key);
+    if (storedKeys.length > 0) {
+      expect(storedKeys).toEqual([howItWorksSeenKey]);
+    }
+    expect(localStorage.getItem(howItWorksSeenKey)).toBe("1");
+    expect(localStorage.getItem("nametris.playerName")).toBeNull();
+    expect(localStorage.length).toBe(1);
     expect(pushState).not.toHaveBeenCalled();
     expect(replaceState).not.toHaveBeenCalled();
     expect(xhrOpen).not.toHaveBeenCalled();

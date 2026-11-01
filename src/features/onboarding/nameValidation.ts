@@ -2,19 +2,22 @@ export type NameValidationResult =
   | { readonly valid: true; readonly name: string }
   | { readonly valid: false; readonly message: string };
 
-const invalidNameMessage = "Use 2–10 English letters without spaces or symbols.";
+export const nameRuleMessage = "Letters A-Z only (2-10)";
+export const nameLengthLimit = 10;
+
+export function lettersOnlyName(input: string): string {
+  return input
+    .toUpperCase()
+    .replace(/[^A-Z]/g, "")
+    .slice(0, nameLengthLimit);
+}
 
 export function validatePlayerName(input: string): NameValidationResult {
-  const trimmed = input.trim();
+  const name = lettersOnlyName(input);
 
-  if (trimmed === "") {
-    return { valid: true, name: "HARSH" };
+  if (!/^[A-Z]{2,10}$/.test(name)) {
+    return { valid: false, message: nameRuleMessage };
   }
 
-  const normalized = trimmed.toUpperCase();
-  if (!/^[A-Z]{2,10}$/.test(normalized)) {
-    return { valid: false, message: invalidNameMessage };
-  }
-
-  return { valid: true, name: normalized };
+  return { valid: true, name };
 }

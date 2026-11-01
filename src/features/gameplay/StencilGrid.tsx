@@ -41,7 +41,7 @@ export function StencilGrid({ name, stencil, activePiece }: StencilGridProps) {
         className="stencil-grid"
         style={style}
         role="grid"
-        aria-label={`Name stencil for ${name}`}
+        aria-label={`Name outline for ${name}`}
         aria-rowcount={stencil.rows}
         aria-colcount={stencil.columns}
       >
@@ -57,7 +57,7 @@ export function StencilGrid({ name, stencil, activePiece }: StencilGridProps) {
             : isPreview
               ? keptCellKeys.has(key)
                 ? "preview-valid"
-                : "preview-trimmed"
+                : "preview-lost"
               : isMaskCell
                 ? "open"
                 : "void";
@@ -66,7 +66,9 @@ export function StencilGrid({ name, stencil, activePiece }: StencilGridProps) {
             <span
               key={key}
               role="gridcell"
-              aria-label={`Stencil row ${row + 1}, column ${column + 1}, ${status}`}
+              aria-label={`Name outline row ${row + 1}, column ${column + 1}, ${
+                status === "preview-lost" ? "lost" : status
+              }`}
               className="stencil-cell"
               data-testid="stencil-cell"
               data-status={status}
