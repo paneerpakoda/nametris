@@ -24,7 +24,7 @@ export function LossScreen({ result, onPlayAgain, onNewName }: LossScreenProps) 
           <h1>STACK OVERFLOW</h1>
           <p className="loss-name">{result.name}</p>
           <p className="loss-message">
-            The stack reached the top before you claimed the name. The stencil still
+            The stack reached the top before you claimed the name. Your name still
             reached:
           </p>
           <strong className="loss-progress">{result.displayPercent}%</strong>

@@ -5,11 +5,13 @@ test("keeps core CRT copy legible and high contrast", async ({ page }) => {
   await expect(page.getByRole("region", { name: "Welcome display" })).toBeVisible();
   expect(
     await page
-      .locator(".field-help")
+      .locator(".privacy-note")
       .evaluate((element) => Number.parseFloat(getComputedStyle(element).fontSize)),
   ).toBeGreaterThanOrEqual(10);
 
+  await page.getByLabel("Your name").fill("JO");
   await page.getByRole("button", { name: "Start building" }).click();
+  await page.getByRole("button", { name: "Skip" }).click();
   await expect(page.getByRole("region", { name: "Gameplay display" })).toBeVisible();
   const coreFontSizes = await page
     .locator(
@@ -76,10 +78,10 @@ test("completes onboarding, pause, finish, and replay with keyboard input", asyn
   await expect(page.getByRole("region", { name: "Welcome display" })).toBeVisible();
 
   await page.keyboard.press("Tab");
-  await expect(
-    page.getByRole("textbox", { name: "Your name (optional)" }),
-  ).toBeFocused();
+  await expect(page.getByRole("textbox", { name: "Your name" })).toBeFocused();
+  await page.keyboard.type("JO");
   await page.keyboard.press("Enter");
+  await page.getByRole("button", { name: "Skip" }).click();
 
   const game = page.getByRole("application", { name: "Nametris game" });
   await expect(game).toBeFocused();
@@ -91,7 +93,7 @@ test("completes onboarding, pause, finish, and replay with keyboard input", asyn
   const resume = page.getByRole("button", { name: "Resume game" });
   await expect(resume).toBeFocused();
   await page.keyboard.press("Tab");
-  await expect(resume).toBeFocused();
+  await expect(page.getByRole("button", { name: "Restart run" })).toBeFocused();
   await page.keyboard.press("p");
   await expect(game).toBeFocused();
 

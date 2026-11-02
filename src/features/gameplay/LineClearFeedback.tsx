@@ -20,11 +20,11 @@ export function LineClearFeedback({ event }: LineClearFeedbackProps) {
   } CLEARED`;
   const detail = hasWaste
     ? event.transfersStored > 0
-      ? `+${event.transfersStored} BANKED · ${event.transfersWasted} LOST · BANK FULL`
-      : `${event.transfersWasted === 1 ? "TRANSFER" : "TRANSFERS"} LOST · BANK FULL · USE SHIFT`
+      ? `+${event.transfersStored} STORED · ${event.transfersWasted} LOST · FULL`
+      : `${event.transfersWasted === 1 ? "NAME PIECE" : "NAME PIECES"} LOST · FULL · USE SHIFT`
     : `+${event.transfersStored} ${
-        event.transfersStored === 1 ? "TRANSFER" : "TRANSFERS"
-      } · BANK ${event.bankCount}/${maximumTransferCount}`;
+        event.transfersStored === 1 ? "NAME PIECE" : "NAME PIECES"
+      } · ${event.bankCount}/${maximumTransferCount}`;
 
   return (
     <div

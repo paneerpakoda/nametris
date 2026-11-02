@@ -4,6 +4,8 @@ import { KeyHint } from "../../components/KeyHint";
 
 interface GameHelpDialogProps {
   readonly onClose: () => void;
+  readonly onShowHowItWorks?: () => void;
+  readonly onShowHints?: () => void;
 }
 
 interface HelpControl {
@@ -17,7 +19,7 @@ const boardControls = [
   { keys: ["SPACE"], label: "Hard drop" },
   { keys: ["↑", "X"], label: "Rotate clockwise" },
   { keys: ["Z"], label: "Rotate counter-clockwise" },
-  { keys: ["SHIFT"], label: "Route before the cyan deadline" },
+  { keys: ["SHIFT"], label: "Send a name piece before the send line" },
   { keys: ["P", "ESC"], label: "Pause" },
 ] as const satisfies readonly HelpControl[];
 
@@ -25,11 +27,15 @@ const stencilControls = [
   { keys: ["ARROWS", "WASD"], label: "Move in four directions" },
   { keys: ["X"], label: "Rotate clockwise" },
   { keys: ["Z"], label: "Rotate counter-clockwise" },
-  { keys: ["ENTER", "SPACE"], label: "Lock; outside cells are trimmed" },
-  { keys: ["ESC"], label: "Cancel and preserve the transfer" },
+  { keys: ["ENTER", "SPACE"], label: "Lock; parts outside the outline are lost" },
+  { keys: ["ESC"], label: "Cancel and keep the name piece" },
 ] as const satisfies readonly HelpControl[];
 
-export function GameHelpDialog({ onClose }: GameHelpDialogProps) {
+export function GameHelpDialog({
+  onClose,
+  onShowHowItWorks,
+  onShowHints,
+}: GameHelpDialogProps) {
   const titleId = useId();
   const descriptionId = useId();
   const closeRef = useRef<HTMLButtonElement>(null);
@@ -62,15 +68,31 @@ export function GameHelpDialog({ onClose }: GameHelpDialogProps) {
         <p className="panel-kicker">QUICK REFERENCE</p>
         <h2 id={titleId}>How to play Nametris</h2>
         <p id={descriptionId} className="help-intro">
-          Clear full rows to earn and bank up to three transfers, then press Shift
-          before a piece crosses the cyan route deadline. In the stencil, any part
-          outside an open NAME cell is trimmed. At 80% you may finish safely; 100% earns
-          a perfect result.
+          Clear a full row to earn a name piece. You can hold up to three. Press Shift
+          to send one onto your name while it is still above the send line. Parts
+          outside the outline are lost. At 80% you may finish; 100% finishes on its own.
         </p>
 
         <div className="help-columns">
           <HelpSection title="Tetris board" controls={boardControls} />
-          <HelpSection title="Name stencil" controls={stencilControls} />
+          <HelpSection title="Your name" controls={stencilControls} />
+        </div>
+
+        <div className="help-extra">
+          {onShowHowItWorks !== undefined && (
+            <button
+              type="button"
+              className="secondary-button"
+              onClick={onShowHowItWorks}
+            >
+              How it works
+            </button>
+          )}
+          {onShowHints !== undefined && (
+            <button type="button" className="secondary-button" onClick={onShowHints}>
+              Show hints
+            </button>
+          )}
         </div>
 
         <button

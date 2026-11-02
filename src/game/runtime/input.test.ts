@@ -52,4 +52,10 @@ describe("game keyboard input", () => {
       type: "stencil-cancel",
     });
   });
+
+  it("resumes a paused run from Escape or P, and leaves Enter for the menu", () => {
+    expect(getGameAction("Escape", "paused")).toEqual({ type: "resume" });
+    expect(getGameAction("p", "paused")).toEqual({ type: "resume" });
+    expect(getGameAction("Enter", "paused")).toBeNull();
+  });
 });

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useReducer, useRef, useState } from "react";
 
 import { CabinetShell } from "../../components/CabinetShell";
 import { ControlDeck } from "../../components/ControlDeck";
+import { TouchPad } from "../../components/TouchPad";
 import { NametrisMark } from "../../components/NametrisMark";
 import { maximumTransferCount } from "../../game/config/gameplay";
 import { createPieceQueue, createSeededRandom } from "../../game/engine/bag";
@@ -22,10 +23,24 @@ import {
   type LossResult,
   type RunResult,
 } from "../../game/engine/result";
+import { HowItWorks } from "../onboarding/HowItWorks";
 import { BoardGrid } from "./BoardGrid";
 import { GameHelpDialog } from "./GameHelpDialog";
 import { GameSidebar } from "./GameSidebar";
-import type { LineClearFeedbackEvent } from "./LineClearFeedback";
+import { LineClearFeedback, type LineClearFeedbackEvent } from "./LineClearFeedback";
+import {
+  addedFilledKeys,
+  clearedVisibleRows,
+  ghostLocksTooHigh,
+  hardDropTrailKeys,
+  lineClearReducedMilliseconds,
+  lineClearVisibleMilliseconds,
+  namePopMilliseconds,
+  pieceCellKeys,
+  prefersReducedMotion,
+  softLockFlashMilliseconds,
+  hardDropTrailMilliseconds,
+} from "./motion";
 import { RunGuidance } from "./RunGuidance";
 import { TransferRail } from "./TransferRail";
 import "../../styles/gameplay.css";
@@ -36,11 +51,24 @@ interface GameplayScreenProps {
   readonly initialSession?: BoardSession;
   readonly onWon?: (result: RunResult) => void;
   readonly onLost?: (result: LossResult) => void;
+  readonly onRestart?: () => void;
+  readonly onNewName?: () => void;
 }
 
 const clockResolutionMilliseconds = 50;
-const lineClearFeedbackDurationMilliseconds = 3_500;
 type HardDropImpact = "idle" | "a" | "b";
+
+interface ClearFx {
+  readonly id: number;
+  readonly rows: readonly number[];
+  readonly scoreDelta: number;
+  readonly showToken: boolean;
+}
+
+interface CellFlash {
+  readonly id: number;
+  readonly keys: ReadonlySet<string>;
+}
 
 type GameplayAction =
   | BoardAction
@@ -68,6 +96,8 @@ export function GameplayScreen({
   initialSession,
   onWon,
   onLost,
+  onRestart,
+  onNewName,
 }: GameplayScreenProps) {
   const queue = useMemo(() => createPieceQueue(createSeededRandom(seed), 100), [seed]);
   const startingSession = useMemo(
@@ -88,27 +118,92 @@ export function GameplayScreen({
     useState<LineClearFeedbackEvent | null>(null);
   const lineClearFeedbackSequenceRef = useRef(0);
   const [hardDropImpact, setHardDropImpact] = useState<HardDropImpact>("idle");
+  const [clearFx, setClearFx] = useState<ClearFx | null>(null);
+  const [lockFlash, setLockFlash] = useState<CellFlash | null>(null);
+  const [dropTrail, setDropTrail] = useState<CellFlash | null>(null);
+  const [popKeys, setPopKeys] = useState<ReadonlySet<string>>(() => new Set());
+  const motionSnapshot = useRef({
+    board: state.board,
+    piece: state.activePiece,
+    score: state.score,
+    queueLength: state.pieceQueue.length,
+    filled: new Set(state.stencil.filledCells.keys()),
+    linesCleared: state.linesCleared,
+    transferCount: state.transferCount,
+  });
+  const pendingHardDrop = useRef(false);
+  const motionId = useRef(0);
   const [helpOpen, setHelpOpen] = useState(false);
+  const [howItWorksOpen, setHowItWorksOpen] = useState(false);
+  const [coachReplay, setCoachReplay] = useState(0);
+  const [emptySendId, setEmptySendId] = useState(0);
+  const [emptySendFlash, setEmptySendFlash] = useState(false);
+  const [finishPromptDismissed, setFinishPromptDismissed] = useState(false);
+  const [restartConfirm, setRestartConfirm] = useState(false);
   const pauseResumeRef = useRef<HTMLButtonElement>(null);
+  const confirmYesRef = useRef<HTMLButtonElement>(null);
+  const pauseMenuRef = useRef<HTMLDivElement>(null);
+  const onWindowKeyRef = useRef<(event: KeyboardEvent) => void>(() => undefined);
+  const handledKeys = useRef(new WeakSet<Event>());
   const ghostPiece = getGhostPiece(state.board, state.activePiece);
+  const tooHigh =
+    (state.phase === "playing" || state.phase === "placing-stencil") &&
+    ghostLocksTooHigh(ghostPiece);
+  const tokenRow =
+    clearFx !== null && clearFx.showToken && !prefersReducedMotion()
+      ? (clearFx.rows.at(-1) ?? null)
+      : null;
   const canRoute = canRouteActivePiece(state);
   const slowZoneActive = state.transferCount >= maximumTransferCount && canRoute;
   const canLock =
     state.stencilPiece !== null &&
     getStencilPieceProjection(state.stencil, state.stencilPiece).keptCellKeys.size > 0;
+  const finishPromptOpen =
+    state.canFinish &&
+    !finishPromptDismissed &&
+    (state.phase === "playing" || state.phase === "placing-stencil") &&
+    !helpOpen &&
+    !howItWorksOpen;
 
   useEffect(() => {
     gameRef.current?.focus();
   }, []);
 
   useEffect(() => {
-    if (state.phase !== "paused" || helpOpen) {
+    if (state.phase !== "paused" || helpOpen || howItWorksOpen) {
       return;
     }
 
-    const frame = window.requestAnimationFrame(() => pauseResumeRef.current?.focus());
+    const frame = window.requestAnimationFrame(() => {
+      (restartConfirm ? confirmYesRef : pauseResumeRef).current?.focus();
+    });
     return () => window.cancelAnimationFrame(frame);
-  }, [helpOpen, state.phase]);
+  }, [helpOpen, howItWorksOpen, restartConfirm, state.phase]);
+
+  useEffect(() => {
+    const listener = (event: KeyboardEvent) => {
+      onWindowKeyRef.current(event);
+    };
+    window.addEventListener("keydown", listener, true);
+    return () => window.removeEventListener("keydown", listener, true);
+  }, []);
+
+  useEffect(() => {
+    const runInProgress =
+      state.phase === "playing" ||
+      state.phase === "placing-stencil" ||
+      state.phase === "paused";
+    if (!runInProgress) {
+      return;
+    }
+
+    const warnBeforeUnload = (event: BeforeUnloadEvent) => {
+      event.preventDefault();
+      event.returnValue = "";
+    };
+    window.addEventListener("beforeunload", warnBeforeUnload);
+    return () => window.removeEventListener("beforeunload", warnBeforeUnload);
+  }, [state.phase]);
 
   useEffect(() => {
     if (import.meta.env.VITE_NAMETRIS_E2E !== "true") {
@@ -153,32 +248,33 @@ export function GameplayScreen({
         bankCount: state.transferCount,
       });
 
+      const pieceWord = (amount: number) =>
+        amount === 1 ? "name piece" : "name pieces";
+
       if (transfersWasted > 0) {
         const linePhrase = `${count} ${count === 1 ? "line" : "lines"} cleared.`;
-        const wastedPhrase = `${transfersWasted} ${
-          transfersWasted === 1 ? "transfer" : "transfers"
-        } wasted`;
+        const wastedPhrase = `${transfersWasted} ${pieceWord(transfersWasted)} lost`;
 
         if (transfersStored > 0) {
           setAnnouncement(
-            `${linePhrase} ${transfersStored} ${
-              transfersStored === 1 ? "transfer" : "transfers"
-            } earned and stored. ${wastedPhrase} because the bank reached ${maximumTransferCount}. Use Shift before your next clear.`,
+            `${linePhrase} ${transfersStored} ${pieceWord(
+              transfersStored,
+            )} earned and stored. ${wastedPhrase} because you already have ${maximumTransferCount}. Use Shift before your next clear.`,
           );
         } else {
           setAnnouncement(
-            `${linePhrase} ${wastedPhrase} because the bank was already full at ${maximumTransferCount}. Use Shift before your next clear.`,
+            `${linePhrase} ${wastedPhrase} because you already have ${maximumTransferCount}. Use Shift before your next clear.`,
           );
         }
       } else {
         const fullBankPrompt =
           state.transferCount === maximumTransferCount
-            ? ` Transfer bank full at ${maximumTransferCount}. Use Shift before clearing more.`
+            ? ` You have ${maximumTransferCount} name pieces. Use Shift before clearing more.`
             : "";
         setAnnouncement(
-          `${count} ${count === 1 ? "line" : "lines"} cleared. ${transfersStored} ${
-            transfersStored === 1 ? "transfer" : "transfers"
-          } earned.${fullBankPrompt}`,
+          `${count} ${count === 1 ? "line" : "lines"} cleared. ${transfersStored} ${pieceWord(
+            transfersStored,
+          )} earned.${fullBankPrompt}`,
         );
       }
     } else if (state.canFinish && !previous.canFinish) {
@@ -212,11 +308,97 @@ export function GameplayScreen({
     }
 
     const timeout = window.setTimeout(
-      () => setLineClearFeedback(null),
-      lineClearFeedbackDurationMilliseconds,
+      () => {
+        setLineClearFeedback(null);
+        setClearFx(null);
+      },
+      prefersReducedMotion()
+        ? lineClearReducedMilliseconds
+        : lineClearVisibleMilliseconds,
     );
     return () => window.clearTimeout(timeout);
   }, [lineClearFeedback]);
+
+  useEffect(() => {
+    const previous = motionSnapshot.current;
+    const hardDrop = pendingHardDrop.current;
+    const queueShrunk = state.pieceQueue.length < previous.queueLength;
+
+    if (state.linesCleared > previous.linesCleared) {
+      const lockedPiece = hardDrop
+        ? getGhostPiece(previous.board, previous.piece)
+        : previous.piece;
+      motionId.current += 1;
+      setClearFx({
+        id: motionId.current,
+        rows: clearedVisibleRows(previous.board, lockedPiece),
+        scoreDelta: state.score - previous.score,
+        showToken: state.transferCount > previous.transferCount,
+      });
+    }
+
+    if (queueShrunk) {
+      motionId.current += 1;
+      if (hardDrop) {
+        const ghost = getGhostPiece(previous.board, previous.piece);
+        setDropTrail({
+          id: motionId.current,
+          keys: new Set(hardDropTrailKeys(previous.piece, ghost.row)),
+        });
+      } else {
+        setLockFlash({
+          id: motionId.current,
+          keys: new Set(pieceCellKeys(previous.piece)),
+        });
+      }
+    }
+
+    const filled = addedFilledKeys(previous.filled, state.stencil.filledCells);
+    if (filled.length > 0) {
+      setPopKeys(new Set(filled));
+    }
+
+    pendingHardDrop.current = false;
+    motionSnapshot.current = {
+      board: state.board,
+      piece: state.activePiece,
+      score: state.score,
+      queueLength: state.pieceQueue.length,
+      filled: new Set(state.stencil.filledCells.keys()),
+      linesCleared: state.linesCleared,
+      transferCount: state.transferCount,
+    };
+  }, [state]);
+
+  useEffect(() => {
+    if (lockFlash === null) {
+      return;
+    }
+    const timeout = window.setTimeout(
+      () => setLockFlash(null),
+      softLockFlashMilliseconds,
+    );
+    return () => window.clearTimeout(timeout);
+  }, [lockFlash]);
+
+  useEffect(() => {
+    if (dropTrail === null) {
+      return;
+    }
+    const timeout = window.setTimeout(
+      () => setDropTrail(null),
+      hardDropTrailMilliseconds,
+    );
+    return () => window.clearTimeout(timeout);
+  }, [dropTrail]);
+
+  useEffect(() => {
+    if (popKeys.size === 0) {
+      return;
+    }
+    const timeout = window.setTimeout(() => setPopKeys(new Set()), namePopMilliseconds);
+    return () => window.clearTimeout(timeout);
+  }, [popKeys]);
 
   useEffect(() => {
     if (state.phase !== "playing" && state.phase !== "placing-stencil") {
@@ -265,14 +447,87 @@ export function GameplayScreen({
     }
 
     if (action.type === "hard-drop") {
+      pendingHardDrop.current = true;
       setHardDropImpact((current) => (current === "a" ? "b" : "a"));
+    }
+    if (action.type === "route-to-stencil" && state.transferCount === 0) {
+      setEmptySendId((current) => current + 1);
+      setEmptySendFlash(
+        !(
+          typeof window.matchMedia === "function" &&
+          window.matchMedia("(prefers-reduced-motion: reduce)").matches
+        ),
+      );
+      setAnnouncement("No name pieces yet. Clear a row first.");
     }
     dispatch(action);
   }
 
-  function handleKeyDown(event: React.KeyboardEvent<HTMLDivElement>) {
-    const action = getGameAction(event.key, state.phase);
+  useEffect(() => {
+    if (emptySendId === 0) {
+      return;
+    }
 
+    const flashTimer = window.setTimeout(() => setEmptySendFlash(false), 150);
+    const hideTimer = window.setTimeout(() => setEmptySendId(0), 1_500);
+    return () => {
+      window.clearTimeout(flashTimer);
+      window.clearTimeout(hideTimer);
+    };
+  }, [emptySendId]);
+
+  function handleWindowKey(event: KeyboardEvent) {
+    if (handledKeys.current.has(event)) {
+      return;
+    }
+    handledKeys.current.add(event);
+
+    if (helpOpen || howItWorksOpen) {
+      return;
+    }
+
+    if (restartConfirm) {
+      if (event.key === "Escape" || event.key.toLowerCase() === "p") {
+        event.preventDefault();
+        event.stopPropagation();
+        setRestartConfirm(false);
+        dispatch({ type: "resume" });
+        window.requestAnimationFrame(() => gameRef.current?.focus());
+      }
+      return;
+    }
+
+    if (state.phase === "paused") {
+      if (event.key === "Escape" || event.key.toLowerCase() === "p") {
+        event.preventDefault();
+        event.stopPropagation();
+        dispatch({ type: "resume" });
+        window.requestAnimationFrame(() => gameRef.current?.focus());
+      }
+      return;
+    }
+
+    if (finishPromptOpen) {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        event.stopPropagation();
+        dispatch({ type: "finish-run" });
+        return;
+      }
+      if (event.key === "Escape") {
+        event.preventDefault();
+        event.stopPropagation();
+        setFinishPromptDismissed(true);
+        return;
+      }
+      const promptedAction = getGameAction(event.key, state.phase);
+      if (promptedAction?.type !== "hard-drop" && promptedAction?.type !== "pause") {
+        event.preventDefault();
+        return;
+      }
+    }
+
+    const action = getGameAction(event.key, state.phase);
     if (action === null) {
       return;
     }
@@ -284,12 +539,46 @@ export function GameplayScreen({
     }
   }
 
+  useEffect(() => {
+    onWindowKeyRef.current = handleWindowKey;
+  });
+
+  function handleKeyDown(event: React.KeyboardEvent<HTMLDivElement>) {
+    handleWindowKey(event.nativeEvent);
+  }
+
   function handleCabinetInput(key: string) {
+    if (document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
     const action = getGameAction(key, state.phase);
     if (action !== null) {
       performPlayerAction(action);
     }
     window.requestAnimationFrame(() => gameRef.current?.focus());
+  }
+
+  function trapPauseTab(event: React.KeyboardEvent<HTMLDivElement>) {
+    if (event.key !== "Tab") {
+      return;
+    }
+
+    const buttons = [
+      ...(pauseMenuRef.current?.querySelectorAll<HTMLButtonElement>("button") ?? []),
+    ];
+    const first = buttons[0];
+    const last = buttons[buttons.length - 1];
+    if (first === undefined || last === undefined) {
+      return;
+    }
+
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
   }
 
   function openHelp() {
@@ -306,7 +595,7 @@ export function GameplayScreen({
   const controlDeck = (
     <ControlDeck
       phase={state.phase}
-      canRoute={canRoute}
+      canRoute={state.transferCount === 0 || canRoute}
       canLock={canLock}
       onInput={helpOpen ? undefined : handleCabinetInput}
     />
@@ -326,13 +615,25 @@ export function GameplayScreen({
           </div>
           <RunGuidance
             state={state}
+            replayKey={coachReplay}
             onDismiss={() =>
               window.requestAnimationFrame(() => gameRef.current?.focus())
             }
           />
           <span className="game-mode-label">
-            {state.phase === "placing-stencil" ? "NAME ROUTING" : "CLEAR / BUILD"}
+            {state.phase === "placing-stencil" ? "YOUR NAME" : "CLEAR / BUILD"}
           </span>
+          <button
+            type="button"
+            className="touch-only touch-pause"
+            aria-label={state.phase === "paused" ? "Touch resume" : "Touch pause"}
+            onPointerDown={(event) => {
+              event.preventDefault();
+              handleCabinetInput("p");
+            }}
+          >
+            {state.phase === "paused" ? "Resume" : "Pause"}
+          </button>
         </header>
 
         <div
@@ -358,13 +659,46 @@ export function GameplayScreen({
               activePiece={state.activePiece}
               ghostPiece={ghostPiece}
               slowZoneActive={slowZoneActive}
+              freezeRemaining={
+                state.phase === "placing-stencil"
+                  ? state.freezeRemainingMilliseconds
+                  : null
+              }
+              clearedRows={clearFx?.rows ?? []}
+              clearing={clearFx !== null && clearFx.rows.length > 0}
+              lockFlashKeys={lockFlash?.keys}
+              lockFlashId={lockFlash?.id}
+              trailKeys={dropTrail?.keys}
+              trailId={dropTrail?.id}
+              tooHigh={tooHigh}
+              tokenRow={tokenRow}
             />
+            {(lineClearFeedback !== null || clearFx !== null) && (
+              <div className="board-feedback">
+                {clearFx !== null && (
+                  <em className="score-delta" data-testid="score-delta">
+                    +{clearFx.scoreDelta}
+                  </em>
+                )}
+                {lineClearFeedback !== null && (
+                  <LineClearFeedback
+                    key={lineClearFeedback.id}
+                    event={lineClearFeedback}
+                  />
+                )}
+              </div>
+            )}
           </section>
 
           <TransferRail
             transferCount={state.transferCount}
             nextPiece={state.nextPiece}
-            feedback={lineClearFeedback}
+            onTouchSend={() => {
+              if (helpOpen || howItWorksOpen || restartConfirm || finishPromptOpen) {
+                return;
+              }
+              handleCabinetInput("Shift");
+            }}
           />
 
           <GameSidebar
@@ -374,39 +708,142 @@ export function GameplayScreen({
             onStencilCancel={() => handleCabinetInput("Escape")}
             onFinish={() => performPlayerAction({ type: "finish-run" })}
             onHelp={openHelp}
+            emptySendNotice={emptySendId !== 0}
+            emptySendFlash={emptySendFlash}
+            scorePop={clearFx !== null}
+            popKeys={popKeys}
           />
 
-          {helpOpen && <GameHelpDialog onClose={closeHelp} />}
+          {state.canFinish && state.phase !== "won" && state.phase !== "lost" && (
+            <p className="finish-banner" data-testid="finish-banner">
+              80% reached
+            </p>
+          )}
 
-          {state.phase === "paused" && !helpOpen && (
+          {finishPromptOpen && (
+            <div
+              className="finish-prompt"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="finish-prompt-title"
+            >
+              <h2 id="finish-prompt-title">80% reached</h2>
+              <div className="overlay-actions">
+                <button
+                  type="button"
+                  className="primary-button compact"
+                  onClick={() => dispatch({ type: "finish-run" })}
+                >
+                  Finish now · Enter
+                </button>
+                <button
+                  type="button"
+                  className="secondary-button"
+                  onClick={() => setFinishPromptDismissed(true)}
+                >
+                  Play on · Esc
+                </button>
+              </div>
+            </div>
+          )}
+
+          {helpOpen && (
+            <GameHelpDialog
+              onClose={closeHelp}
+              onShowHowItWorks={() => {
+                setHelpOpen(false);
+                setHowItWorksOpen(true);
+              }}
+              onShowHints={() => {
+                setCoachReplay((current) => current + 1);
+                closeHelp();
+              }}
+            />
+          )}
+
+          {howItWorksOpen && (
+            <HowItWorks
+              overlay
+              onDone={() => {
+                setHowItWorksOpen(false);
+                dispatch({ type: "resume" });
+                window.requestAnimationFrame(() => gameRef.current?.focus());
+              }}
+            />
+          )}
+
+          {state.phase === "paused" && !helpOpen && !howItWorksOpen && (
             <div
               className="game-overlay"
               role="dialog"
               aria-modal="true"
               aria-labelledby="pause-dialog-title"
-              onKeyDown={(event) => {
-                if (event.key === "Tab") {
-                  event.preventDefault();
-                  event.stopPropagation();
-                  pauseResumeRef.current?.focus();
-                }
-              }}
+              onKeyDown={trapPauseTab}
             >
               <p className="eyebrow">TAKE A BREATH</p>
-              <h2 id="pause-dialog-title">Game paused</h2>
-              <p>
-                {state.pauseReason === "hidden"
-                  ? "The tab was hidden. Resume when you are ready."
-                  : "Your stack is waiting."}
-              </p>
-              <button
-                ref={pauseResumeRef}
-                type="button"
-                className="primary-button compact"
-                onClick={() => handleCabinetInput("p")}
-              >
-                Resume game
-              </button>
+              {restartConfirm ? (
+                <>
+                  <h2 id="pause-dialog-title">End this run and start again?</h2>
+                  <div className="overlay-actions" ref={pauseMenuRef}>
+                    <button
+                      ref={confirmYesRef}
+                      type="button"
+                      className="primary-button compact"
+                      onClick={() => onRestart?.()}
+                    >
+                      Yes
+                    </button>
+                    <button
+                      type="button"
+                      className="secondary-button"
+                      onClick={() => setRestartConfirm(false)}
+                    >
+                      No
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <h2 id="pause-dialog-title">Game paused</h2>
+                  <p>
+                    {state.pauseReason === "hidden"
+                      ? "The tab was hidden. Resume when you are ready."
+                      : "Your stack is waiting."}
+                  </p>
+                  <p data-testid="run-seed">Seed {seed}</p>
+                  <div className="overlay-actions" ref={pauseMenuRef}>
+                    <button
+                      ref={pauseResumeRef}
+                      type="button"
+                      className="primary-button compact"
+                      onClick={() => handleCabinetInput("p")}
+                    >
+                      Resume game
+                    </button>
+                    <button
+                      type="button"
+                      className="secondary-button"
+                      onClick={() => setRestartConfirm(true)}
+                    >
+                      Restart run
+                    </button>
+                    <button
+                      type="button"
+                      className="secondary-button"
+                      onClick={() => onNewName?.()}
+                    >
+                      New name
+                    </button>
+                    <button
+                      type="button"
+                      className="secondary-button"
+                      onClick={openHelp}
+                    >
+                      How to play
+                    </button>
+                  </div>
+                </>
+              )}
             </div>
           )}
 
@@ -417,6 +854,18 @@ export function GameplayScreen({
               <p>Final score: {state.score.toLocaleString()}</p>
             </div>
           )}
+        </div>
+
+        <div className="touch-only">
+          <TouchPad
+            phase={state.phase}
+            onInput={(key) => {
+              if (helpOpen || howItWorksOpen || restartConfirm || finishPromptOpen) {
+                return;
+              }
+              handleCabinetInput(key);
+            }}
+          />
         </div>
 
         <p className="sr-only" role="status" aria-live="polite">

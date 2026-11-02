@@ -138,7 +138,7 @@
 .reward-award > span {
   color: var(--crt-muted);
   font-family: var(--font-mono);
-  font-size: 0.58rem;
+  font-size: 0.6875rem;
   font-weight: 700;
   letter-spacing: 0.14em;
 }
@@ -198,7 +198,7 @@
   color: var(--phosphor-red);
   background: rgb(240 68 52 / 7%);
   font-family: var(--font-mono);
-  font-size: 0.68rem;
+  font-size: 0.6875rem;
   font-weight: 700;
   letter-spacing: 0.08em;
 }
@@ -240,7 +240,7 @@
 .loss-metrics dt {
   color: var(--crt-muted);
   font-family: var(--font-pixel);
-  font-size: 0.64rem;
+  font-size: 0.6875rem;
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -380,7 +380,7 @@
   }
 
   .result-heading .eyebrow {
-    font-size: 0.62rem;
+    font-size: 0.6875rem;
   }
 
   .reward-card {

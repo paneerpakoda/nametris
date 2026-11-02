@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { playerTitles } from "../game/config/titles";
 import type { RunResult } from "../game/engine/result";
@@ -44,11 +44,17 @@ describe("App", () => {
     expect(screen.getByText("Your name stays on this device.")).toBeInTheDocument();
   });
 
-  it("starts a playable board from the welcome action", async () => {
+  it("shows how it works on the first start, then a playable board", async () => {
     const user = userEvent.setup();
     render(<App />);
 
+    await user.type(screen.getByLabelText("Your name"), "JO");
     await user.click(screen.getByRole("button", { name: "Start building" }));
+    expect(
+      screen.getByRole("heading", { name: "Fill your name to 80% to win." }),
+    ).toBeVisible();
+
+    await user.click(screen.getByRole("button", { name: "Skip" }));
 
     expect(
       screen.getByRole("grid", { name: "Normal Tetris board" }),
@@ -62,7 +68,7 @@ describe("App", () => {
     await user.click(screen.getByRole("button", { name: "Play again" }));
 
     expect(
-      screen.getByRole("grid", { name: "Name stencil for HARSH" }),
+      screen.getByRole("grid", { name: "Name outline for HARSH" }),
     ).toBeInTheDocument();
   });
 
@@ -73,6 +79,60 @@ describe("App", () => {
     await user.click(screen.getByRole("button", { name: "Try another name" }));
 
     expect(screen.getByRole("heading", { name: "NAMETRIS" })).toBeInTheDocument();
-    expect(screen.getByLabelText("Your name (optional)")).toHaveValue("");
+    expect(screen.getByLabelText("Your name")).toHaveValue("");
+  });
+
+  it("keeps the name on this device and fills it in next time", async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    await user.type(screen.getByLabelText("Your name"), "JO");
+    await user.click(screen.getByRole("button", { name: "Start building" }));
+    await user.click(screen.getByRole("button", { name: "Skip" }));
+    await user.click(screen.getByRole("button", { name: "Pause game" }));
+    await user.click(screen.getByRole("button", { name: "New name" }));
+
+    expect(screen.getByLabelText("Your name")).toHaveValue("JO");
+  });
+
+  it("uses the address seed for every run in the visit", async () => {
+    window.history.pushState(null, "", "/?seed=20260730");
+    const random = vi.spyOn(Math, "random").mockReturnValue(0.9);
+    const user = userEvent.setup();
+    render(<App />);
+
+    await user.type(screen.getByLabelText("Your name"), "JO");
+    await user.click(screen.getByRole("button", { name: "Start building" }));
+    await user.click(screen.getByRole("button", { name: "Skip" }));
+    await user.click(screen.getByRole("button", { name: "Pause game" }));
+    expect(screen.getByTestId("run-seed")).toHaveTextContent("Seed 20260730");
+
+    await user.click(screen.getByRole("button", { name: "Restart run" }));
+    await user.click(screen.getByRole("button", { name: "Yes" }));
+    await user.click(screen.getByRole("button", { name: "Pause game" }));
+    expect(screen.getByTestId("run-seed")).toHaveTextContent("Seed 20260730");
+    expect(window.location.href).not.toContain("JO");
+    random.mockRestore();
+  });
+
+  it("draws a different seed for the next run when the address has none", async () => {
+    const random = vi
+      .spyOn(Math, "random")
+      .mockReturnValueOnce(0.2)
+      .mockReturnValueOnce(0.4);
+    const user = userEvent.setup();
+    render(<App />);
+
+    await user.type(screen.getByLabelText("Your name"), "JO");
+    await user.click(screen.getByRole("button", { name: "Start building" }));
+    await user.click(screen.getByRole("button", { name: "Skip" }));
+    await user.click(screen.getByRole("button", { name: "Pause game" }));
+    expect(screen.getByTestId("run-seed")).toHaveTextContent("Seed 200000000");
+
+    await user.click(screen.getByRole("button", { name: "Restart run" }));
+    await user.click(screen.getByRole("button", { name: "Yes" }));
+    await user.click(screen.getByRole("button", { name: "Pause game" }));
+    expect(screen.getByTestId("run-seed")).toHaveTextContent("Seed 400000000");
+    random.mockRestore();
   });
 });

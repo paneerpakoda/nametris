@@ -2,9 +2,7 @@ import type { BoardAction, BoardPhase } from "../engine/session";
 
 export function getGameAction(key: string, phase: BoardPhase): BoardAction | null {
   if (phase === "paused") {
-    return key === "Escape" || key.toLowerCase() === "p" || key === "Enter"
-      ? { type: "resume" }
-      : null;
+    return key === "Escape" || key.toLowerCase() === "p" ? { type: "resume" } : null;
   }
 
   if (phase === "placing-stencil") {

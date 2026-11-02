@@ -22,8 +22,8 @@ describe("BoardGrid", () => {
     );
 
     expect(screen.getByTestId("route-zone-label")).toHaveTextContent(
-      /ROUTE ZONE\s*TOP 7 ROWS · SHIFT/,
+      /SEND ZONE\s*TOP 7 ROWS · SHIFT/,
     );
-    expect(screen.getByText("ROUTE DEADLINE")).toBeInTheDocument();
+    expect(screen.getByText("SEND LINE")).toBeInTheDocument();
   });
 });

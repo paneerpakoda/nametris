@@ -1,30 +1,49 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { CabinetShell } from "../../components/CabinetShell";
 import { ControlDeck } from "../../components/ControlDeck";
 import { NametrisMark } from "../../components/NametrisMark";
-import { validatePlayerName } from "./nameValidation";
+import { describePlayerName } from "./nameStats";
+import { lettersOnlyName, nameLengthLimit, nameRuleMessage } from "./nameValidation";
 import "../../styles/onboarding.css";
 
 interface WelcomeScreenProps {
   readonly onStart: (name: string) => void;
+  readonly initialName?: string;
 }
 
-export function WelcomeScreen({ onStart }: WelcomeScreenProps) {
-  const [input, setInput] = useState("");
-  const [error, setError] = useState<string | null>(null);
+export function WelcomeScreen({ onStart, initialName = "" }: WelcomeScreenProps) {
+  const [input, setInput] = useState(() => lettersOnlyName(initialName));
+  const [ruleAlert, setRuleAlert] = useState(false);
+  const stats = describePlayerName(input);
 
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const result = validatePlayerName(input);
-
-    if (!result.valid) {
-      setError(result.message);
+  useEffect(() => {
+    if (!ruleAlert) {
       return;
     }
 
-    setError(null);
-    onStart(result.name);
+    const timeout = window.setTimeout(() => setRuleAlert(false), 2_000);
+    return () => window.clearTimeout(timeout);
+  }, [ruleAlert]);
+
+  function handleNameChange(value: string) {
+    const stripped = lettersOnlyName(value);
+    const typedNonLetter = /[^A-Za-z]/.test(value);
+    const overLimit = value.replace(/[^A-Za-z]/g, "").length > nameLengthLimit;
+    if (typedNonLetter || overLimit) {
+      setRuleAlert(true);
+    }
+    setInput(stripped);
+  }
+
+  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!/^[A-Z]{2,10}$/.test(input)) {
+      setRuleAlert(true);
+      return;
+    }
+
+    onStart(input);
   }
 
   return (
@@ -44,36 +63,42 @@ export function WelcomeScreen({ onStart }: WelcomeScreenProps) {
           </p>
 
           <form className="welcome-form" onSubmit={handleSubmit} noValidate>
-            <label htmlFor="player-name">Your name (optional)</label>
+            <label htmlFor="player-name">Your name</label>
             <input
               id="player-name"
               value={input}
-              onChange={(event) => {
-                setInput(event.target.value);
-                if (error !== null) {
-                  setError(null);
-                }
-              }}
-              placeholder="HARSH"
+              maxLength={nameLengthLimit}
+              onChange={(event) => handleNameChange(event.target.value)}
               autoComplete="off"
+              autoCapitalize="characters"
               spellCheck={false}
-              aria-describedby="name-help name-privacy"
-              aria-invalid={error !== null}
-              aria-errormessage={error === null ? undefined : "name-error"}
+              aria-describedby="name-stats name-privacy"
+              aria-invalid={ruleAlert}
             />
-            <p id="name-help" className="field-help">
-              2–10 English letters. Leave blank to play as HARSH.
-            </p>
-            {error !== null && (
-              <p id="name-error" className="field-error" role="alert">
-                <span aria-hidden="true" /> {error}
+            <div id="name-stats" className="name-stats">
+              {stats !== null && (
+                <>
+                  <p>
+                    {stats.name} - {stats.cells} cells - {stats.band}
+                  </p>
+                  <p>needs at least about {stats.minimumLines} lines</p>
+                </>
+              )}
+            </div>
+            {ruleAlert && (
+              <p className="field-error" role="alert">
+                <span aria-hidden="true" /> {nameRuleMessage}
               </p>
             )}
             <p id="name-privacy" className="privacy-note">
               <span aria-hidden="true">◆</span> Your name stays on this device.
             </p>
             <div className="welcome-start-frame">
-              <button type="submit" className="primary-button">
+              <button
+                type="submit"
+                className="primary-button"
+                disabled={input.length < 2}
+              >
                 Start building
               </button>
             </div>

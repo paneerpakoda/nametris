@@ -9,6 +9,10 @@ interface GameSidebarProps {
   readonly onStencilCancel: () => void;
   readonly onFinish: () => void;
   readonly onHelp: () => void;
+  readonly emptySendNotice?: boolean;
+  readonly emptySendFlash?: boolean;
+  readonly scorePop?: boolean;
+  readonly popKeys?: ReadonlySet<string>;
 }
 
 export function GameSidebar({
@@ -18,6 +22,10 @@ export function GameSidebar({
   onStencilCancel,
   onFinish,
   onHelp,
+  emptySendNotice = false,
+  emptySendFlash = false,
+  scorePop = false,
+  popKeys,
 }: GameSidebarProps) {
   return (
     <aside className="game-sidebar">
@@ -39,10 +47,13 @@ export function GameSidebar({
         onLock={onStencilLock}
         onCancel={onStencilCancel}
         onFinish={onFinish}
+        emptySendNotice={emptySendNotice}
+        emptySendFlash={emptySendFlash}
+        popKeys={popKeys}
       />
 
       <section className="metric-strip" aria-label="Game metrics">
-        <Metric label="Score" value={state.score} testId="score" />
+        <Metric label="Score" value={state.score} testId="score" pop={scorePop} />
         <Metric
           label="Active time"
           value={formatActiveTime(state.activeMilliseconds)}
@@ -59,11 +70,12 @@ interface MetricProps {
   readonly label: string;
   readonly value: number | string;
   readonly testId?: string;
+  readonly pop?: boolean;
 }
 
-function Metric({ label, value, testId }: MetricProps) {
+function Metric({ label, value, testId, pop = false }: MetricProps) {
   return (
-    <div className="metric">
+    <div className={pop ? "metric is-score-pop" : "metric"}>
       <span>{label}</span>
       <strong data-testid={testId}>
         {typeof value === "number" ? value.toLocaleString() : value}

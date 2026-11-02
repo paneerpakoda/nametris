@@ -23,7 +23,7 @@ describe("ControlDeck", () => {
 
     await user.click(screen.getByRole("button", { name: "Move left" }));
     await user.click(screen.getByRole("button", { name: "Hard drop" }));
-    await user.click(screen.getByRole("button", { name: "Route piece to name" }));
+    await user.click(screen.getByRole("button", { name: "Send" }));
 
     expect(onInput.mock.calls.map(([key]) => key)).toEqual(["ArrowLeft", " ", "Shift"]);
   });
@@ -38,7 +38,7 @@ describe("ControlDeck", () => {
       />,
     );
 
-    expect(screen.getByRole("button", { name: "Route piece to name" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Send" })).toBeDisabled();
   });
 
   it("switches to placement controls while the stencil is active", async () => {

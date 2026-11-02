@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { FREEZE_BUDGET_MS, getGravityMilliseconds } from "../config/gameplay";
 import type { PieceType } from "../model/types";
 import { BOARD_HEIGHT } from "./board";
 import {
@@ -514,5 +515,87 @@ describe("piece routing", () => {
         columnDelta: 0,
       }),
     ).toBe(state);
+  });
+
+  it("shares one think-time budget across Shift and Esc", () => {
+    const state = routableSquareSession();
+    const placing = reduceBoardSession(state, { type: "route-to-stencil" });
+    const partial = reduceBoardSession(placing, {
+      type: "tick",
+      elapsedMilliseconds: 3_000,
+    });
+    const canceled = reduceBoardSession(partial, { type: "stencil-cancel" });
+    const again = reduceBoardSession(canceled, { type: "route-to-stencil" });
+    const expired = reduceBoardSession(again, {
+      type: "tick",
+      elapsedMilliseconds: 2_000,
+    });
+
+    expect(partial.freezeRemainingMilliseconds).toBe(2_000);
+    expect(canceled.freezeRemainingMilliseconds).toBe(2_000);
+    expect(canceled.canceledRoutes).toBe(1);
+    expect(canceled.transferCount).toBe(1);
+    expect(expired.phase).toBe("playing");
+    expect(expired.freezeRemainingMilliseconds).toBe(0);
+    expect(expired.canceledRoutes).toBe(1);
+    expect(expired.transferCount).toBe(1);
+    expect(expired.activePiece).toEqual(state.activePiece);
+    expect(reduceBoardSession(expired, { type: "route-to-stencil" })).toBe(expired);
+  });
+
+  it("resumes gravity with the time left after the think-time budget", () => {
+    const state = routableSquareSession();
+    const placing = reduceBoardSession(state, { type: "route-to-stencil" });
+    const dropped = reduceBoardSession(placing, {
+      type: "tick",
+      elapsedMilliseconds: FREEZE_BUDGET_MS + getGravityMilliseconds(1),
+    });
+
+    expect(dropped.phase).toBe("playing");
+    expect(dropped.activePiece.row).toBe(state.activePiece.row + 1);
+    expect(dropped.transferCount).toBe(1);
+    expect(dropped.canceledRoutes).toBe(0);
+  });
+
+  it("does not spend think time while the run is paused", () => {
+    const state = routableSquareSession();
+    const placing = reduceBoardSession(state, { type: "route-to-stencil" });
+    const active = reduceBoardSession(placing, {
+      type: "tick",
+      elapsedMilliseconds: 250,
+    });
+    const paused = reduceBoardSession(active, { type: "pause", reason: "player" });
+    const waiting = reduceBoardSession(paused, {
+      type: "tick",
+      elapsedMilliseconds: 1_000,
+    });
+
+    expect(waiting.phase).toBe("paused");
+    expect(waiting.freezeRemainingMilliseconds).toBe(FREEZE_BUDGET_MS - 250);
+  });
+
+  it("resets think time when the next piece appears", () => {
+    const state = routableSquareSession();
+    const placing = reduceBoardSession(state, { type: "route-to-stencil" });
+    const partial = reduceBoardSession(placing, {
+      type: "tick",
+      elapsedMilliseconds: 1_000,
+    });
+    const locked = reduceBoardSession(partial, { type: "stencil-lock" });
+
+    expect(locked.freezeRemainingMilliseconds).toBe(FREEZE_BUDGET_MS);
+  });
+
+  it("finishes from name placement when the player claims an 80% run", () => {
+    const placing = reduceBoardSession(
+      { ...routableSquareSession(), canFinish: true },
+      { type: "route-to-stencil" },
+    );
+    const finished = reduceBoardSession(placing, { type: "finish-run" });
+
+    expect(placing.phase).toBe("placing-stencil");
+    expect(finished.phase).toBe("won");
+    expect(finished.transferCount).toBe(1);
+    expect(finished.canceledRoutes).toBe(0);
   });
 });

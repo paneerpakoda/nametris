@@ -74,12 +74,12 @@ const referenceGroups: readonly DeckGroup[] = [
     ],
   },
   {
-    label: "SEND TO NAME",
+    label: "SEND",
     keys: [
       {
         key: "Shift",
         legend: "SHIFT",
-        label: "Route piece to name",
+        label: "Send",
         icon: Send,
         wide: true,
       },
@@ -188,7 +188,7 @@ function getInteractiveGroups(
   }
 
   return referenceGroups.map((group) =>
-    group.label === "SEND TO NAME"
+    group.label === "SEND"
       ? {
           ...group,
           keys: group.keys.map((key) => ({ ...key, disabled: !canRoute })),
@@ -232,7 +232,10 @@ export function ControlDeck({
                   key={deckKey.key}
                   aria-label={deckKey.label}
                   disabled={deckKey.disabled}
-                  onClick={() => onInput(deckKey.key)}
+                  onClick={(event) => {
+                    event.currentTarget.blur();
+                    onInput(deckKey.key);
+                  }}
                 >
                   <deckKey.icon className="cabinet-key-icon" aria-hidden="true" />
                   {deckKey.legend !== "" && (

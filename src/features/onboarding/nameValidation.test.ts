@@ -1,29 +1,32 @@
 import { describe, expect, it } from "vitest";
 
-import { validatePlayerName } from "./nameValidation";
+import { lettersOnlyName, nameRuleMessage, validatePlayerName } from "./nameValidation";
 
 describe("player-name validation", () => {
-  it("uses HARSH for blank input", () => {
+  it("rejects a blank name", () => {
     expect(validatePlayerName("   ")).toEqual({
-      valid: true,
-      name: "HARSH",
+      valid: false,
+      message: nameRuleMessage,
     });
   });
 
-  it("trims and uppercases valid ASCII letters", () => {
-    expect(validatePlayerName("  anmol  ")).toEqual({
+  it("keeps only A-Z letters and caps the length at 10", () => {
+    expect(lettersOnlyName("  anmol! ")).toBe("ANMOL");
+    expect(lettersOnlyName("ABCDEFGHIJKLMNOP")).toBe("ABCDEFGHIJ");
+  });
+
+  it("accepts 2 to 10 letters", () => {
+    expect(validatePlayerName("jo")).toEqual({ valid: true, name: "JO" });
+    expect(validatePlayerName("ABCDEFGHIJ")).toEqual({
       valid: true,
-      name: "ANMOL",
+      name: "ABCDEFGHIJ",
     });
   });
 
-  it.each(["A", "ABCDEFGHIJK", "A B", "A1", "ÉVA", "<AB>"])(
-    "rejects invalid non-empty input: %s",
-    (input) => {
-      expect(validatePlayerName(input)).toEqual({
-        valid: false,
-        message: "Use 2–10 English letters without spaces or symbols.",
-      });
-    },
-  );
+  it("rejects a single letter after stripping", () => {
+    expect(validatePlayerName("A1")).toEqual({
+      valid: false,
+      message: nameRuleMessage,
+    });
+  });
 });

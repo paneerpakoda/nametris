@@ -19,7 +19,7 @@ describe("StencilGrid", () => {
     );
 
     expect(
-      screen.getByRole("grid", { name: "Name stencil for HARSH" }),
+      screen.getByRole("grid", { name: "Name outline for HARSH" }),
     ).toHaveAttribute("aria-colcount", "2");
     expect(screen.getAllByTestId("stencil-cell")).toHaveLength(4);
     expect(screen.getAllByTestId("stencil-cell")[0]).toHaveAttribute(
@@ -28,7 +28,7 @@ describe("StencilGrid", () => {
     );
   });
 
-  it("distinguishes cells that will stay from cells that will be trimmed", () => {
+  it("distinguishes cells that will stay from cells that will be lost", () => {
     const stencil = createStencilState(new Set(["0:0"]), 2, 2);
 
     render(
@@ -47,7 +47,7 @@ describe("StencilGrid", () => {
     expect(
       screen
         .getAllByTestId("stencil-cell")
-        .filter((cell) => cell.dataset.status === "preview-trimmed"),
+        .filter((cell) => cell.dataset.status === "preview-lost"),
     ).toHaveLength(3);
   });
 });
