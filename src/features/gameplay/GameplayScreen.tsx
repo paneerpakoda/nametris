@@ -23,6 +23,9 @@ import {
   type LossResult,
   type RunResult,
 } from "../../game/engine/result";
+import { holdAudio, playSound, primeAudio } from "../juice/audio";
+import { PauseSoundSettings, SoundButton } from "../juice/JuiceControls";
+import { getJuicePreferences, updateJuicePreferences } from "../juice/preferences";
 import { HowItWorks } from "../onboarding/HowItWorks";
 import { BoardGrid } from "./BoardGrid";
 import { GameHelpDialog } from "./GameHelpDialog";
@@ -417,6 +420,11 @@ export function GameplayScreen({
   }, [state.phase]);
 
   useEffect(() => {
+    holdAudio("pause", state.phase === "paused");
+    return () => holdAudio("pause", false);
+  }, [state.phase]);
+
+  useEffect(() => {
     const handleVisibility = () => {
       if (document.hidden) {
         dispatch({ type: "pause", reason: "hidden" });
@@ -479,6 +487,27 @@ export function GameplayScreen({
       return;
     }
     handledKeys.current.add(event);
+
+    primeAudio();
+
+    if (
+      event.key.toLowerCase() === "m" &&
+      !event.repeat &&
+      !event.metaKey &&
+      !event.ctrlKey &&
+      !event.altKey &&
+      !(event.target instanceof HTMLTextAreaElement) &&
+      !(event.target instanceof HTMLInputElement && event.target.type !== "range")
+    ) {
+      event.preventDefault();
+      event.stopPropagation();
+      const muted = getJuicePreferences().muted;
+      updateJuicePreferences({ muted: !muted });
+      if (muted) {
+        playSound("ui");
+      }
+      return;
+    }
 
     if (helpOpen || howItWorksOpen) {
       return;
@@ -562,7 +591,7 @@ export function GameplayScreen({
     }
 
     const buttons = [
-      ...(pauseMenuRef.current?.querySelectorAll<HTMLButtonElement>("button") ?? []),
+      ...(pauseMenuRef.current?.querySelectorAll<HTMLElement>("button, input") ?? []),
     ];
     const first = buttons[0];
     const last = buttons[buttons.length - 1];
@@ -611,17 +640,20 @@ export function GameplayScreen({
             <NametrisMark compact />
             <h1>NAMETRIS</h1>
           </div>
-          <button
-            type="button"
-            className="touch-only touch-pause"
-            aria-label={state.phase === "paused" ? "Touch resume" : "Touch pause"}
-            onPointerDown={(event) => {
-              event.preventDefault();
-              handleCabinetInput("p");
-            }}
-          >
-            {state.phase === "paused" ? "Resume" : "Pause"}
-          </button>
+          <div className="game-header-actions">
+            <SoundButton />
+            <button
+              type="button"
+              className="touch-only touch-pause"
+              aria-label={state.phase === "paused" ? "Touch resume" : "Touch pause"}
+              onPointerDown={(event) => {
+                event.preventDefault();
+                handleCabinetInput("p");
+              }}
+            >
+              {state.phase === "paused" ? "Resume" : "Pause"}
+            </button>
+          </div>
         </header>
 
         <div
@@ -827,6 +859,7 @@ export function GameplayScreen({
                     >
                       How to play
                     </button>
+                    <PauseSoundSettings />
                   </div>
                 </>
               )}

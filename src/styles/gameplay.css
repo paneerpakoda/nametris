@@ -24,6 +24,55 @@
   border-bottom: 1px solid rgb(236 75 55 / 28%);
 }
 
+.game-header-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.sound-toggle,
+.pause-settings button {
+  min-height: 28px;
+  padding: 4px 8px;
+  border: 1px solid rgb(255 245 220 / 55%);
+  border-radius: 4px;
+  color: #fff5dc;
+  background: #1c201b;
+  cursor: pointer;
+  font-family: var(--font-pixel);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+}
+
+.pause-settings {
+  display: grid;
+  gap: 8px;
+  margin-top: 4px;
+  color: #fff5dc;
+  font-size: 12px;
+  text-align: left;
+}
+
+.pause-settings .sound-toggle,
+.pause-settings button {
+  width: 100%;
+  min-height: 36px;
+}
+
+.pause-volume {
+  display: grid;
+  gap: 4px;
+  color: #fff5dc;
+  font-size: 12px;
+}
+
+.pause-volume input {
+  width: 100%;
+  min-height: 24px;
+  accent-color: #ffc45d;
+}
+
 .game-title-lockup {
   display: flex;
   align-items: center;
@@ -1417,8 +1466,11 @@ button.touch-only {
     justify-self: end;
   }
 
-  .touch-pause {
+  .game-header-actions {
     grid-area: mode;
+  }
+
+  .touch-pause {
     justify-self: end;
   }
 
@@ -1480,4 +1532,24 @@ button.touch-only {
     animation-iteration-count: 1 !important;
     animation-timing-function: linear !important;
   }
+}
+
+.is-reduced-motion .line-clear-feedback,
+.is-reduced-motion .rail-transfer-metric.is-transfer-full,
+.is-reduced-motion .game-surface.is-hard-drop-impact-a .board-frame,
+.is-reduced-motion .game-surface.is-hard-drop-impact-b .board-frame,
+.is-reduced-motion .empty-send-notice.is-flash,
+.is-reduced-motion .score-delta,
+.is-reduced-motion .metric.is-score-pop strong,
+.is-reduced-motion .board-cell.is-drop-trail,
+.is-reduced-motion .name-piece-token {
+  animation: none !important;
+}
+
+.is-reduced-motion .color-flash,
+.is-reduced-motion .board-frame.is-clear-pulse::after {
+  animation-name: color-flash !important;
+  animation-duration: 150ms !important;
+  animation-iteration-count: 1 !important;
+  animation-timing-function: linear !important;
 }

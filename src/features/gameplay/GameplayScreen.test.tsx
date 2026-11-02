@@ -153,6 +153,16 @@ describe("GameplayScreen", () => {
     expect(screen.getByText("NAME PIECE LOST · FULL · USE SHIFT")).toBeVisible();
   });
 
+  it("toggles sound from the header button and the M key", async () => {
+    const user = userEvent.setup();
+    render(<GameplayScreen seed={7} />);
+
+    await user.click(screen.getByRole("button", { name: "Mute sound" }));
+    expect(screen.getByRole("button", { name: "Unmute sound" })).toBeInTheDocument();
+    await user.keyboard("m");
+    expect(screen.getByRole("button", { name: "Mute sound" })).toBeInTheDocument();
+  });
+
   it("pauses and resumes from real buttons", async () => {
     const user = userEvent.setup();
     render(<GameplayScreen seed={7} />);
@@ -181,7 +191,7 @@ describe("GameplayScreen", () => {
     await user.tab({ shift: true });
     expect(resume).toHaveFocus();
     await user.tab({ shift: true });
-    expect(screen.getByRole("button", { name: "How to play" })).toHaveFocus();
+    expect(screen.getByRole("button", { name: "Move sounds" })).toHaveFocus();
 
     await user.keyboard("p");
     await waitFor(() =>
