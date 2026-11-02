@@ -37,13 +37,18 @@
 .cabinet-display-section {
   position: relative;
   display: grid;
+  height: 100%;
   min-height: 0;
+  grid-template-rows: minmax(0, 1fr);
   padding: clamp(28px, 4vh, 48px) clamp(66px, 6vw, 108px) clamp(18px, 2.4vh, 28px);
+  overflow: hidden;
 }
 
 .cabinet-bezel {
   min-width: 0;
+  height: 100%;
   min-height: 0;
+  overflow: hidden;
   padding: 6px;
   border: 2px solid var(--cabinet-bezel-border);
   border-radius: 16px;

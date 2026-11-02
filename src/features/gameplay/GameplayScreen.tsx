@@ -41,7 +41,6 @@ import {
   softLockFlashMilliseconds,
   hardDropTrailMilliseconds,
 } from "./motion";
-import { RunGuidance } from "./RunGuidance";
 import { TransferRail } from "./TransferRail";
 import "../../styles/gameplay.css";
 
@@ -135,7 +134,6 @@ export function GameplayScreen({
   const motionId = useRef(0);
   const [helpOpen, setHelpOpen] = useState(false);
   const [howItWorksOpen, setHowItWorksOpen] = useState(false);
-  const [coachReplay, setCoachReplay] = useState(0);
   const [emptySendId, setEmptySendId] = useState(0);
   const [emptySendFlash, setEmptySendFlash] = useState(false);
   const [finishPromptDismissed, setFinishPromptDismissed] = useState(false);
@@ -613,16 +611,6 @@ export function GameplayScreen({
             <NametrisMark compact />
             <h1>NAMETRIS</h1>
           </div>
-          <RunGuidance
-            state={state}
-            replayKey={coachReplay}
-            onDismiss={() =>
-              window.requestAnimationFrame(() => gameRef.current?.focus())
-            }
-          />
-          <span className="game-mode-label">
-            {state.phase === "placing-stencil" ? "YOUR NAME" : "CLEAR / BUILD"}
-          </span>
           <button
             type="button"
             className="touch-only touch-pause"
@@ -654,25 +642,27 @@ export function GameplayScreen({
               <p className="panel-kicker">01 / CLEAR LINES</p>
               <h2 id="normal-board-title">TETRIS BOARD</h2>
             </div>
-            <BoardGrid
-              board={state.board}
-              activePiece={state.activePiece}
-              ghostPiece={ghostPiece}
-              slowZoneActive={slowZoneActive}
-              freezeRemaining={
-                state.phase === "placing-stencil"
-                  ? state.freezeRemainingMilliseconds
-                  : null
-              }
-              clearedRows={clearFx?.rows ?? []}
-              clearing={clearFx !== null && clearFx.rows.length > 0}
-              lockFlashKeys={lockFlash?.keys}
-              lockFlashId={lockFlash?.id}
-              trailKeys={dropTrail?.keys}
-              trailId={dropTrail?.id}
-              tooHigh={tooHigh}
-              tokenRow={tokenRow}
-            />
+            <div className="board-fit">
+              <BoardGrid
+                board={state.board}
+                activePiece={state.activePiece}
+                ghostPiece={ghostPiece}
+                slowZoneActive={slowZoneActive}
+                freezeRemaining={
+                  state.phase === "placing-stencil"
+                    ? state.freezeRemainingMilliseconds
+                    : null
+                }
+                clearedRows={clearFx?.rows ?? []}
+                clearing={clearFx !== null && clearFx.rows.length > 0}
+                lockFlashKeys={lockFlash?.keys}
+                lockFlashId={lockFlash?.id}
+                trailKeys={dropTrail?.keys}
+                trailId={dropTrail?.id}
+                tooHigh={tooHigh}
+                tokenRow={tokenRow}
+              />
+            </div>
             {(lineClearFeedback !== null || clearFx !== null) && (
               <div className="board-feedback">
                 {clearFx !== null && (
@@ -753,10 +743,6 @@ export function GameplayScreen({
               onShowHowItWorks={() => {
                 setHelpOpen(false);
                 setHowItWorksOpen(true);
-              }}
-              onShowHints={() => {
-                setCoachReplay((current) => current + 1);
-                closeHelp();
               }}
             />
           )}

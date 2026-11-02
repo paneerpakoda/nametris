@@ -57,9 +57,7 @@ test("welcome cabinet", async ({ page }) => {
 
 test("normal gameplay cabinet", async ({ page }) => {
   await startRun(page);
-  await expect(
-    page.getByText("Fill a row to clear it. Each clear gives you a name piece."),
-  ).toBeVisible();
+  await expect(page.getByRole("region", { name: "TETRIS BOARD" })).toBeVisible();
   await expectCabinetScreenshot(page, "gameplay-normal.png");
 });
 
@@ -86,11 +84,7 @@ test("transfer-ready cabinet", async ({ page }) => {
   await startRun(page);
   await loadFixture(page, "route-return");
   await expect(page.getByTestId("transfers")).toHaveText("1 / 3");
-  await expect(
-    page.getByText(
-      "You earned a name piece. Press Shift while the piece is still above the blue line.",
-    ),
-  ).toBeVisible();
+  await expect(page.getByRole("button", { name: "Send O" })).toBeEnabled();
   await expectCabinetScreenshot(page, "gameplay-transfer-ready.png");
 });
 

@@ -14,9 +14,7 @@ test("keeps core CRT copy legible and high contrast", async ({ page }) => {
   await page.getByRole("button", { name: "Skip" }).click();
   await expect(page.getByRole("region", { name: "Gameplay display" })).toBeVisible();
   const coreFontSizes = await page
-    .locator(
-      ".run-guidance small, .stencil-actions p, .metric span, .control-group-label",
-    )
+    .locator(".stencil-actions p, .metric span, .control-group-label")
     .evaluateAll((elements) =>
       elements.map((element) => Number.parseFloat(getComputedStyle(element).fontSize)),
     );
