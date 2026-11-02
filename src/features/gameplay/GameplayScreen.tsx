@@ -24,6 +24,7 @@ import {
   type RunResult,
 } from "../../game/engine/result";
 import { holdAudio, playSound, primeAudio } from "../juice/audio";
+import { useJuiceSounds } from "../juice/useJuiceSounds";
 import { PauseSoundSettings, SoundButton } from "../juice/JuiceControls";
 import { getJuicePreferences, updateJuicePreferences } from "../juice/preferences";
 import { HowItWorks } from "../onboarding/HowItWorks";
@@ -418,6 +419,8 @@ export function GameplayScreen({
 
     return () => window.clearInterval(interval);
   }, [state.phase]);
+
+  useJuiceSounds(state, hardDropImpact, emptySendId);
 
   useEffect(() => {
     holdAudio("pause", state.phase === "paused");

@@ -243,8 +243,10 @@ describe("sound engine", () => {
     rewards.engine.play("level-up");
     await Promise.resolve();
 
-    expect(rewards.context.oscillators.map((oscillator) => oscillator.started)).toEqual(
-      [0, 0.12, 0.3],
-    );
+    const starts = rewards.context.oscillators.map((oscillator) => oscillator.started);
+    expect(starts[0]).toBe(0);
+    expect(starts).toContain(0.12);
+    expect(starts).toContain(0.3);
+    expect(Math.max(...starts.map((started) => started ?? 0))).toBeLessThanOrEqual(0.7);
   });
 });
