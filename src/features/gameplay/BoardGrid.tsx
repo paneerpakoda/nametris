@@ -19,6 +19,10 @@ interface BoardGridProps {
   readonly trailId?: number;
   readonly tooHigh?: boolean;
   readonly tokenRow?: number | null;
+  readonly danger?: boolean;
+  readonly shiftReady?: boolean;
+  readonly levelUp?: number | null;
+  readonly reducedMotion?: boolean;
 }
 
 function cellKey(row: number, column: number): string {
@@ -39,6 +43,10 @@ export function BoardGrid({
   trailId = 0,
   tooHigh = false,
   tokenRow = null,
+  danger = false,
+  shiftReady = false,
+  levelUp = null,
+  reducedMotion = false,
 }: BoardGridProps) {
   const activeCells = useMemo(
     () =>
@@ -137,6 +145,26 @@ export function BoardGrid({
               />
             );
           }),
+        )}
+        {danger && (
+          <span
+            className={reducedMotion ? "danger-edge is-static" : "danger-edge"}
+            data-testid="danger-edge"
+            aria-hidden="true"
+          />
+        )}
+        {shiftReady && (
+          <span className="shift-ready-tag" data-testid="shift-ready">
+            SHIFT
+          </span>
+        )}
+        {levelUp !== null && (
+          <>
+            <strong className="level-up" data-testid="level-up">
+              LEVEL {levelUp}
+            </strong>
+            {!reducedMotion && <span className="level-ripple" aria-hidden="true" />}
+          </>
         )}
         {tooHigh && (
           <>

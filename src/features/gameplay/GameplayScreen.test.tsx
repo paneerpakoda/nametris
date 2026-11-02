@@ -153,6 +153,23 @@ describe("GameplayScreen", () => {
     expect(screen.getByText("NAME PIECE LOST · FULL · USE SHIFT")).toBeVisible();
   });
 
+  it("shows the start count and a shift cue when a name piece can be sent", async () => {
+    render(
+      <GameplayScreen
+        initialSession={{
+          ...createBoardSession(["O", "I", "T"]),
+          transferCount: 1,
+        }}
+      />,
+    );
+
+    expect(await screen.findByTestId("start-count")).toHaveTextContent(/3|Ready/);
+    expect(await screen.findByTestId("shift-ready")).toHaveTextContent("SHIFT");
+    expect(screen.getByRole("button", { name: /^Send$/ })).toHaveClass(
+      "is-shift-ready",
+    );
+  });
+
   it("toggles sound from the header button and the M key", async () => {
     const user = userEvent.setup();
     render(<GameplayScreen seed={7} />);
@@ -409,7 +426,9 @@ describe("GameplayScreen", () => {
       />,
     );
     expect(screen.getByText("PLACE THE O")).toBeInTheDocument();
-    expect(screen.getByTestId("finish-banner")).toHaveTextContent("80% reached");
+    expect(screen.getByTestId("finish-banner")).toHaveTextContent(
+      "80%: YOU CAN FINISH",
+    );
 
     fireEvent.keyDown(window, { key: "Enter" });
 

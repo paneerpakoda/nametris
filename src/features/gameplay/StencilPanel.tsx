@@ -15,6 +15,7 @@ interface StencilPanelProps {
   readonly emptySendNotice?: boolean;
   readonly emptySendFlash?: boolean;
   readonly popKeys?: ReadonlySet<string>;
+  readonly markerPop?: boolean;
 }
 
 export function StencilPanel({
@@ -26,6 +27,7 @@ export function StencilPanel({
   emptySendNotice = false,
   emptySendFlash = false,
   popKeys,
+  markerPop = false,
 }: StencilPanelProps) {
   const completion = getStencilCompletion(state.stencil);
   const isPlacing = state.phase === "placing-stencil";
@@ -66,7 +68,7 @@ export function StencilPanel({
       </div>
 
       <div
-        className="completion-track"
+        className={state.canFinish ? "completion-track is-gold" : "completion-track"}
         role="progressbar"
         aria-label="Name completion"
         aria-valuemin={0}
@@ -78,7 +80,10 @@ export function StencilPanel({
           className="completion-fill"
           style={{ width: `${completion.displayPercent}%` }}
         />
-        <span className="completion-threshold" aria-hidden="true">
+        <span
+          className={markerPop ? "completion-threshold is-pop" : "completion-threshold"}
+          aria-hidden="true"
+        >
           <small>80%</small>
         </span>
       </div>

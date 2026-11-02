@@ -13,6 +13,7 @@ interface GameSidebarProps {
   readonly emptySendFlash?: boolean;
   readonly scorePop?: boolean;
   readonly popKeys?: ReadonlySet<string>;
+  readonly markerPop?: boolean;
 }
 
 export function GameSidebar({
@@ -26,6 +27,7 @@ export function GameSidebar({
   emptySendFlash = false,
   scorePop = false,
   popKeys,
+  markerPop = false,
 }: GameSidebarProps) {
   return (
     <aside className="game-sidebar">
@@ -50,6 +52,7 @@ export function GameSidebar({
         emptySendNotice={emptySendNotice}
         emptySendFlash={emptySendFlash}
         popKeys={popKeys}
+        markerPop={markerPop}
       />
 
       <section className="metric-strip" aria-label="Game metrics">

@@ -8,12 +8,16 @@ interface TransferRailProps {
   readonly nextPiece: PieceType;
   readonly transferCount: number;
   readonly onTouchSend?: () => void;
+  readonly fillingFrom?: number | null;
+  readonly counterTick?: boolean;
 }
 
 export function TransferRail({
   nextPiece,
   transferCount,
   onTouchSend,
+  fillingFrom = null,
+  counterTick = false,
 }: TransferRailProps) {
   const isFull = transferCount >= maximumTransferCount;
 
@@ -22,7 +26,11 @@ export function TransferRail({
       <div className="transfer-arrows" aria-label={`${transferCount} name pieces`}>
         {Array.from({ length: maximumTransferCount }, (_, index) => (
           <span
-            className="transfer-arrow"
+            className={
+              fillingFrom !== null && index >= fillingFrom && index < transferCount
+                ? "transfer-arrow is-filling"
+                : "transfer-arrow"
+            }
             data-testid="transfer-arrow"
             data-status={index < transferCount ? "stored" : "empty"}
             key={index}
@@ -49,7 +57,9 @@ export function TransferRail({
       )}
 
       <div
-        className={`rail-transfer-metric${isFull ? " is-transfer-full" : ""}`}
+        className={`rail-transfer-metric${isFull ? " is-transfer-full" : ""}${
+          counterTick ? " is-ticking" : ""
+        }`}
         data-testid="transfer-metric"
         data-status={isFull ? "full" : "available"}
         aria-label={`Name pieces: ${transferCount} of ${maximumTransferCount}${

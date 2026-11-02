@@ -21,6 +21,7 @@ interface ControlDeckProps {
   readonly canRoute?: boolean;
   readonly canLock?: boolean;
   readonly onInput?: (key: string) => void;
+  readonly shiftReady?: boolean;
 }
 
 interface DeckKey {
@@ -202,6 +203,7 @@ export function ControlDeck({
   canRoute = false,
   canLock = false,
   onInput,
+  shiftReady = false,
 }: ControlDeckProps) {
   const groups =
     phase === undefined
@@ -217,7 +219,9 @@ export function ControlDeck({
             {group.keys.map((deckKey) =>
               onInput === undefined ? (
                 <kbd
-                  className={`cabinet-key${deckKey.wide === true ? " is-wide" : ""}`}
+                  className={`cabinet-key${deckKey.wide === true ? " is-wide" : ""}${
+                    shiftReady && deckKey.key === "Shift" ? " is-shift-ready" : ""
+                  }`}
                   key={deckKey.key}
                 >
                   <deckKey.icon className="cabinet-key-icon" aria-hidden="true" />
@@ -228,7 +232,9 @@ export function ControlDeck({
               ) : (
                 <button
                   type="button"
-                  className={`cabinet-key${deckKey.wide === true ? " is-wide" : ""}`}
+                  className={`cabinet-key${deckKey.wide === true ? " is-wide" : ""}${
+                    shiftReady && deckKey.key === "Shift" ? " is-shift-ready" : ""
+                  }`}
                   key={deckKey.key}
                   aria-label={deckKey.label}
                   disabled={deckKey.disabled}

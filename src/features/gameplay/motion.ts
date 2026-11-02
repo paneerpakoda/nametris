@@ -6,7 +6,7 @@ export const lineClearVisibleMilliseconds = 900;
 export const lineClearReducedMilliseconds = 1_200;
 export const rowClearMilliseconds = 180;
 export const softLockFlashMilliseconds = 80;
-export const hardDropTrailMilliseconds = 100;
+export const hardDropTrailMilliseconds = 120;
 export const hardDropBumpMilliseconds = 90;
 export const namePopMilliseconds = 180;
 

@@ -24,6 +24,7 @@ import {
   type RunResult,
 } from "../../game/engine/result";
 import { holdAudio, playSound, primeAudio } from "../juice/audio";
+import { useJuiceFrame } from "../juice/frame";
 import { useJuiceSounds } from "../juice/useJuiceSounds";
 import { PauseSoundSettings, SoundButton } from "../juice/JuiceControls";
 import { getJuicePreferences, updateJuicePreferences } from "../juice/preferences";
@@ -321,6 +322,9 @@ export function GameplayScreen({
     return () => window.clearTimeout(timeout);
   }, [lineClearFeedback]);
 
+  useJuiceSounds(state, hardDropImpact, emptySendId);
+  const juiceFrame = useJuiceFrame(state);
+
   useEffect(() => {
     const previous = motionSnapshot.current;
     const hardDrop = pendingHardDrop.current;
@@ -341,13 +345,13 @@ export function GameplayScreen({
 
     if (queueShrunk) {
       motionId.current += 1;
-      if (hardDrop) {
+      if (hardDrop && !juiceFrame.reduced) {
         const ghost = getGhostPiece(previous.board, previous.piece);
         setDropTrail({
           id: motionId.current,
           keys: new Set(hardDropTrailKeys(previous.piece, ghost.row)),
         });
-      } else {
+      } else if (!hardDrop) {
         setLockFlash({
           id: motionId.current,
           keys: new Set(pieceCellKeys(previous.piece)),
@@ -370,7 +374,7 @@ export function GameplayScreen({
       linesCleared: state.linesCleared,
       transferCount: state.transferCount,
     };
-  }, [state]);
+  }, [juiceFrame.reduced, state]);
 
   useEffect(() => {
     if (lockFlash === null) {
@@ -419,8 +423,6 @@ export function GameplayScreen({
 
     return () => window.clearInterval(interval);
   }, [state.phase]);
-
-  useJuiceSounds(state, hardDropImpact, emptySendId);
 
   useEffect(() => {
     holdAudio("pause", state.phase === "paused");
@@ -627,6 +629,7 @@ export function GameplayScreen({
       phase={state.phase}
       canRoute={state.transferCount === 0 || canRoute}
       canLock={canLock}
+      shiftReady={juiceFrame.shiftGlow}
       onInput={helpOpen ? undefined : handleCabinetInput}
     />
   );
@@ -644,6 +647,11 @@ export function GameplayScreen({
             <h1>NAMETRIS</h1>
           </div>
           <div className="game-header-actions">
+            {juiceFrame.countdown !== null && (
+              <span className="start-count" data-testid="start-count">
+                {juiceFrame.countdown}
+              </span>
+            )}
             <SoundButton />
             <button
               type="button"
@@ -696,6 +704,10 @@ export function GameplayScreen({
                 trailId={dropTrail?.id}
                 tooHigh={tooHigh}
                 tokenRow={tokenRow}
+                danger={juiceFrame.danger}
+                shiftReady={juiceFrame.shiftGlow}
+                levelUp={juiceFrame.levelUp}
+                reducedMotion={juiceFrame.reduced}
               />
             </div>
             {(lineClearFeedback !== null || clearFx !== null) && (
@@ -718,6 +730,8 @@ export function GameplayScreen({
           <TransferRail
             transferCount={state.transferCount}
             nextPiece={state.nextPiece}
+            fillingFrom={juiceFrame.fillingFrom}
+            counterTick={juiceFrame.counterTick}
             onTouchSend={() => {
               if (helpOpen || howItWorksOpen || restartConfirm || finishPromptOpen) {
                 return;
@@ -737,11 +751,12 @@ export function GameplayScreen({
             emptySendFlash={emptySendFlash}
             scorePop={clearFx !== null}
             popKeys={popKeys}
+            markerPop={juiceFrame.markerPop}
           />
 
           {state.canFinish && state.phase !== "won" && state.phase !== "lost" && (
             <p className="finish-banner" data-testid="finish-banner">
-              80% reached
+              80%: YOU CAN FINISH
             </p>
           )}
 
