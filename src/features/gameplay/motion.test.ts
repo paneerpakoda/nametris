@@ -52,7 +52,7 @@ describe("gameplay motion cues", () => {
   it("keeps each cue inside its short window", () => {
     expect(rowClearMilliseconds).toBe(180);
     expect(softLockFlashMilliseconds).toBe(80);
-    expect(hardDropTrailMilliseconds).toBe(100);
+    expect(hardDropTrailMilliseconds).toBe(120);
     expect(hardDropBumpMilliseconds).toBe(90);
     expect(namePopMilliseconds).toBe(180);
     expect(lineClearVisibleMilliseconds).toBe(900);

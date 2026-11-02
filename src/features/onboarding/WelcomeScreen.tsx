@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 
 import { CabinetShell } from "../../components/CabinetShell";
+import { primeAudio } from "../juice/audio";
 import { ControlDeck } from "../../components/ControlDeck";
 import { NametrisMark } from "../../components/NametrisMark";
 import { describePlayerName } from "./nameStats";
@@ -43,6 +44,7 @@ export function WelcomeScreen({ onStart, initialName = "" }: WelcomeScreenProps)
       return;
     }
 
+    primeAudio();
     onStart(input);
   }
 

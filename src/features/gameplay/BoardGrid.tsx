@@ -19,6 +19,11 @@ interface BoardGridProps {
   readonly trailId?: number;
   readonly tooHigh?: boolean;
   readonly tokenRow?: number | null;
+  readonly danger?: boolean;
+  readonly shiftReady?: boolean;
+  readonly levelUp?: number | null;
+  readonly reducedMotion?: boolean;
+  readonly lossGrey?: "down" | "instant" | null;
 }
 
 function cellKey(row: number, column: number): string {
@@ -39,6 +44,11 @@ export function BoardGrid({
   trailId = 0,
   tooHigh = false,
   tokenRow = null,
+  danger = false,
+  shiftReady = false,
+  levelUp = null,
+  reducedMotion = false,
+  lossGrey = null,
 }: BoardGridProps) {
   const activeCells = useMemo(
     () =>
@@ -138,6 +148,26 @@ export function BoardGrid({
             );
           }),
         )}
+        {danger && (
+          <span
+            className={reducedMotion ? "danger-edge is-static" : "danger-edge"}
+            data-testid="danger-edge"
+            aria-hidden="true"
+          />
+        )}
+        {shiftReady && (
+          <span className="shift-ready-tag" data-testid="shift-ready">
+            SHIFT
+          </span>
+        )}
+        {levelUp !== null && (
+          <>
+            <strong className="level-up" data-testid="level-up">
+              LEVEL {levelUp}
+            </strong>
+            {!reducedMotion && <span className="level-ripple" aria-hidden="true" />}
+          </>
+        )}
         {tooHigh && (
           <>
             <span className="too-high-wash" aria-hidden="true" />
@@ -146,14 +176,35 @@ export function BoardGrid({
             </span>
           </>
         )}
-        {clearedRows.map((row) => (
-          <span
-            key={`clear-${row}`}
-            className="clear-row color-flash"
-            data-testid="cleared-row"
-            style={{ top: `calc(${row} * var(--board-cell))` }}
-          />
-        ))}
+        {!reducedMotion &&
+          clearedRows.map((row) => (
+            <span
+              key={`clear-${row}`}
+              className="clear-row"
+              data-testid="cleared-row"
+              data-tier={Math.min(4, clearedRows.length)}
+              style={{ top: `calc(${row} * var(--board-cell))` }}
+            />
+          ))}
+        {clearedRows.length >= 3 && (
+          <strong className="clear-word" data-testid="clear-word">
+            {clearedRows.length >= 4 ? "QUAD" : "TRIPLE"}
+          </strong>
+        )}
+        {lossGrey !== null &&
+          Array.from({ length: VISIBLE_BOARD_HEIGHT }, (_, index) => (
+            <span
+              key={`grey-${index}`}
+              className={lossGrey === "instant" ? "grey-row is-static" : "grey-row"}
+              data-testid="grey-row"
+              style={
+                {
+                  top: `calc(${index} * var(--board-cell))`,
+                  "--grey-index": index,
+                } as CSSProperties
+              }
+            />
+          ))}
         {tokenRow !== null && <NamePieceToken row={tokenRow} />}
       </div>
     </div>

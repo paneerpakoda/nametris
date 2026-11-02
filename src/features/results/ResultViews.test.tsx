@@ -4,6 +4,8 @@ import { describe, expect, it, vi } from "vitest";
 
 import { playerTitles } from "../../game/config/titles";
 import type { LossResult, RunResult } from "../../game/engine/result";
+import { updateJuicePreferences } from "../juice/preferences";
+import { resetParticles } from "../juice/particles";
 import { LossScreen } from "./LossScreen";
 import { SuccessScreen } from "./SuccessScreen";
 
@@ -118,5 +120,36 @@ describe("result views", () => {
     await user.click(screen.getByRole("button", { name: "Try another name" }));
     expect(onPlayAgain).toHaveBeenCalledOnce();
     expect(onNewName).toHaveBeenCalledOnce();
+  });
+
+  it("drops at most sixty confetti squares above the actions", () => {
+    resetParticles();
+    const result: RunResult = {
+      ...base,
+      outcome: "won",
+      title: playerTitles.blockPoet,
+    };
+
+    render(<SuccessScreen result={result} onPlayAgain={vi.fn()} onNewName={vi.fn()} />);
+
+    expect(document.querySelectorAll(".speck").length).toBeLessThanOrEqual(60);
+    expect(document.querySelectorAll(".speck").length).toBeGreaterThan(0);
+    expect(screen.queryByTestId("win-plaque")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Play again" })).toBeVisible();
+  });
+
+  it("shows a gold name plaque when motion is reduced", () => {
+    updateJuicePreferences({ reducedMotion: true });
+    const result: RunResult = {
+      ...base,
+      outcome: "won",
+      title: playerTitles.blockPoet,
+    };
+
+    render(<SuccessScreen result={result} onPlayAgain={vi.fn()} onNewName={vi.fn()} />);
+
+    expect(screen.getByTestId("win-plaque")).toHaveTextContent("HARSH");
+    expect(document.querySelector(".speck")).not.toBeInTheDocument();
+    updateJuicePreferences({ reducedMotion: false });
   });
 });

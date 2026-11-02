@@ -5,6 +5,7 @@ import { describe, expect, it, vi } from "vitest";
 import { createBoardSession } from "../../game/engine/session";
 import { createStencilState } from "../../game/engine/stencil";
 import { BOARD_HEIGHT } from "../../game/engine/board";
+import { updateJuicePreferences } from "../juice/preferences";
 import { GameplayScreen } from "./GameplayScreen";
 
 describe("GameplayScreen", () => {
@@ -153,6 +154,33 @@ describe("GameplayScreen", () => {
     expect(screen.getByText("NAME PIECE LOST · FULL · USE SHIFT")).toBeVisible();
   });
 
+  it("shows the start count and a shift cue when a name piece can be sent", async () => {
+    render(
+      <GameplayScreen
+        initialSession={{
+          ...createBoardSession(["O", "I", "T"]),
+          transferCount: 1,
+        }}
+      />,
+    );
+
+    expect(await screen.findByTestId("start-count")).toHaveTextContent(/3|Ready/);
+    expect(await screen.findByTestId("shift-ready")).toHaveTextContent("SHIFT");
+    expect(screen.getByRole("button", { name: /^Send$/ })).toHaveClass(
+      "is-shift-ready",
+    );
+  });
+
+  it("toggles sound from the header button and the M key", async () => {
+    const user = userEvent.setup();
+    render(<GameplayScreen seed={7} />);
+
+    await user.click(screen.getByRole("button", { name: "Mute sound" }));
+    expect(screen.getByRole("button", { name: "Unmute sound" })).toBeInTheDocument();
+    await user.keyboard("m");
+    expect(screen.getByRole("button", { name: "Mute sound" })).toBeInTheDocument();
+  });
+
   it("pauses and resumes from real buttons", async () => {
     const user = userEvent.setup();
     render(<GameplayScreen seed={7} />);
@@ -181,7 +209,7 @@ describe("GameplayScreen", () => {
     await user.tab({ shift: true });
     expect(resume).toHaveFocus();
     await user.tab({ shift: true });
-    expect(screen.getByRole("button", { name: "How to play" })).toHaveFocus();
+    expect(screen.getByRole("button", { name: "Move sounds" })).toHaveFocus();
 
     await user.keyboard("p");
     await waitFor(() =>
@@ -287,8 +315,11 @@ describe("GameplayScreen", () => {
 
     render(<GameplayScreen initialSession={initialSession} onLost={onLost} />);
 
+    expect(screen.getAllByTestId("grey-row")).toHaveLength(20);
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
     await waitFor(() => expect(onLost).toHaveBeenCalledOnce());
     expect(onLost.mock.calls[0]?.[0]).not.toHaveProperty("title");
+    expect(screen.getByRole("alert")).toBeInTheDocument();
   });
 
   it("offers a real route button only when the piece is eligible", async () => {
@@ -399,7 +430,9 @@ describe("GameplayScreen", () => {
       />,
     );
     expect(screen.getByText("PLACE THE O")).toBeInTheDocument();
-    expect(screen.getByTestId("finish-banner")).toHaveTextContent("80% reached");
+    expect(screen.getByTestId("finish-banner")).toHaveTextContent(
+      "80%: YOU CAN FINISH",
+    );
 
     fireEvent.keyDown(window, { key: "Enter" });
 
@@ -543,6 +576,7 @@ describe("GameplayScreen", () => {
     expect(
       screen.getAllByTestId("stencil-cell").some((cell) => cell.dataset.pop === "new"),
     ).toBe(true);
+    expect(screen.getByTestId("piece-fly")).toBeInTheDocument();
   });
 
   it("flashes a soft lock and then drops the row message", () => {
@@ -603,5 +637,56 @@ describe("GameplayScreen", () => {
 
     expect(screen.getByTestId("score").textContent).toBe("0");
     expect(screen.getByRole("dialog", { name: "How to play Nametris" })).toBeVisible();
+  });
+
+  it("keeps a movement key on the same schedule through a four-row clear", () => {
+    const quad = () => {
+      const session = createBoardSession(["I", "O", "T", "J"]);
+      return {
+        ...session,
+        board: session.board.map((row, rowIndex) =>
+          row.map((cell, columnIndex) =>
+            rowIndex >= BOARD_HEIGHT - 4 && columnIndex !== 5 ? "J" : cell,
+          ),
+        ),
+        activePiece: {
+          type: "I" as const,
+          rotation: 1 as const,
+          row: BOARD_HEIGHT - 4,
+          column: 3,
+        },
+      };
+    };
+    const median = (values: number[]) => {
+      const ordered = [...values].sort((left, right) => left - right);
+      return ordered[Math.floor(ordered.length / 2)] ?? 0;
+    };
+    const sample = (reducedMotion: boolean) => {
+      updateJuicePreferences({
+        reducedMotion,
+        muted: reducedMotion,
+        volume: reducedMotion ? 0 : 0.5,
+      });
+      const view = render(<GameplayScreen initialSession={quad()} />);
+      const game = screen.getByRole("application", { name: "Nametris game" });
+      fireEvent.keyDown(game, { key: " " });
+      expect(screen.getByTestId("clear-word")).toHaveTextContent("QUAD");
+      const samples: number[] = [];
+      for (let index = 0; index < 12; index += 1) {
+        const started = performance.now();
+        fireEvent.keyDown(game, { key: "ArrowLeft" });
+        samples.push(performance.now() - started);
+      }
+      view.unmount();
+      return median(samples);
+    };
+
+    const on = sample(false);
+    const off = sample(true);
+    updateJuicePreferences({ reducedMotion: false, muted: false, volume: 0.5 });
+    console.info(
+      `key-to-move during quad clear ms effects-on=${on.toFixed(2)} effects-off=${off.toFixed(2)}`,
+    );
+    expect(Math.abs(on - off)).toBeLessThan(15);
   });
 });

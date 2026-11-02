@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { GameplayScreen } from "../features/gameplay/GameplayScreen";
 import { HowItWorks } from "../features/onboarding/HowItWorks";
@@ -10,6 +10,7 @@ import {
   readStoredPlayerName,
   storePlayerName,
 } from "../features/onboarding/playerNameStorage";
+import { useReducedMotion } from "../features/juice/preferences";
 import { WelcomeScreen } from "../features/onboarding/WelcomeScreen";
 import { LossScreen } from "../features/results/LossScreen";
 import { SuccessScreen } from "../features/results/SuccessScreen";
@@ -30,6 +31,12 @@ export function App({ initialOutcome }: AppProps) {
   const [runNumber, setRunNumber] = useState(0);
   const [seed, setSeed] = useState(() => createRunSeed(window.location.search));
   const [showIntro, setShowIntro] = useState(false);
+  const reducedMotion = useReducedMotion();
+
+  useEffect(() => {
+    document.documentElement.classList.toggle("is-reduced-motion", reducedMotion);
+    return () => document.documentElement.classList.remove("is-reduced-motion");
+  }, [reducedMotion]);
 
   function nextSeed() {
     setSeed(createRunSeed(window.location.search));

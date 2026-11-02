@@ -1,8 +1,11 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { CabinetShell } from "../../components/CabinetShell";
 import { ControlDeck } from "../../components/ControlDeck";
 import type { RunResult } from "../../game/engine/result";
+import { ParticleField } from "../juice/ParticleField";
+import { emitConfetti } from "../juice/particles";
+import { useReducedMotion } from "../juice/preferences";
 import { RewardCard } from "../reward/RewardCard";
 import { copyResult, downloadRewardCard, shareResult } from "../reward/localActions";
 import "../../styles/reward.css";
@@ -14,7 +17,19 @@ interface SuccessScreenProps {
 }
 
 export function SuccessScreen({ result, onPlayAgain, onNewName }: SuccessScreenProps) {
+  const reduced = useReducedMotion();
   const [actionStatus, setActionStatus] = useState("");
+
+  useEffect(() => {
+    if (reduced) {
+      return;
+    }
+    try {
+      emitConfetti();
+    } catch {
+      // Confetti must not block the win screen.
+    }
+  }, [reduced]);
 
   async function handleCopy() {
     try {
@@ -45,6 +60,13 @@ export function SuccessScreen({ result, onPlayAgain, onNewName }: SuccessScreenP
       controlDeck={<ControlDeck />}
     >
       <main className="result-shell result-shell-success">
+        {reduced ? (
+          <p className="win-plaque" data-testid="win-plaque">
+            {result.name}
+          </p>
+        ) : (
+          <ParticleField />
+        )}
         <div className="result-heading">
           <p className="eyebrow">RUN COMPLETE</p>
           <h1>YOU BUILT IT.</h1>

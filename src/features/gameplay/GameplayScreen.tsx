@@ -23,6 +23,13 @@ import {
   type LossResult,
   type RunResult,
 } from "../../game/engine/result";
+import { holdAudio, playSound, primeAudio } from "../juice/audio";
+import { completedLetterIndexes } from "../juice/cues";
+import { useJuiceFrame } from "../juice/frame";
+import { emitDust } from "../juice/particles";
+import { useJuiceSounds } from "../juice/useJuiceSounds";
+import { PauseSoundSettings, SoundButton } from "../juice/JuiceControls";
+import { getJuicePreferences, updateJuicePreferences } from "../juice/preferences";
 import { HowItWorks } from "../onboarding/HowItWorks";
 import { BoardGrid } from "./BoardGrid";
 import { GameHelpDialog } from "./GameHelpDialog";
@@ -40,9 +47,12 @@ import {
   prefersReducedMotion,
   softLockFlashMilliseconds,
   hardDropTrailMilliseconds,
+  letterFlashMilliseconds,
+  pieceFlyMilliseconds,
+  stackGreyMilliseconds,
 } from "./motion";
-import { RunGuidance } from "./RunGuidance";
 import { TransferRail } from "./TransferRail";
+import type { NameFly } from "./StencilGrid";
 import "../../styles/gameplay.css";
 
 interface GameplayScreenProps {
@@ -122,6 +132,14 @@ export function GameplayScreen({
   const [lockFlash, setLockFlash] = useState<CellFlash | null>(null);
   const [dropTrail, setDropTrail] = useState<CellFlash | null>(null);
   const [popKeys, setPopKeys] = useState<ReadonlySet<string>>(() => new Set());
+  const [fly, setFly] = useState<NameFly | null>(null);
+  const [brightLetters, setBrightLetters] = useState<ReadonlySet<number>>(
+    () => new Set(),
+  );
+  const [flashLetters, setFlashLetters] = useState<ReadonlySet<number>>(
+    () => new Set(),
+  );
+  const [lossCard, setLossCard] = useState(false);
   const motionSnapshot = useRef({
     board: state.board,
     piece: state.activePiece,
@@ -130,12 +148,14 @@ export function GameplayScreen({
     filled: new Set(state.stencil.filledCells.keys()),
     linesCleared: state.linesCleared,
     transferCount: state.transferCount,
+    phase: state.phase,
+    stencilPiece: state.stencilPiece,
+    stencil: state.stencil,
   });
   const pendingHardDrop = useRef(false);
   const motionId = useRef(0);
   const [helpOpen, setHelpOpen] = useState(false);
   const [howItWorksOpen, setHowItWorksOpen] = useState(false);
-  const [coachReplay, setCoachReplay] = useState(0);
   const [emptySendId, setEmptySendId] = useState(0);
   const [emptySendFlash, setEmptySendFlash] = useState(false);
   const [finishPromptDismissed, setFinishPromptDismissed] = useState(false);
@@ -220,17 +240,6 @@ export function GameplayScreen({
       }
     };
   }, []);
-
-  useEffect(() => {
-    if (state.phase === "won" && reportedOutcomeRef.current !== "won") {
-      reportedOutcomeRef.current = "won";
-      onWon?.(createRunResult(state));
-    }
-    if (state.phase === "lost" && reportedOutcomeRef.current !== "lost") {
-      reportedOutcomeRef.current = "lost";
-      onLost?.(createLossResult(state));
-    }
-  }, [onLost, onWon, state]);
 
   useEffect(() => {
     const previous = previousAnnouncementState.current;
@@ -319,6 +328,33 @@ export function GameplayScreen({
     return () => window.clearTimeout(timeout);
   }, [lineClearFeedback]);
 
+  useJuiceSounds(state, hardDropImpact, emptySendId);
+  const juiceFrame = useJuiceFrame(state);
+
+  useEffect(() => {
+    if (state.phase === "won" && reportedOutcomeRef.current !== "won") {
+      reportedOutcomeRef.current = "won";
+      onWon?.(createRunResult(state));
+    }
+    if (state.phase !== "lost" || reportedOutcomeRef.current === "lost") {
+      return;
+    }
+    if (juiceFrame.reduced) {
+      const timeout = window.setTimeout(() => {
+        reportedOutcomeRef.current = "lost";
+        setLossCard(true);
+        onLost?.(createLossResult(state));
+      }, 0);
+      return () => window.clearTimeout(timeout);
+    }
+    const timeout = window.setTimeout(() => {
+      reportedOutcomeRef.current = "lost";
+      setLossCard(true);
+      onLost?.(createLossResult(state));
+    }, stackGreyMilliseconds);
+    return () => window.clearTimeout(timeout);
+  }, [juiceFrame.reduced, onLost, onWon, state]);
+
   useEffect(() => {
     const previous = motionSnapshot.current;
     const hardDrop = pendingHardDrop.current;
@@ -339,13 +375,13 @@ export function GameplayScreen({
 
     if (queueShrunk) {
       motionId.current += 1;
-      if (hardDrop) {
+      if (hardDrop && !juiceFrame.reduced) {
         const ghost = getGhostPiece(previous.board, previous.piece);
         setDropTrail({
           id: motionId.current,
           keys: new Set(hardDropTrailKeys(previous.piece, ghost.row)),
         });
-      } else {
+      } else if (!hardDrop) {
         setLockFlash({
           id: motionId.current,
           keys: new Set(pieceCellKeys(previous.piece)),
@@ -354,8 +390,54 @@ export function GameplayScreen({
     }
 
     const filled = addedFilledKeys(previous.filled, state.stencil.filledCells);
-    if (filled.length > 0) {
+    if (filled.length > 0 && !juiceFrame.reduced) {
       setPopKeys(new Set(filled));
+    }
+    if (
+      filled.length > 0 &&
+      previous.phase === "placing-stencil" &&
+      previous.stencilPiece !== null
+    ) {
+      const projection = getStencilPieceProjection(
+        previous.stencil,
+        previous.stencilPiece,
+      );
+      if (!juiceFrame.reduced) {
+        motionId.current += 1;
+        setFly({
+          id: motionId.current,
+          piece: previous.stencilPiece,
+          kept: projection.keptCellKeys,
+          lost: projection.trimmedCellKeys,
+        });
+        try {
+          emitDust(
+            projection.trimmedCellKeys,
+            previous.stencil.columns,
+            previous.stencil.rows,
+          );
+        } catch {
+          // Dust is optional and must not stop the lock.
+        }
+      }
+      const letters = completedLetterIndexes(
+        state.name,
+        state.stencil.mask,
+        previous.filled,
+        state.stencil.filledCells,
+      );
+      if (letters.length > 0) {
+        setBrightLetters((current) => {
+          const next = new Set(current);
+          for (const index of letters) {
+            next.add(index);
+          }
+          return next;
+        });
+        if (!juiceFrame.reduced) {
+          setFlashLetters(new Set(letters));
+        }
+      }
     }
 
     pendingHardDrop.current = false;
@@ -367,8 +449,11 @@ export function GameplayScreen({
       filled: new Set(state.stencil.filledCells.keys()),
       linesCleared: state.linesCleared,
       transferCount: state.transferCount,
+      phase: state.phase,
+      stencilPiece: state.stencilPiece,
+      stencil: state.stencil,
     };
-  }, [state]);
+  }, [juiceFrame.reduced, state]);
 
   useEffect(() => {
     if (lockFlash === null) {
@@ -401,6 +486,25 @@ export function GameplayScreen({
   }, [popKeys]);
 
   useEffect(() => {
+    if (fly === null) {
+      return;
+    }
+    const timeout = window.setTimeout(() => setFly(null), pieceFlyMilliseconds);
+    return () => window.clearTimeout(timeout);
+  }, [fly]);
+
+  useEffect(() => {
+    if (flashLetters.size === 0) {
+      return;
+    }
+    const timeout = window.setTimeout(
+      () => setFlashLetters(new Set()),
+      letterFlashMilliseconds,
+    );
+    return () => window.clearTimeout(timeout);
+  }, [flashLetters]);
+
+  useEffect(() => {
     if (state.phase !== "playing" && state.phase !== "placing-stencil") {
       return;
     }
@@ -416,6 +520,11 @@ export function GameplayScreen({
     }, clockResolutionMilliseconds);
 
     return () => window.clearInterval(interval);
+  }, [state.phase]);
+
+  useEffect(() => {
+    holdAudio("pause", state.phase === "paused");
+    return () => holdAudio("pause", false);
   }, [state.phase]);
 
   useEffect(() => {
@@ -481,6 +590,27 @@ export function GameplayScreen({
       return;
     }
     handledKeys.current.add(event);
+
+    primeAudio();
+
+    if (
+      event.key.toLowerCase() === "m" &&
+      !event.repeat &&
+      !event.metaKey &&
+      !event.ctrlKey &&
+      !event.altKey &&
+      !(event.target instanceof HTMLTextAreaElement) &&
+      !(event.target instanceof HTMLInputElement && event.target.type !== "range")
+    ) {
+      event.preventDefault();
+      event.stopPropagation();
+      const muted = getJuicePreferences().muted;
+      updateJuicePreferences({ muted: !muted });
+      if (muted) {
+        playSound("ui");
+      }
+      return;
+    }
 
     if (helpOpen || howItWorksOpen) {
       return;
@@ -564,7 +694,7 @@ export function GameplayScreen({
     }
 
     const buttons = [
-      ...(pauseMenuRef.current?.querySelectorAll<HTMLButtonElement>("button") ?? []),
+      ...(pauseMenuRef.current?.querySelectorAll<HTMLElement>("button, input") ?? []),
     ];
     const first = buttons[0];
     const last = buttons[buttons.length - 1];
@@ -597,6 +727,7 @@ export function GameplayScreen({
       phase={state.phase}
       canRoute={state.transferCount === 0 || canRoute}
       canLock={canLock}
+      shiftReady={juiceFrame.shiftGlow}
       onInput={helpOpen ? undefined : handleCabinetInput}
     />
   );
@@ -613,27 +744,25 @@ export function GameplayScreen({
             <NametrisMark compact />
             <h1>NAMETRIS</h1>
           </div>
-          <RunGuidance
-            state={state}
-            replayKey={coachReplay}
-            onDismiss={() =>
-              window.requestAnimationFrame(() => gameRef.current?.focus())
-            }
-          />
-          <span className="game-mode-label">
-            {state.phase === "placing-stencil" ? "YOUR NAME" : "CLEAR / BUILD"}
-          </span>
-          <button
-            type="button"
-            className="touch-only touch-pause"
-            aria-label={state.phase === "paused" ? "Touch resume" : "Touch pause"}
-            onPointerDown={(event) => {
-              event.preventDefault();
-              handleCabinetInput("p");
-            }}
-          >
-            {state.phase === "paused" ? "Resume" : "Pause"}
-          </button>
+          <div className="game-header-actions">
+            {juiceFrame.countdown !== null && (
+              <span className="start-count" data-testid="start-count">
+                {juiceFrame.countdown}
+              </span>
+            )}
+            <SoundButton />
+            <button
+              type="button"
+              className="touch-only touch-pause"
+              aria-label={state.phase === "paused" ? "Touch resume" : "Touch pause"}
+              onPointerDown={(event) => {
+                event.preventDefault();
+                handleCabinetInput("p");
+              }}
+            >
+              {state.phase === "paused" ? "Resume" : "Pause"}
+            </button>
+          </div>
         </header>
 
         <div
@@ -654,25 +783,38 @@ export function GameplayScreen({
               <p className="panel-kicker">01 / CLEAR LINES</p>
               <h2 id="normal-board-title">TETRIS BOARD</h2>
             </div>
-            <BoardGrid
-              board={state.board}
-              activePiece={state.activePiece}
-              ghostPiece={ghostPiece}
-              slowZoneActive={slowZoneActive}
-              freezeRemaining={
-                state.phase === "placing-stencil"
-                  ? state.freezeRemainingMilliseconds
-                  : null
-              }
-              clearedRows={clearFx?.rows ?? []}
-              clearing={clearFx !== null && clearFx.rows.length > 0}
-              lockFlashKeys={lockFlash?.keys}
-              lockFlashId={lockFlash?.id}
-              trailKeys={dropTrail?.keys}
-              trailId={dropTrail?.id}
-              tooHigh={tooHigh}
-              tokenRow={tokenRow}
-            />
+            <div className="board-fit">
+              <BoardGrid
+                board={state.board}
+                activePiece={state.activePiece}
+                ghostPiece={ghostPiece}
+                slowZoneActive={slowZoneActive}
+                freezeRemaining={
+                  state.phase === "placing-stencil"
+                    ? state.freezeRemainingMilliseconds
+                    : null
+                }
+                clearedRows={clearFx?.rows ?? []}
+                clearing={clearFx !== null && clearFx.rows.length > 0}
+                lockFlashKeys={lockFlash?.keys}
+                lockFlashId={lockFlash?.id}
+                trailKeys={dropTrail?.keys}
+                trailId={dropTrail?.id}
+                tooHigh={tooHigh}
+                tokenRow={tokenRow}
+                danger={juiceFrame.danger}
+                shiftReady={juiceFrame.shiftGlow}
+                levelUp={juiceFrame.levelUp}
+                reducedMotion={juiceFrame.reduced}
+                lossGrey={
+                  state.phase === "lost"
+                    ? juiceFrame.reduced
+                      ? "instant"
+                      : "down"
+                    : null
+                }
+              />
+            </div>
             {(lineClearFeedback !== null || clearFx !== null) && (
               <div className="board-feedback">
                 {clearFx !== null && (
@@ -693,6 +835,8 @@ export function GameplayScreen({
           <TransferRail
             transferCount={state.transferCount}
             nextPiece={state.nextPiece}
+            fillingFrom={juiceFrame.fillingFrom}
+            counterTick={juiceFrame.counterTick}
             onTouchSend={() => {
               if (helpOpen || howItWorksOpen || restartConfirm || finishPromptOpen) {
                 return;
@@ -712,11 +856,16 @@ export function GameplayScreen({
             emptySendFlash={emptySendFlash}
             scorePop={clearFx !== null}
             popKeys={popKeys}
+            markerPop={juiceFrame.markerPop}
+            fly={fly}
+            brightLetters={brightLetters}
+            flashLetters={flashLetters}
+            reducedMotion={juiceFrame.reduced}
           />
 
           {state.canFinish && state.phase !== "won" && state.phase !== "lost" && (
             <p className="finish-banner" data-testid="finish-banner">
-              80% reached
+              80%: YOU CAN FINISH
             </p>
           )}
 
@@ -753,10 +902,6 @@ export function GameplayScreen({
               onShowHowItWorks={() => {
                 setHelpOpen(false);
                 setHowItWorksOpen(true);
-              }}
-              onShowHints={() => {
-                setCoachReplay((current) => current + 1);
-                closeHelp();
               }}
             />
           )}
@@ -841,13 +986,14 @@ export function GameplayScreen({
                     >
                       How to play
                     </button>
+                    <PauseSoundSettings />
                   </div>
                 </>
               )}
             </div>
           )}
 
-          {state.phase === "lost" && (
+          {lossCard && state.phase === "lost" && (
             <div className="game-overlay" role="alert">
               <p className="eyebrow">STACK OVERFLOW</p>
               <h2>Run over</h2>
