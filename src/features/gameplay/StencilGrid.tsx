@@ -1,21 +1,42 @@
 import { useMemo, type CSSProperties } from "react";
 
-import { stencilCellKey } from "../../game/glyphs/alphabet";
+import { glyphColumns, glyphSpacing, stencilCellKey } from "../../game/glyphs/alphabet";
 import {
   getStencilPieceProjection,
   type StencilState,
 } from "../../game/engine/stencil";
 import { getPieceCells } from "../../game/engine/pieces";
 import type { ActivePiece } from "../../game/model/types";
+import { ParticleField } from "../juice/ParticleField";
+
+export interface NameFly {
+  readonly id: number;
+  readonly piece: ActivePiece;
+  readonly kept: ReadonlySet<string>;
+  readonly lost: ReadonlySet<string>;
+}
 
 interface StencilGridProps {
   readonly name: string;
   readonly stencil: StencilState;
   readonly activePiece: ActivePiece | null;
   readonly popKeys?: ReadonlySet<string>;
+  readonly fly?: NameFly | null;
+  readonly brightLetters?: ReadonlySet<number>;
+  readonly flashLetters?: ReadonlySet<number>;
+  readonly reducedMotion?: boolean;
 }
 
-export function StencilGrid({ name, stencil, activePiece, popKeys }: StencilGridProps) {
+export function StencilGrid({
+  name,
+  stencil,
+  activePiece,
+  popKeys,
+  fly = null,
+  brightLetters,
+  flashLetters,
+  reducedMotion = false,
+}: StencilGridProps) {
   const activeCells = useMemo(
     () =>
       new Set(
@@ -51,6 +72,12 @@ export function StencilGrid({ name, stencil, activePiece, popKeys }: StencilGrid
           const column = index % stencil.columns;
           const key = stencilCellKey({ row, column });
           const isMaskCell = stencil.mask.has(key);
+          const letterSpan = glyphColumns + glyphSpacing;
+          const letterIndex = Math.floor(column / letterSpan);
+          const inLetter = isMaskCell && column % letterSpan < glyphColumns;
+          const letterDone = inLetter && (brightLetters?.has(letterIndex) ?? false);
+          const letterFlash =
+            letterDone && !reducedMotion && (flashLetters?.has(letterIndex) ?? false);
           const lockedPiece = stencil.filledCells.get(key);
           const isPreview = activeCells.has(key);
           const status = lockedPiece
@@ -70,9 +97,14 @@ export function StencilGrid({ name, stencil, activePiece, popKeys }: StencilGrid
               aria-label={`Name outline row ${row + 1}, column ${column + 1}, ${
                 status === "preview-lost" ? "lost" : status
               }`}
-              className={
-                popKeys?.has(key) ? "stencil-cell is-pop color-flash" : "stencil-cell"
-              }
+              className={[
+                "stencil-cell",
+                popKeys?.has(key) ? "is-pop color-flash" : "",
+                letterDone ? "is-letter-done" : "",
+                letterFlash ? "is-letter-flash" : "",
+              ]
+                .filter(Boolean)
+                .join(" ")}
               data-testid="stencil-cell"
               data-pop={popKeys?.has(key) ? "new" : undefined}
               data-status={status}
@@ -80,6 +112,24 @@ export function StencilGrid({ name, stencil, activePiece, popKeys }: StencilGrid
             />
           );
         })}
+        {fly !== null && !reducedMotion && (
+          <div className="piece-fly" data-testid="piece-fly" aria-hidden="true">
+            {getPieceCells(fly.piece).map((cell) => {
+              const key = stencilCellKey(cell);
+              return (
+                <span
+                  key={`${fly.id}-${key}`}
+                  className={
+                    fly.kept.has(key) ? "fly-cell is-kept" : "fly-cell is-lost"
+                  }
+                  data-piece={fly.piece.type}
+                  style={{ gridRow: cell.row + 1, gridColumn: cell.column + 1 }}
+                />
+              );
+            })}
+          </div>
+        )}
+        <ParticleField />
       </div>
     </div>
   );

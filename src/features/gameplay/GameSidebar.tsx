@@ -1,6 +1,7 @@
 import type { BoardSession } from "../../game/engine/session";
 import { formatActiveTime } from "../../game/runtime/clock";
 import { StencilPanel } from "./StencilPanel";
+import type { NameFly } from "./StencilGrid";
 
 interface GameSidebarProps {
   readonly state: BoardSession;
@@ -14,6 +15,10 @@ interface GameSidebarProps {
   readonly scorePop?: boolean;
   readonly popKeys?: ReadonlySet<string>;
   readonly markerPop?: boolean;
+  readonly fly?: NameFly | null;
+  readonly brightLetters?: ReadonlySet<number>;
+  readonly flashLetters?: ReadonlySet<number>;
+  readonly reducedMotion?: boolean;
 }
 
 export function GameSidebar({
@@ -28,6 +33,10 @@ export function GameSidebar({
   scorePop = false,
   popKeys,
   markerPop = false,
+  fly = null,
+  brightLetters,
+  flashLetters,
+  reducedMotion = false,
 }: GameSidebarProps) {
   return (
     <aside className="game-sidebar">
@@ -53,6 +62,10 @@ export function GameSidebar({
         emptySendFlash={emptySendFlash}
         popKeys={popKeys}
         markerPop={markerPop}
+        fly={fly}
+        brightLetters={brightLetters}
+        flashLetters={flashLetters}
+        reducedMotion={reducedMotion}
       />
 
       <section className="metric-strip" aria-label="Game metrics">

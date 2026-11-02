@@ -24,7 +24,9 @@ import {
   type RunResult,
 } from "../../game/engine/result";
 import { holdAudio, playSound, primeAudio } from "../juice/audio";
+import { completedLetterIndexes } from "../juice/cues";
 import { useJuiceFrame } from "../juice/frame";
+import { emitDust } from "../juice/particles";
 import { useJuiceSounds } from "../juice/useJuiceSounds";
 import { PauseSoundSettings, SoundButton } from "../juice/JuiceControls";
 import { getJuicePreferences, updateJuicePreferences } from "../juice/preferences";
@@ -45,8 +47,12 @@ import {
   prefersReducedMotion,
   softLockFlashMilliseconds,
   hardDropTrailMilliseconds,
+  letterFlashMilliseconds,
+  pieceFlyMilliseconds,
+  stackGreyMilliseconds,
 } from "./motion";
 import { TransferRail } from "./TransferRail";
+import type { NameFly } from "./StencilGrid";
 import "../../styles/gameplay.css";
 
 interface GameplayScreenProps {
@@ -126,6 +132,14 @@ export function GameplayScreen({
   const [lockFlash, setLockFlash] = useState<CellFlash | null>(null);
   const [dropTrail, setDropTrail] = useState<CellFlash | null>(null);
   const [popKeys, setPopKeys] = useState<ReadonlySet<string>>(() => new Set());
+  const [fly, setFly] = useState<NameFly | null>(null);
+  const [brightLetters, setBrightLetters] = useState<ReadonlySet<number>>(
+    () => new Set(),
+  );
+  const [flashLetters, setFlashLetters] = useState<ReadonlySet<number>>(
+    () => new Set(),
+  );
+  const [lossCard, setLossCard] = useState(false);
   const motionSnapshot = useRef({
     board: state.board,
     piece: state.activePiece,
@@ -134,6 +148,9 @@ export function GameplayScreen({
     filled: new Set(state.stencil.filledCells.keys()),
     linesCleared: state.linesCleared,
     transferCount: state.transferCount,
+    phase: state.phase,
+    stencilPiece: state.stencilPiece,
+    stencil: state.stencil,
   });
   const pendingHardDrop = useRef(false);
   const motionId = useRef(0);
@@ -223,17 +240,6 @@ export function GameplayScreen({
       }
     };
   }, []);
-
-  useEffect(() => {
-    if (state.phase === "won" && reportedOutcomeRef.current !== "won") {
-      reportedOutcomeRef.current = "won";
-      onWon?.(createRunResult(state));
-    }
-    if (state.phase === "lost" && reportedOutcomeRef.current !== "lost") {
-      reportedOutcomeRef.current = "lost";
-      onLost?.(createLossResult(state));
-    }
-  }, [onLost, onWon, state]);
 
   useEffect(() => {
     const previous = previousAnnouncementState.current;
@@ -326,6 +332,30 @@ export function GameplayScreen({
   const juiceFrame = useJuiceFrame(state);
 
   useEffect(() => {
+    if (state.phase === "won" && reportedOutcomeRef.current !== "won") {
+      reportedOutcomeRef.current = "won";
+      onWon?.(createRunResult(state));
+    }
+    if (state.phase !== "lost" || reportedOutcomeRef.current === "lost") {
+      return;
+    }
+    if (juiceFrame.reduced) {
+      const timeout = window.setTimeout(() => {
+        reportedOutcomeRef.current = "lost";
+        setLossCard(true);
+        onLost?.(createLossResult(state));
+      }, 0);
+      return () => window.clearTimeout(timeout);
+    }
+    const timeout = window.setTimeout(() => {
+      reportedOutcomeRef.current = "lost";
+      setLossCard(true);
+      onLost?.(createLossResult(state));
+    }, stackGreyMilliseconds);
+    return () => window.clearTimeout(timeout);
+  }, [juiceFrame.reduced, onLost, onWon, state]);
+
+  useEffect(() => {
     const previous = motionSnapshot.current;
     const hardDrop = pendingHardDrop.current;
     const queueShrunk = state.pieceQueue.length < previous.queueLength;
@@ -360,8 +390,54 @@ export function GameplayScreen({
     }
 
     const filled = addedFilledKeys(previous.filled, state.stencil.filledCells);
-    if (filled.length > 0) {
+    if (filled.length > 0 && !juiceFrame.reduced) {
       setPopKeys(new Set(filled));
+    }
+    if (
+      filled.length > 0 &&
+      previous.phase === "placing-stencil" &&
+      previous.stencilPiece !== null
+    ) {
+      const projection = getStencilPieceProjection(
+        previous.stencil,
+        previous.stencilPiece,
+      );
+      if (!juiceFrame.reduced) {
+        motionId.current += 1;
+        setFly({
+          id: motionId.current,
+          piece: previous.stencilPiece,
+          kept: projection.keptCellKeys,
+          lost: projection.trimmedCellKeys,
+        });
+        try {
+          emitDust(
+            projection.trimmedCellKeys,
+            previous.stencil.columns,
+            previous.stencil.rows,
+          );
+        } catch {
+          // Dust is optional and must not stop the lock.
+        }
+      }
+      const letters = completedLetterIndexes(
+        state.name,
+        state.stencil.mask,
+        previous.filled,
+        state.stencil.filledCells,
+      );
+      if (letters.length > 0) {
+        setBrightLetters((current) => {
+          const next = new Set(current);
+          for (const index of letters) {
+            next.add(index);
+          }
+          return next;
+        });
+        if (!juiceFrame.reduced) {
+          setFlashLetters(new Set(letters));
+        }
+      }
     }
 
     pendingHardDrop.current = false;
@@ -373,6 +449,9 @@ export function GameplayScreen({
       filled: new Set(state.stencil.filledCells.keys()),
       linesCleared: state.linesCleared,
       transferCount: state.transferCount,
+      phase: state.phase,
+      stencilPiece: state.stencilPiece,
+      stencil: state.stencil,
     };
   }, [juiceFrame.reduced, state]);
 
@@ -405,6 +484,25 @@ export function GameplayScreen({
     const timeout = window.setTimeout(() => setPopKeys(new Set()), namePopMilliseconds);
     return () => window.clearTimeout(timeout);
   }, [popKeys]);
+
+  useEffect(() => {
+    if (fly === null) {
+      return;
+    }
+    const timeout = window.setTimeout(() => setFly(null), pieceFlyMilliseconds);
+    return () => window.clearTimeout(timeout);
+  }, [fly]);
+
+  useEffect(() => {
+    if (flashLetters.size === 0) {
+      return;
+    }
+    const timeout = window.setTimeout(
+      () => setFlashLetters(new Set()),
+      letterFlashMilliseconds,
+    );
+    return () => window.clearTimeout(timeout);
+  }, [flashLetters]);
 
   useEffect(() => {
     if (state.phase !== "playing" && state.phase !== "placing-stencil") {
@@ -708,6 +806,13 @@ export function GameplayScreen({
                 shiftReady={juiceFrame.shiftGlow}
                 levelUp={juiceFrame.levelUp}
                 reducedMotion={juiceFrame.reduced}
+                lossGrey={
+                  state.phase === "lost"
+                    ? juiceFrame.reduced
+                      ? "instant"
+                      : "down"
+                    : null
+                }
               />
             </div>
             {(lineClearFeedback !== null || clearFx !== null) && (
@@ -752,6 +857,10 @@ export function GameplayScreen({
             scorePop={clearFx !== null}
             popKeys={popKeys}
             markerPop={juiceFrame.markerPop}
+            fly={fly}
+            brightLetters={brightLetters}
+            flashLetters={flashLetters}
+            reducedMotion={juiceFrame.reduced}
           />
 
           {state.canFinish && state.phase !== "won" && state.phase !== "lost" && (
@@ -884,7 +993,7 @@ export function GameplayScreen({
             </div>
           )}
 
-          {state.phase === "lost" && (
+          {lossCard && state.phase === "lost" && (
             <div className="game-overlay" role="alert">
               <p className="eyebrow">STACK OVERFLOW</p>
               <h2>Run over</h2>

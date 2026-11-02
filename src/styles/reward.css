@@ -7,6 +7,7 @@
 }
 
 .result-shell {
+  position: relative;
   display: grid;
   width: 100%;
   height: 100%;
@@ -17,6 +18,21 @@
   gap: clamp(8px, 1.5vh, 14px);
   overflow: hidden;
   text-align: center;
+}
+
+.win-plaque {
+  margin: 0;
+  padding: 8px 14px;
+  color: #24180a;
+  background: #e6b422;
+  font-family: var(--font-pixel);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+}
+
+.result-shell > .speck-layer {
+  height: 42%;
+  bottom: auto;
 }
 
 .result-heading {

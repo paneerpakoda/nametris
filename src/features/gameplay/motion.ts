@@ -9,6 +9,9 @@ export const softLockFlashMilliseconds = 80;
 export const hardDropTrailMilliseconds = 120;
 export const hardDropBumpMilliseconds = 90;
 export const namePopMilliseconds = 180;
+export const pieceFlyMilliseconds = 250;
+export const letterFlashMilliseconds = 300;
+export const stackGreyMilliseconds = 600;
 
 export function prefersReducedMotion(): boolean {
   return (

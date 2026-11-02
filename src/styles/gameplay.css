@@ -540,24 +540,79 @@
   position: absolute;
   z-index: 3;
   left: 0;
-  width: 100%;
+  width: 58%;
   height: var(--board-cell);
   background: #fff4df;
   pointer-events: none;
-  transform-origin: center;
-  animation: row-clear 180ms ease-in forwards;
+  animation: row-sweep 220ms ease-out forwards;
 }
 
-@keyframes row-clear {
+.clear-row[data-tier="2"],
+.clear-row[data-tier="3"],
+.clear-row[data-tier="4"] {
+  width: 100%;
+}
+
+@keyframes row-sweep {
+  from {
+    transform: translateX(-110%);
+    opacity: 0.9;
+  }
+
+  to {
+    transform: translateX(120%);
+    opacity: 0;
+  }
+}
+
+.clear-word {
+  position: absolute;
+  z-index: 6;
+  top: 42%;
+  right: 4px;
+  margin: 0;
+  padding: 3px 6px;
+  color: #24180a;
+  background: #fff4df;
+  font-family: var(--font-pixel);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  pointer-events: none;
+  animation: clear-word 700ms linear forwards;
+}
+
+@keyframes clear-word {
   0%,
-  30% {
-    transform: scaleY(1);
+  78% {
     opacity: 1;
   }
 
   100% {
-    transform: scaleY(0);
     opacity: 0;
+  }
+}
+
+.grey-row {
+  position: absolute;
+  z-index: 7;
+  left: 0;
+  width: 100%;
+  height: var(--board-cell);
+  background: rgb(92 90 84 / 88%);
+  opacity: 0;
+  pointer-events: none;
+  animation: grey-in 30ms linear forwards;
+  animation-delay: calc(var(--grey-index) * 30ms);
+}
+
+.grey-row.is-static {
+  opacity: 1;
+  animation: none;
+}
+
+@keyframes grey-in {
+  to {
+    opacity: 1;
   }
 }
 
@@ -918,11 +973,117 @@
 }
 
 .stencil-grid {
+  position: relative;
   display: grid;
   width: 100%;
   max-height: 100%;
   grid-template-columns: repeat(var(--stencil-columns), minmax(0, 1fr));
   gap: clamp(1px, 0.2vw, 3px);
+}
+
+.piece-fly {
+  position: absolute;
+  z-index: 5;
+  display: grid;
+  pointer-events: none;
+  inset: 0;
+  grid-template-columns: repeat(var(--stencil-columns), minmax(0, 1fr));
+  gap: inherit;
+  animation: piece-fly 250ms ease-in forwards;
+}
+
+@keyframes piece-fly {
+  0% {
+    transform: translate(16px, -26px) scale(1);
+    opacity: 1;
+  }
+
+  55% {
+    transform: translate(-10px, -8px) scale(0.62);
+    opacity: 0.92;
+  }
+
+  100% {
+    transform: translate(0, 0) scale(0.2);
+    opacity: 0;
+  }
+}
+
+.fly-cell.is-kept {
+  animation: kept-flare 250ms ease-out;
+}
+
+.fly-cell.is-lost {
+  animation: dust-crumble 180ms linear forwards;
+}
+
+@keyframes kept-flare {
+  40% {
+    transform: scale(1.18);
+  }
+}
+
+@keyframes dust-crumble {
+  to {
+    transform: translateY(6px) scale(0.35);
+    opacity: 0;
+  }
+}
+
+.stencil-cell.is-letter-done {
+  position: relative;
+}
+
+.stencil-cell.is-letter-done::after {
+  position: absolute;
+  background: #fff4df;
+  content: "";
+  opacity: 0.28;
+  pointer-events: none;
+  inset: 0;
+}
+
+.stencil-cell.is-letter-flash::after {
+  animation: letter-cream 300ms linear;
+}
+
+@keyframes letter-cream {
+  from {
+    opacity: 0.62;
+  }
+
+  to {
+    opacity: 0.28;
+  }
+}
+
+.speck-layer {
+  position: absolute;
+  z-index: 6;
+  overflow: hidden;
+  pointer-events: none;
+  inset: 0;
+}
+
+.speck {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  opacity: 0.9;
+  animation: speck-drift 250ms linear forwards;
+}
+
+.speck.is-confetti {
+  width: 6px;
+  height: 6px;
+  animation-duration: 1.5s;
+}
+
+@keyframes speck-drift {
+  to {
+    transform: translate(var(--drift-x), var(--drift-y));
+    opacity: 0;
+  }
 }
 
 .stencil-cell {
@@ -1529,6 +1690,23 @@ button.touch-only {
     animation-iteration-count: 1 !important;
     animation-timing-function: linear !important;
   }
+
+  .clear-row,
+  .piece-fly,
+  .speck {
+    display: none !important;
+  }
+
+  .clear-word,
+  .fly-cell,
+  .stencil-cell.is-letter-flash::after,
+  .grey-row {
+    animation: none !important;
+  }
+
+  .grey-row {
+    opacity: 1;
+  }
 }
 
 .is-reduced-motion .line-clear-feedback,
@@ -1549,6 +1727,23 @@ button.touch-only {
   animation-duration: 150ms !important;
   animation-iteration-count: 1 !important;
   animation-timing-function: linear !important;
+}
+
+.is-reduced-motion .clear-row,
+.is-reduced-motion .piece-fly,
+.is-reduced-motion .speck {
+  display: none !important;
+}
+
+.is-reduced-motion .clear-word,
+.is-reduced-motion .fly-cell,
+.is-reduced-motion .stencil-cell.is-letter-flash::after,
+.is-reduced-motion .grey-row {
+  animation: none !important;
+}
+
+.is-reduced-motion .grey-row {
+  opacity: 1;
 }
 
 .start-count,

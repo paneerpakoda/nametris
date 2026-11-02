@@ -4,7 +4,7 @@ import {
 } from "../../game/engine/stencil";
 import { maximumTransferCount } from "../../game/config/gameplay";
 import { canRouteActivePiece, type BoardSession } from "../../game/engine/session";
-import { StencilGrid } from "./StencilGrid";
+import { StencilGrid, type NameFly } from "./StencilGrid";
 
 interface StencilPanelProps {
   readonly state: BoardSession;
@@ -16,6 +16,10 @@ interface StencilPanelProps {
   readonly emptySendFlash?: boolean;
   readonly popKeys?: ReadonlySet<string>;
   readonly markerPop?: boolean;
+  readonly fly?: NameFly | null;
+  readonly brightLetters?: ReadonlySet<number>;
+  readonly flashLetters?: ReadonlySet<number>;
+  readonly reducedMotion?: boolean;
 }
 
 export function StencilPanel({
@@ -28,6 +32,10 @@ export function StencilPanel({
   emptySendFlash = false,
   popKeys,
   markerPop = false,
+  fly = null,
+  brightLetters,
+  flashLetters,
+  reducedMotion = false,
 }: StencilPanelProps) {
   const completion = getStencilCompletion(state.stencil);
   const isPlacing = state.phase === "placing-stencil";
@@ -100,6 +108,10 @@ export function StencilPanel({
         stencil={state.stencil}
         activePiece={state.stencilPiece}
         popKeys={popKeys}
+        fly={fly}
+        brightLetters={brightLetters}
+        flashLetters={flashLetters}
+        reducedMotion={reducedMotion}
       />
 
       {isPlacing ? (
