@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 
+import logoUrl from "../../assets/logo-160.png";
 import { CabinetShell } from "../../components/CabinetShell";
 import { primeAudio } from "../juice/audio";
 import { ControlDeck } from "../../components/ControlDeck";
-import { NametrisMark } from "../../components/NametrisMark";
 import { describePlayerName } from "./nameStats";
 import { lettersOnlyName, nameLengthLimit, nameRuleMessage } from "./nameValidation";
 import "../../styles/onboarding.css";
@@ -57,7 +57,7 @@ export function WelcomeScreen({ onStart, initialName = "" }: WelcomeScreenProps)
       <main className="welcome-screen" aria-labelledby="welcome-title">
         <section className="welcome-layout">
           <div className="welcome-brand-mark">
-            <NametrisMark />
+            <img src={logoUrl} alt="" width={80} height={80} />
           </div>
           <h1 id="welcome-title">NAMETRIS</h1>
           <p className="welcome-tagline">
@@ -101,7 +101,8 @@ export function WelcomeScreen({ onStart, initialName = "" }: WelcomeScreenProps)
                 className="primary-button"
                 disabled={input.length < 2}
               >
-                Start building
+                <span className="face" aria-hidden="true" />
+                <span className="label">Start building</span>
               </button>
             </div>
           </form>

@@ -69,7 +69,9 @@ export function StencilPanel({
                 : "NAME OUTLINE"}
           </h2>
           {state.canFinish && state.phase !== "won" && (
-            <span className="finish-ready-badge">◆ FINISH UNLOCKED</span>
+            <span className="finish-ready-badge">
+              <span aria-hidden="true">◆</span> FINISH UNLOCKED
+            </span>
           )}
         </div>
         <strong className="completion-value">{completion.displayPercent}%</strong>

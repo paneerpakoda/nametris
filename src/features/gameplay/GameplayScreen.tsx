@@ -779,6 +779,11 @@ export function GameplayScreen({
           onKeyDown={handleKeyDown}
         >
           <section className="board-panel" aria-labelledby="normal-board-title">
+            {state.canFinish && state.phase !== "won" && state.phase !== "lost" && (
+              <p className="finish-banner" data-testid="finish-banner">
+                80%: YOU CAN FINISH
+              </p>
+            )}
             <div className="panel-heading">
               <p className="panel-kicker">01 / CLEAR LINES</p>
               <h2 id="normal-board-title">TETRIS BOARD</h2>
@@ -862,12 +867,6 @@ export function GameplayScreen({
             flashLetters={flashLetters}
             reducedMotion={juiceFrame.reduced}
           />
-
-          {state.canFinish && state.phase !== "won" && state.phase !== "lost" && (
-            <p className="finish-banner" data-testid="finish-banner">
-              80%: YOU CAN FINISH
-            </p>
-          )}
 
           {finishPromptOpen && (
             <div
