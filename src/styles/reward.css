@@ -25,7 +25,7 @@
   padding: 8px 14px;
   color: #24180a;
   background: #e6b422;
-  font-family: var(--font-pixel);
+  font-family: var(--font-ui);
   font-size: 12px;
   letter-spacing: 0.08em;
 }
@@ -44,10 +44,18 @@
 }
 
 .result-heading h1 {
-  color: var(--crt-text);
-  font-size: clamp(2rem, 4.8vh, 3.2rem);
-  letter-spacing: 0.07em;
-  text-shadow: 3px 3px 0 rgb(236 75 55 / 22%);
+  font-family: var(--font-display);
+  font-size: clamp(2.5rem, 6vh, 4rem);
+  font-weight: 700;
+  letter-spacing: 0;
+  line-height: 0.9;
+  color: transparent;
+  background: linear-gradient(to bottom, #fdfeec 0%, #f8e6a4 50%, #a87f49 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: none;
+  filter: drop-shadow(0 3px 0 #893128) drop-shadow(0 0 20px rgb(181 28 28 / 80%));
 }
 
 .reward-card {
@@ -129,8 +137,8 @@
 .reward-brand {
   margin: 0;
   color: var(--phosphor-red);
-  font-family: var(--font-pixel);
-  font-size: 0.7rem;
+  font-family: var(--font-ui);
+  font-size: 12px;
   font-weight: 800;
   letter-spacing: 0.24em;
 }
@@ -153,21 +161,26 @@
 .reward-name-lockup > span,
 .reward-award > span {
   color: var(--crt-muted);
-  font-family: var(--font-mono);
-  font-size: 0.6875rem;
+  font-family: var(--font-ui);
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.14em;
 }
 
 .reward-card h2 {
   margin: 0;
-  color: var(--crt-text);
-  font-family: var(--font-pixel);
-  font-size: clamp(1.65rem, 4.3vh, 2.9rem);
+  font-family: var(--font-display);
+  font-size: clamp(2.0625rem, 5.375vh, 3.625rem);
   font-weight: 700;
-  letter-spacing: 0.12em;
-  line-height: 0.88;
-  text-shadow: 3px 3px 0 rgb(240 68 52 / 20%);
+  letter-spacing: 0;
+  line-height: 0.9;
+  color: transparent;
+  background: linear-gradient(to bottom, #fdfeec 0%, #f8e6a4 50%, #a87f49 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: none;
+  filter: drop-shadow(0 3px 0 #893128) drop-shadow(0 0 20px rgb(181 28 28 / 80%));
 }
 
 .result-stencil {
@@ -198,7 +211,7 @@
 .reward-title {
   margin: 2px 0 0;
   color: var(--phosphor-amber);
-  font-family: var(--font-pixel);
+  font-family: var(--font-ui);
   font-size: clamp(0.82rem, 1.8vh, 1.08rem);
   font-weight: 700;
   letter-spacing: 0.05em;
@@ -213,8 +226,8 @@
   border-radius: 4px;
   color: var(--phosphor-red);
   background: rgb(240 68 52 / 7%);
-  font-family: var(--font-mono);
-  font-size: 0.6875rem;
+  font-family: var(--font-ui);
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.08em;
 }
@@ -255,8 +268,8 @@
 .reward-metrics dt,
 .loss-metrics dt {
   color: var(--crt-muted);
-  font-family: var(--font-pixel);
-  font-size: 0.6875rem;
+  font-family: var(--font-ui);
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -266,7 +279,7 @@
 .loss-metrics dd {
   margin: 0;
   color: var(--crt-text);
-  font-family: var(--font-mono);
+  font-family: var(--font-ui);
   font-size: 1.05rem;
   font-weight: 700;
 }
@@ -286,15 +299,18 @@
   min-height: 38px;
   margin: 0;
   padding: 9px 14px;
-  font-size: 0.72rem;
-  letter-spacing: 0.04em;
+  font-family: var(--font-ui);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0;
+  line-height: 1.2;
 }
 
 .result-status {
   min-height: 1.2em;
   margin: -4px 0 0;
   color: var(--crt-muted);
-  font-size: 0.74rem;
+  font-size: 12px;
 }
 
 .loss-card {
@@ -332,19 +348,28 @@
 }
 
 .loss-card h1 {
-  color: var(--phosphor-red);
-  font-size: clamp(2.2rem, 6.8vh, 4.25rem);
-  letter-spacing: 0.05em;
-  text-shadow: 3px 3px 0 rgb(236 75 55 / 18%);
+  font-family: var(--font-display);
+  font-size: clamp(2.75rem, 8.5vh, 5.3125rem);
+  font-weight: 700;
+  letter-spacing: 0;
+  line-height: 0.9;
+  color: transparent;
+  background: linear-gradient(to bottom, #fdfeec 0%, #f8e6a4 50%, #a87f49 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: none;
+  filter: drop-shadow(0 3px 0 #893128) drop-shadow(0 0 20px rgb(181 28 28 / 80%));
 }
 
 .loss-name {
   margin: 8px 0 0;
   color: var(--phosphor-amber);
-  font-family: var(--font-pixel);
-  font-size: 0.85rem;
+  font-family: var(--font-ui);
+  font-size: 14px;
   font-weight: 700;
   letter-spacing: 0.18em;
+  line-height: 1.3;
 }
 
 .loss-message {
@@ -357,9 +382,11 @@
 
 .loss-progress {
   color: var(--phosphor-red);
-  font-family: var(--font-pixel);
+  font-family: var(--font-ui);
   font-size: clamp(2.4rem, 5.8vh, 3.8rem);
+  font-weight: 700;
   line-height: 1;
+  text-shadow: 0 0 40px rgb(181 28 28 / 80%);
 }
 
 .loss-stencil {
@@ -392,11 +419,11 @@
   }
 
   .result-heading h1 {
-    font-size: 2rem;
+    font-size: 2.5rem;
   }
 
   .result-heading .eyebrow {
-    font-size: 0.6875rem;
+    font-size: 12px;
   }
 
   .reward-card {
@@ -406,7 +433,7 @@
   }
 
   .reward-card h2 {
-    font-size: 1.7rem;
+    font-size: 2.125rem;
   }
 
   .reward-title {
@@ -419,7 +446,7 @@
   }
 
   .loss-card h1 {
-    font-size: 2.5rem;
+    font-size: 3.125rem;
   }
 
   .loss-progress {

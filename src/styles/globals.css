@@ -1,7 +1,59 @@
 @import "tailwindcss" source("../");
 
+@font-face {
+  font-family: "PP NeueBit";
+  src: url("./fonts/PPNeueBit-Bold.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: block;
+}
+
+@font-face {
+  font-family: "PP NeueBit Fallback";
+  src: local("Courier New"), local("Courier");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: block;
+  size-adjust: 72.9%;
+  ascent-override: 68.58%;
+  descent-override: 19.59%;
+  line-gap-override: 2.44%;
+}
+
+@font-face {
+  font-family: "Space Mono Fallback";
+  src: local("Courier New"), local("Courier");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  size-adjust: 101.98%;
+  ascent-override: 109.82%;
+  descent-override: 35.4%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: "Space Mono Fallback";
+  src: local("Courier New Bold"), local("Courier New");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+  size-adjust: 101.98%;
+  ascent-override: 109.82%;
+  descent-override: 35.4%;
+  line-gap-override: 0%;
+}
+
+@theme {
+  --font-sans: "Space Mono", "Space Mono Fallback", monospace;
+  --font-mono: "Space Mono", "Space Mono Fallback", monospace;
+  --default-font-family: "Space Mono", "Space Mono Fallback", monospace;
+  --default-mono-font-family: "Space Mono", "Space Mono Fallback", monospace;
+}
+
 :root {
-  font-family: "IBM Plex Mono", "Courier New", monospace;
+  font-family: var(--font-ui);
+  font-size: 16px;
   color: #fff5dc;
   background: #161714;
   font-synthesis: none;
@@ -31,8 +83,10 @@
   --phosphor-red: #ff6b54;
   --phosphor-amber: #ffc45d;
   --route-blue: #57b1ff;
-  --font-pixel: "Silkscreen", "Courier New", monospace;
-  --font-mono: "IBM Plex Mono", "Courier New", monospace;
+  --font-display: "PP NeueBit", "PP NeueBit Fallback", "Space Mono", monospace;
+  --font-ui: "Space Mono", "Space Mono Fallback", monospace;
+  --default-font-family: var(--font-ui);
+  --default-mono-font-family: var(--font-ui);
   --radius-large: 14px;
   --radius-medium: 7px;
   --shadow-glow: 0 0 28px rgb(236 75 55 / 16%);
@@ -135,9 +189,9 @@ summary:focus-visible {
   box-shadow:
     0 2px 0 #05060b,
     inset 0 1px 0 rgb(255 255 255 / 12%);
-  font-family: var(--font-mono);
-  font-size: 0.6875rem;
-  font-weight: 900;
+  font-family: var(--font-ui);
+  font-size: 12px;
+  font-weight: 700;
   line-height: 1;
 }
 
@@ -148,17 +202,19 @@ summary:focus-visible {
 .eyebrow {
   margin: 0 0 12px;
   color: var(--phosphor-red);
-  font-family: var(--font-pixel);
-  font-size: 0.75rem;
-  font-weight: 800;
+  font-family: var(--font-ui);
+  font-size: 12px;
+  font-weight: 700;
   letter-spacing: 0.22em;
+  line-height: 1.2;
 }
 
 h1 {
   margin: 0;
-  font-family: var(--font-pixel);
-  font-size: clamp(3rem, 8vw, 6rem);
-  letter-spacing: 0.02em;
+  font-family: var(--font-display);
+  font-size: clamp(3.75rem, 10vw, 7.5rem);
+  font-weight: 700;
+  letter-spacing: 0;
   line-height: 0.9;
 }
 
@@ -175,15 +231,18 @@ h1 {
   border: 1px dashed rgb(66 232 224 / 60%);
   border-radius: var(--radius-medium);
   color: var(--lime);
-  font-family: var(--font-mono);
-  font-size: clamp(1.8rem, 6vw, 3.4rem);
-  font-weight: 900;
-  letter-spacing: 0.12em;
+  font-family: var(--font-display);
+  font-size: clamp(2.25rem, 7.5vw, 4.25rem);
+  font-weight: 700;
+  letter-spacing: 0;
+  line-height: 0.9;
 }
 
 .privacy-note {
   color: var(--muted);
-  font-size: 0.86rem;
+  font-family: var(--font-ui);
+  font-size: 14px;
+  line-height: 1.4;
 }
 
 .privacy-note span {
@@ -194,30 +253,78 @@ h1 {
   width: 100%;
   margin-top: 12px;
   padding: 14px 24px;
-  border: 1px solid #ff8b78;
-  border-radius: var(--radius-medium);
+  border: 0;
+  border-radius: 8px;
   color: #fff8e9;
   background: #b93a28;
   box-shadow:
-    0 5px 0 #7f2118,
-    0 0 20px rgb(236 75 55 / 23%),
-    inset 0 1px 0 rgb(255 255 255 / 28%);
+    inset 0 3px 2px rgb(255 255 255 / 25%),
+    inset 0 -3px 2px rgb(0 0 0 / 40%),
+    inset 3px 0 2px rgb(255 255 255 / 25%),
+    inset -3px 0 2px rgb(255 255 255 / 25%);
   cursor: pointer;
-  font-family: var(--font-pixel);
-  font-weight: 900;
-  letter-spacing: 0.05em;
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 0;
+  line-height: 1;
   text-transform: uppercase;
 }
 
-.primary-button:hover {
+.primary-button:hover:not(:disabled) {
   background: #c4402c;
 }
 
 .primary-button:active:not(:disabled) {
-  translate: 0 3px;
+  translate: 0 2px;
   box-shadow:
-    0 2px 0 #7f2118,
-    0 0 14px rgb(236 75 55 / 18%);
+    inset 0 -3px 2px rgb(255 255 255 / 25%),
+    inset 0 3px 2px rgb(0 0 0 / 40%),
+    inset -3px 0 2px rgb(255 255 255 / 25%),
+    inset 3px 0 2px rgb(255 255 255 / 25%);
+}
+
+.privacy-note > span[aria-hidden],
+.run-guidance > span[aria-hidden],
+.finish-ready-badge > span[aria-hidden] {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-right: 0.45em;
+  font-size: 0;
+  line-height: 0;
+  vertical-align: 0.12em;
+}
+
+.privacy-note > span[aria-hidden]::before,
+.run-guidance > span[aria-hidden]::before,
+.finish-ready-badge > span[aria-hidden]::before {
+  content: "";
+  display: block;
+  width: 6px;
+  height: 6px;
+  background: #ff6b54;
+  transform: rotate(45deg);
+}
+
+@media (forced-colors: active) {
+  .welcome-screen h1,
+  .result-heading h1,
+  .loss-card h1,
+  .game-overlay h2,
+  .help-dialog > h2,
+  .how-it-works h2,
+  .reward-card h2,
+  .primary-button .label {
+    background: none;
+    -webkit-text-fill-color: CanvasText;
+    color: CanvasText;
+    filter: none;
+  }
+
+  .welcome-start-frame::before {
+    background: CanvasText;
+  }
 }
 
 @keyframes color-flash {

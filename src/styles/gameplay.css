@@ -40,7 +40,7 @@
   color: #fff5dc;
   background: #1c201b;
   cursor: pointer;
-  font-family: var(--font-pixel);
+  font-family: var(--font-ui);
   font-size: 12px;
   letter-spacing: 0.04em;
 }
@@ -81,17 +81,20 @@
 
 .game-title-lockup h1 {
   color: var(--crt-text);
+  font-family: var(--font-ui);
   font-size: 1.05rem;
+  font-weight: 700;
   line-height: 1;
-  text-shadow: 2px 2px 0 #531d14;
+  text-shadow: 0 0 12px rgb(181 28 28 / 40%);
 }
 
 .game-mode-label {
   color: var(--phosphor-red);
-  font-family: var(--font-pixel);
-  font-size: 0.7rem;
+  font-family: var(--font-ui);
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.12em;
+  line-height: 1;
 }
 
 .run-guidance {
@@ -117,7 +120,7 @@
 
 .run-guidance > span {
   color: currentcolor;
-  font-size: 0.6875rem;
+  font-size: 12px;
 }
 
 .run-guidance div {
@@ -130,7 +133,7 @@
 .run-guidance strong {
   margin: 0;
   overflow: visible;
-  font-family: var(--font-pixel);
+  font-family: var(--font-ui);
   font-size: 0.75rem;
   letter-spacing: 0.04em;
   line-height: 1.35;
@@ -141,7 +144,7 @@
 .run-guidance small {
   overflow: hidden;
   color: var(--crt-muted);
-  font-size: 0.7rem;
+  font-size: 12px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -248,8 +251,8 @@
 .panel-kicker {
   margin: 0 0 2px;
   color: var(--phosphor-red);
-  font-family: var(--font-pixel);
-  font-size: 0.6875rem;
+  font-family: var(--font-ui);
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.12em;
 }
@@ -258,7 +261,7 @@
 .stencil-panel h2 {
   margin: 0;
   color: var(--crt-text);
-  font-family: var(--font-pixel);
+  font-family: var(--font-ui);
   font-size: 0.75rem;
   letter-spacing: 0.08em;
 }
@@ -315,7 +318,7 @@
   pointer-events: none;
   color: var(--route-blue);
   background: rgb(6 15 22 / 88%);
-  font-family: var(--font-pixel);
+  font-family: var(--font-ui);
   font-weight: 700;
   letter-spacing: 0.05em;
   line-height: 1.15;
@@ -323,19 +326,21 @@
 
 .transfer-route-zone strong {
   flex: 0 0 auto;
-  font-size: 0.6875rem;
+  font-size: 12px;
   white-space: nowrap;
 }
 
 .transfer-route-zone small {
-  overflow: hidden;
+  overflow: visible;
+  flex: 1 1 0;
+  min-width: 0;
   color: var(--crt-text);
-  font-family: var(--font-mono);
-  font-size: 0.6875rem;
+  font-family: var(--font-ui);
+  font-size: 12px;
   font-weight: 700;
+  letter-spacing: 0;
   text-align: right;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  white-space: normal;
 }
 
 .transfer-route-deadline {
@@ -355,8 +360,8 @@
   padding: 2px 4px;
   color: #f4f9ff;
   background: #145d9e;
-  font-family: var(--font-pixel);
-  font-size: 0.6875rem;
+  font-family: var(--font-ui);
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.05em;
 }
@@ -469,8 +474,8 @@
 
 .line-clear-feedback strong {
   color: currentcolor;
-  font-family: var(--font-pixel);
-  font-size: 0.6875rem;
+  font-family: var(--font-ui);
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.06em;
   line-height: 1;
@@ -480,7 +485,7 @@
 
 .line-clear-feedback small {
   color: var(--crt-text);
-  font-size: 0.6875rem;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.02em;
   line-height: 1.25;
@@ -504,7 +509,7 @@
 .score-delta {
   justify-self: center;
   color: #ffc45d;
-  font-family: var(--font-pixel);
+  font-family: var(--font-ui);
   font-size: 0.75rem;
   font-style: normal;
   pointer-events: none;
@@ -574,7 +579,7 @@
   padding: 3px 6px;
   color: #24180a;
   background: #fff4df;
-  font-family: var(--font-pixel);
+  font-family: var(--font-ui);
   font-size: 12px;
   letter-spacing: 0.06em;
   pointer-events: none;
@@ -675,8 +680,8 @@
   padding: 2px 6px;
   color: #fff8e9;
   background: #9d2418;
-  font-family: var(--font-pixel);
-  font-size: 0.6875rem;
+  font-family: var(--font-ui);
+  font-size: 12px;
   letter-spacing: 0.08em;
   pointer-events: none;
   transform: translateX(-50%);
@@ -769,21 +774,21 @@
 
 .rail-transfer-metric > span,
 .rail-next-piece > span {
-  font-family: var(--font-pixel);
-  font-size: 0.6875rem;
+  font-family: var(--font-ui);
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.08em;
 }
 
 .rail-transfer-metric strong {
   color: var(--phosphor-amber);
-  font-family: var(--font-pixel);
+  font-family: var(--font-ui);
   font-size: 1.24rem;
 }
 
 .rail-transfer-metric strong small {
   color: var(--crt-muted);
-  font-size: 0.72rem;
+  font-size: 12px;
 }
 
 .transfer-full-label {
@@ -792,8 +797,8 @@
   border: 1px solid var(--phosphor-red);
   border-radius: 2px;
   color: var(--phosphor-red);
-  font-family: var(--font-pixel);
-  font-size: 0.6875rem;
+  font-family: var(--font-ui);
+  font-size: 12px;
   font-style: normal;
   letter-spacing: 0.07em;
 }
@@ -843,8 +848,8 @@
   align-items: center;
   justify-content: space-between;
   color: var(--phosphor-red);
-  font-family: var(--font-pixel);
-  font-size: 0.6875rem;
+  font-family: var(--font-ui);
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.12em;
 }
@@ -856,8 +861,8 @@
   color: var(--phosphor-red);
   background: rgb(236 75 55 / 6%);
   cursor: pointer;
-  font-family: var(--font-pixel);
-  font-size: 0.6875rem;
+  font-family: var(--font-ui);
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.06em;
 }
@@ -881,7 +886,7 @@
 
 .completion-value {
   color: var(--phosphor-amber);
-  font-family: var(--font-pixel);
+  font-family: var(--font-ui);
   font-size: 1.2rem;
   text-shadow: 0 0 8px rgb(243 162 50 / 28%);
 }
@@ -914,8 +919,8 @@
   top: 12px;
   left: 50%;
   color: var(--phosphor-amber);
-  font-family: var(--font-pixel);
-  font-size: 0.6875rem;
+  font-family: var(--font-ui);
+  font-size: 12px;
   font-weight: 700;
   transform: translateX(-50%);
 }
@@ -924,8 +929,8 @@
   display: inline-block;
   margin-top: 4px;
   color: var(--phosphor-amber);
-  font-family: var(--font-pixel);
-  font-size: 0.6875rem;
+  font-family: var(--font-ui);
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.08em;
 }
@@ -948,14 +953,14 @@
 }
 
 .transfer-cap-notice strong {
-  font-family: var(--font-pixel);
-  font-size: 0.6875rem;
+  font-family: var(--font-ui);
+  font-size: 12px;
   letter-spacing: 0.05em;
 }
 
 .transfer-cap-notice span {
   color: var(--crt-text);
-  font-size: 0.6875rem;
+  font-size: 12px;
 }
 
 .stencil-frame {
@@ -1123,7 +1128,7 @@
 .empty-send-notice {
   margin: 0;
   color: var(--phosphor-amber);
-  font-size: 0.6875rem;
+  font-size: 12px;
   font-weight: 700;
   line-height: 1.35;
 }
@@ -1171,7 +1176,7 @@
 .stencil-actions p {
   margin: 0;
   color: var(--crt-muted);
-  font-size: 0.72rem;
+  font-size: 12px;
   line-height: 1.4;
 }
 
@@ -1182,15 +1187,15 @@
 
 .placement-guidance p {
   color: var(--phosphor-amber);
-  font-family: var(--font-pixel);
-  font-size: 0.6875rem;
+  font-family: var(--font-ui);
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.04em;
 }
 
 .placement-guidance small {
   color: var(--crt-muted);
-  font-size: 0.6875rem;
+  font-size: 12px;
 }
 
 .stencil-action-buttons {
@@ -1207,18 +1212,27 @@
   color: var(--crt-text);
   background: rgb(236 75 55 / 8%);
   cursor: pointer;
-  font-family: var(--font-pixel);
-  font-size: 0.6875rem;
+  font-family: var(--font-ui);
+  font-size: 12px;
   font-weight: 700;
-  letter-spacing: 0.05em;
+  letter-spacing: 0;
+  line-height: 1.2;
 }
 
 .route-button {
-  color: #fff5df;
-  background: #bb3525;
+  border: 0;
+  border-radius: 8px;
+  color: #fff8e9;
+  background: #b93a28;
   box-shadow:
-    0 3px 0 #5f1811,
-    0 0 10px rgb(236 75 55 / 14%);
+    inset 0 3px 2px rgb(255 255 255 / 25%),
+    inset 0 -3px 2px rgb(0 0 0 / 40%),
+    inset 3px 0 2px rgb(255 255 255 / 25%),
+    inset -3px 0 2px rgb(255 255 255 / 25%);
+}
+
+.route-button:hover:not(:disabled) {
+  background: #c4402c;
 }
 
 .route-button:disabled,
@@ -1249,7 +1263,7 @@
 
 .metric span {
   color: var(--crt-muted);
-  font-size: 0.6875rem;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -1257,7 +1271,7 @@
 
 .metric strong {
   color: var(--crt-text);
-  font-family: var(--font-pixel);
+  font-family: var(--font-ui);
   font-size: clamp(0.9rem, 1.4vw, 1.25rem);
 }
 
@@ -1281,19 +1295,24 @@
   text-align: center;
 }
 
+.board-panel:has(.finish-banner) {
+  grid-template-rows: auto auto minmax(0, 1fr);
+}
+
 .finish-banner {
-  position: absolute;
-  z-index: 4;
-  top: 8px;
-  left: 8px;
-  margin: 0;
+  position: static;
+  z-index: 1;
+  width: max-content;
+  max-width: 100%;
+  margin: 0 0 6px;
   padding: 4px 8px;
   border: 1px solid rgb(255 196 93 / 80%);
   color: #fff4d6;
   background: rgb(42 30 8 / 92%);
-  font-family: var(--font-pixel);
-  font-size: 0.75rem;
+  font-family: var(--font-ui);
+  font-size: 12px;
   letter-spacing: 0.06em;
+  line-height: 1.3;
   pointer-events: none;
 }
 
@@ -1315,8 +1334,11 @@
 .finish-prompt h2 {
   margin: 0;
   color: var(--crt-text);
-  font-family: var(--font-pixel);
-  font-size: 0.9rem;
+  font-family: var(--font-ui);
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.3;
+  text-shadow: 0 0 12px rgb(181 28 28 / 40%);
 }
 
 .overlay-actions {
@@ -1350,10 +1372,18 @@
 
 .game-overlay h2 {
   margin: 0;
-  color: var(--crt-text);
-  font-family: var(--font-pixel);
-  font-size: 2.5rem;
-  text-shadow: 3px 3px 0 #5f1b12;
+  font-family: var(--font-display);
+  font-size: 3.125rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  line-height: 1.05;
+  color: transparent;
+  background: linear-gradient(to bottom, #fdfeec 0%, #f8e6a4 50%, #a87f49 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: none;
+  filter: drop-shadow(0 3px 0 #893128) drop-shadow(0 0 20px rgb(181 28 28 / 80%));
 }
 
 .game-overlay p:not(.eyebrow) {
@@ -1386,9 +1416,18 @@
 
 .help-dialog > h2 {
   margin: 0;
-  font-family: var(--font-pixel);
-  font-size: 1.8rem;
-  letter-spacing: 0.01em;
+  font-family: var(--font-display);
+  font-size: 2.25rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  line-height: 1.1;
+  color: transparent;
+  background: linear-gradient(to bottom, #fdfeec 0%, #f8e6a4 50%, #a87f49 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: none;
+  filter: drop-shadow(0 3px 0 #893128) drop-shadow(0 0 20px rgb(181 28 28 / 80%));
 }
 
 .help-intro {
@@ -1408,9 +1447,11 @@
 .help-section h3 {
   margin: 0 0 10px;
   color: var(--phosphor-amber);
-  font-family: var(--font-pixel);
-  font-size: 0.72rem;
+  font-family: var(--font-ui);
+  font-size: 12px;
+  font-weight: 700;
   letter-spacing: 0.1em;
+  line-height: 1.3;
   text-transform: uppercase;
 }
 
@@ -1437,7 +1478,7 @@
 .help-controls dd {
   margin: 0;
   color: var(--crt-muted);
-  font-size: 0.7rem;
+  font-size: 12px;
   line-height: 1.3;
 }
 
@@ -1547,12 +1588,17 @@ button.touch-only {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid #ff8b78;
-  border-radius: 8px;
-  color: #fff8e9;
-  background: #b93a28;
-  font-family: var(--font-pixel);
-  font-size: 0.6875rem;
+  border: 1px solid #111113;
+  border-radius: 7px;
+  color: #fff;
+  background: linear-gradient(#1a181b, #141317);
+  box-shadow:
+    0 2px 0 #040303,
+    0 3px 4px rgb(0 0 0 / 45%);
+  font-family: var(--font-ui);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.15;
   touch-action: none;
 }
 
@@ -1664,9 +1710,13 @@ button.touch-only {
   .game-overlay,
   .help-overlay,
   .how-it-works-overlay,
-  .finish-prompt,
-  .finish-banner {
+  .finish-prompt {
     grid-area: 1 / 1 / -1 / -1;
+  }
+
+  .finish-banner {
+    grid-area: auto;
+    position: static;
   }
 }
 
@@ -1750,7 +1800,7 @@ button.touch-only {
 .level-up,
 .shift-ready-tag {
   color: #24180a;
-  font-family: var(--font-pixel);
+  font-family: var(--font-ui);
   font-size: 12px;
   letter-spacing: 0.06em;
   pointer-events: none;
