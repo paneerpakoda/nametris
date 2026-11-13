@@ -175,10 +175,10 @@ describe("GameplayScreen", () => {
     const user = userEvent.setup();
     render(<GameplayScreen seed={7} />);
 
-    await user.click(screen.getByRole("button", { name: "Mute sound" }));
-    expect(screen.getByRole("button", { name: "Unmute sound" })).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Sound ON" }));
+    expect(screen.getByRole("button", { name: "Sound OFF" })).toBeInTheDocument();
     await user.keyboard("m");
-    expect(screen.getByRole("button", { name: "Mute sound" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Sound ON" })).toBeInTheDocument();
   });
 
   it("pauses and resumes from real buttons", async () => {
@@ -208,8 +208,12 @@ describe("GameplayScreen", () => {
     expect(screen.getByRole("button", { name: "Restart run" })).toHaveFocus();
     await user.tab({ shift: true });
     expect(resume).toHaveFocus();
+    await user.keyboard("{ArrowDown}");
+    expect(screen.getByRole("button", { name: "Restart run" })).toHaveFocus();
+    await user.keyboard("{ArrowUp}");
+    expect(resume).toHaveFocus();
     await user.tab({ shift: true });
-    expect(screen.getByRole("button", { name: "Move sounds" })).toHaveFocus();
+    expect(screen.getByRole("button", { name: /Move sounds/ })).toHaveFocus();
 
     await user.keyboard("p");
     await waitFor(() =>
@@ -358,13 +362,14 @@ describe("GameplayScreen", () => {
     expect(screen.getByText("Extra line clears cannot add name pieces.")).toBeVisible();
   });
 
-  it("enables finish at exact 80% without interrupting board input", async () => {
+  it("pauses at exact 80% so Shift and drops wait for the decision", async () => {
     const user = userEvent.setup();
     const onWon = vi.fn();
     const mask = new Set(Array.from({ length: 20 }, (_, index) => `0:${index}`));
     const initialSession = {
       ...createBoardSession(["O", "I", "T", "J"]),
       canFinish: true,
+      transferCount: 1,
       stencil: {
         ...createStencilState(mask, 1, 20),
         filledCells: new Map(
@@ -374,20 +379,23 @@ describe("GameplayScreen", () => {
     };
 
     render(<GameplayScreen initialSession={initialSession} onWon={onWon} />);
-    const game = screen.getByRole("application", { name: "Nametris game" });
-    const finish = screen.getByRole("button", { name: "FINISH NAME · 80%" });
     expect(
       screen.getByRole("progressbar", { name: "Name completion" }),
     ).toHaveAttribute("aria-valuetext", "80% complete. Finish unlocks at 80%.");
     expect(screen.getByRole("dialog", { name: "80% reached" })).toBeInTheDocument();
+    expect(
+      screen.queryByRole("heading", { name: "Game paused" }),
+    ).not.toBeInTheDocument();
+    expect(screen.getByText(/Shift and drops are held/)).toBeVisible();
 
-    fireEvent.keyDown(game, { key: "ArrowDown" });
+    fireEvent.keyDown(window, { key: "Shift" });
+    fireEvent.keyDown(window, { key: "ArrowDown" });
+
     expect(screen.getByTestId("score").textContent).toBe("0");
-    fireEvent.keyDown(game, { key: " " });
-    expect(Number(screen.getByTestId("score").textContent)).toBeGreaterThan(0);
-    expect(finish).toBeEnabled();
+    expect(screen.queryByText("PLACE THE O")).not.toBeInTheDocument();
+    expect(screen.getByRole("dialog", { name: "80% reached" })).toBeInTheDocument();
 
-    await user.click(finish);
+    await user.click(screen.getByRole("button", { name: "Finish now · Esc" }));
     await waitFor(() => expect(onWon).toHaveBeenCalledOnce());
     expect(onWon.mock.calls[0]?.[0]).toMatchObject({ displayPercent: 80 });
   });
@@ -434,7 +442,7 @@ describe("GameplayScreen", () => {
       "80%: YOU CAN FINISH",
     );
 
-    fireEvent.keyDown(window, { key: "Enter" });
+    fireEvent.keyDown(window, { key: "Escape" });
 
     await waitFor(() => expect(onWon).toHaveBeenCalledOnce());
     expect(onWon.mock.calls[0]?.[0]).toMatchObject({ displayPercent: 80 });
@@ -449,7 +457,12 @@ describe("GameplayScreen", () => {
     };
 
     render(<GameplayScreen initialSession={initialSession} onWon={onWon} />);
-    fireEvent.keyDown(window, { key: "Escape" });
+    fireEvent.keyDown(window, { key: "Shift" });
+    fireEvent.keyDown(window, { key: "ArrowDown" });
+    expect(screen.getByTestId("score").textContent).toBe("0");
+    expect(screen.getByRole("dialog", { name: "80% reached" })).toBeInTheDocument();
+
+    fireEvent.keyDown(window, { key: " " });
 
     expect(
       screen.queryByRole("dialog", { name: "80% reached" }),
@@ -457,6 +470,12 @@ describe("GameplayScreen", () => {
     expect(screen.getByTestId("finish-banner")).toBeInTheDocument();
     expect(onWon).not.toHaveBeenCalled();
     expect(screen.getByRole("button", { name: "FINISH NAME · 0%" })).toBeEnabled();
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "Play continues. Finish stays available.",
+    );
+
+    fireEvent.keyDown(window, { key: " " });
+    expect(Number(screen.getByTestId("score").textContent)).toBeGreaterThan(0);
   });
 
   it("shows the remaining think time beside the piece", () => {
@@ -508,7 +527,7 @@ describe("GameplayScreen", () => {
     fireEvent.keyDown(window, { key: "Escape" });
 
     await user.click(screen.getByRole("button", { name: "Pause game" }));
-    await user.click(screen.getByRole("button", { name: "New name" }));
+    await user.click(screen.getByRole("button", { name: "Quit to title screen" }));
     expect(onNewName).toHaveBeenCalledOnce();
   });
 

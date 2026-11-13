@@ -14,12 +14,12 @@ describe("pause sound settings", () => {
     const user = userEvent.setup();
     const { unmount } = render(<PauseSoundSettings />);
 
-    expect(screen.getByRole("button", { name: "Mute sound" })).toHaveAttribute(
+    expect(screen.getByRole("button", { name: "Sound ON" })).toHaveAttribute(
       "aria-keyshortcuts",
       "M",
     );
-    await user.click(screen.getByRole("button", { name: "Mute sound" }));
-    expect(screen.getByRole("button", { name: "Unmute sound" })).toHaveAttribute(
+    await user.click(screen.getByRole("button", { name: "Sound ON" }));
+    expect(screen.getByRole("button", { name: "Sound OFF" })).toHaveAttribute(
       "aria-pressed",
       "false",
     );
@@ -31,13 +31,13 @@ describe("pause sound settings", () => {
     fireEvent.change(volume, { target: { value: "0.8" } });
     expect(volume).toHaveValue("0.8");
 
-    await user.click(screen.getByRole("button", { name: "Reduced motion" }));
-    expect(screen.getByRole("button", { name: "Reduced motion" })).toHaveAttribute(
+    await user.click(screen.getByRole("button", { name: "Reduced motion · OFF" }));
+    expect(screen.getByRole("button", { name: "Reduced motion · ON" })).toHaveAttribute(
       "aria-pressed",
       "true",
     );
-    await user.click(screen.getByRole("button", { name: "Move sounds" }));
-    expect(screen.getByRole("button", { name: "Move sounds" })).toHaveAttribute(
+    await user.click(screen.getByRole("button", { name: "Move sounds · OFF" }));
+    expect(screen.getByRole("button", { name: "Move sounds · ON" })).toHaveAttribute(
       "aria-pressed",
       "true",
     );
@@ -53,7 +53,7 @@ describe("pause sound settings", () => {
 
     unmount();
     render(<PauseSoundSettings />);
-    expect(screen.getByRole("button", { name: "Unmute sound" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Sound OFF" })).toBeInTheDocument();
     expect(screen.getByLabelText("Volume")).toHaveValue("0.8");
   });
 });

@@ -74,7 +74,7 @@ export function WelcomeScreen({ onStart, initialName = "" }: WelcomeScreenProps)
               autoComplete="off"
               autoCapitalize="characters"
               spellCheck={false}
-              aria-describedby="name-stats name-privacy"
+              aria-describedby="name-stats"
               aria-invalid={ruleAlert}
             />
             <div id="name-stats" className="name-stats">
@@ -92,9 +92,6 @@ export function WelcomeScreen({ onStart, initialName = "" }: WelcomeScreenProps)
                 <span aria-hidden="true" /> {nameRuleMessage}
               </p>
             )}
-            <p id="name-privacy" className="privacy-note">
-              <span aria-hidden="true">◆</span> Your name stays on this device.
-            </p>
             <div className="welcome-start-frame">
               <button
                 type="submit"

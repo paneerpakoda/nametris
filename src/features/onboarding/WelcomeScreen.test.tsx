@@ -15,7 +15,7 @@ describe("WelcomeScreen", () => {
     ).toBeInTheDocument();
     expect(screen.getByRole("region", { name: "Welcome display" })).toBeInTheDocument();
     expect(screen.getByText("SHIFT").closest("kbd")).not.toBeNull();
-    expect(screen.getByText("Your name stays on this device.")).toBeVisible();
+    expect(screen.getByLabelText("Your name")).toBeVisible();
   });
 
   it("keeps Start disabled until the name has two letters", async () => {

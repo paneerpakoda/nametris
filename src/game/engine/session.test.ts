@@ -426,6 +426,31 @@ describe("piece routing", () => {
     expect(reduceBoardSession(state, { type: "finish-run" }).phase).toBe("won");
   });
 
+  it("claims an 80% finish from the decision pause without dropping", () => {
+    const paused = reduceBoardSession(
+      { ...routableSquareSession(), canFinish: true },
+      { type: "pause", reason: "finish-choice" },
+    );
+
+    expect(
+      reduceBoardSession(paused, { type: "tick", elapsedMilliseconds: 10_000 }),
+    ).toBe(paused);
+    expect(reduceBoardSession(paused, { type: "hard-drop" })).toBe(paused);
+    expect(reduceBoardSession(paused, { type: "route-to-stencil" })).toBe(paused);
+    expect(reduceBoardSession(paused, { type: "finish-run" })).toMatchObject({
+      phase: "won",
+      pauseReason: null,
+      pausedPhase: null,
+      stencilPiece: null,
+    });
+
+    const playerPaused = reduceBoardSession(
+      { ...routableSquareSession(), canFinish: true },
+      { type: "pause", reason: "player" },
+    );
+    expect(reduceBoardSession(playerPaused, { type: "finish-run" })).toBe(playerPaused);
+  });
+
   it("still loses after 80% if the next spawn tops out before finish", () => {
     const state = createBoardSession(["O", "I", "T"]);
     const board = state.board.map((row, rowIndex) =>

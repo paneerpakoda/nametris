@@ -1,3 +1,5 @@
+import { Volume2, VolumeX } from "lucide-react";
+
 import {
   getJuicePreferences,
   updateJuicePreferences,
@@ -16,17 +18,23 @@ function toggleMuted() {
 
 export function SoundButton() {
   const preferences = useJuicePreferences();
+  const soundOn = !preferences.muted;
 
   return (
     <button
       type="button"
       className="sound-toggle"
-      aria-pressed={!preferences.muted}
+      aria-pressed={soundOn}
       aria-keyshortcuts="M"
-      aria-label={preferences.muted ? "Unmute sound" : "Mute sound"}
+      aria-label={soundOn ? "Sound ON" : "Sound OFF"}
       onClick={toggleMuted}
     >
-      {preferences.muted ? "MUTED" : "SOUND"}
+      {soundOn ? (
+        <Volume2 aria-hidden="true" size={14} strokeWidth={2.25} />
+      ) : (
+        <VolumeX aria-hidden="true" size={14} strokeWidth={2.25} />
+      )}
+      {soundOn ? "Sound ON" : "Sound OFF"}
     </button>
   );
 }
@@ -36,6 +44,7 @@ export function PauseSoundSettings() {
 
   return (
     <div className="pause-settings">
+      <p className="pause-settings-label">AUDIO &amp; MOTION</p>
       <SoundButton />
       <label className="pause-volume" htmlFor="sound-volume">
         Volume
@@ -54,6 +63,7 @@ export function PauseSoundSettings() {
       </label>
       <button
         type="button"
+        className="pause-pref-toggle"
         aria-pressed={preferences.reducedMotion}
         onClick={() => {
           primeAudio();
@@ -61,10 +71,11 @@ export function PauseSoundSettings() {
           playSound("ui");
         }}
       >
-        Reduced motion
+        {preferences.reducedMotion ? "Reduced motion · ON" : "Reduced motion · OFF"}
       </button>
       <button
         type="button"
+        className="pause-pref-toggle"
         aria-pressed={preferences.moveSounds}
         onClick={() => {
           primeAudio();
@@ -72,7 +83,7 @@ export function PauseSoundSettings() {
           playSound("ui");
         }}
       >
-        Move sounds
+        {preferences.moveSounds ? "Move sounds · ON" : "Move sounds · OFF"}
       </button>
     </div>
   );

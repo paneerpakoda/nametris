@@ -1,3 +1,4 @@
+import { Copy, Download, Share2, Type } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { CabinetShell } from "../../components/CabinetShell";
@@ -68,7 +69,6 @@ export function SuccessScreen({ result, onPlayAgain, onNewName }: SuccessScreenP
           <ParticleField />
         )}
         <div className="result-heading">
-          <p className="eyebrow">RUN COMPLETE</p>
           <h1>YOU BUILT IT.</h1>
         </div>
         <RewardCard result={result} />
@@ -77,6 +77,7 @@ export function SuccessScreen({ result, onPlayAgain, onNewName }: SuccessScreenP
             Play again
           </button>
           <button type="button" className="secondary-button" onClick={onNewName}>
+            <Type aria-hidden="true" />
             Try another name
           </button>
           <button
@@ -87,12 +88,15 @@ export function SuccessScreen({ result, onPlayAgain, onNewName }: SuccessScreenP
               setActionStatus("Card downloaded locally.");
             }}
           >
+            <Download aria-hidden="true" />
             Download card
           </button>
           <button type="button" className="secondary-button" onClick={handleCopy}>
+            <Copy aria-hidden="true" />
             Copy result
           </button>
           <button type="button" className="secondary-button" onClick={handleShare}>
+            <Share2 aria-hidden="true" />
             Share
           </button>
         </div>

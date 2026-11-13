@@ -34,7 +34,7 @@ import {
 } from "./stencil";
 
 export type BoardPhase = "playing" | "paused" | "placing-stencil" | "won" | "lost";
-export type PauseReason = "player" | "hidden" | "help";
+export type PauseReason = "player" | "hidden" | "help" | "finish-choice";
 
 export interface BoardSession {
   readonly name: string;
@@ -408,9 +408,18 @@ export function reduceBoardSession(
   }
 
   if (action.type === "finish-run") {
-    return (state.phase === "playing" || state.phase === "placing-stencil") &&
-      state.canFinish
-      ? { ...state, phase: "won", stencilPiece: null }
+    const deciding =
+      state.phase === "playing" ||
+      state.phase === "placing-stencil" ||
+      (state.phase === "paused" && state.pauseReason === "finish-choice");
+    return deciding && state.canFinish
+      ? {
+          ...state,
+          phase: "won",
+          pauseReason: null,
+          pausedPhase: null,
+          stencilPiece: null,
+        }
       : state;
   }
 

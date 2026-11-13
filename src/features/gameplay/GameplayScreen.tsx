@@ -1,4 +1,11 @@
-import { useEffect, useMemo, useReducer, useRef, useState } from "react";
+import {
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useReducer,
+  useRef,
+  useState,
+} from "react";
 
 import { CabinetShell } from "../../components/CabinetShell";
 import { ControlDeck } from "../../components/ControlDeck";
@@ -163,6 +170,8 @@ export function GameplayScreen({
   const pauseResumeRef = useRef<HTMLButtonElement>(null);
   const confirmYesRef = useRef<HTMLButtonElement>(null);
   const pauseMenuRef = useRef<HTMLDivElement>(null);
+  const playOnRef = useRef<HTMLButtonElement>(null);
+  const finishMenuRef = useRef<HTMLDivElement>(null);
   const onWindowKeyRef = useRef<(event: KeyboardEvent) => void>(() => undefined);
   const handledKeys = useRef(new WeakSet<Event>());
   const ghostPiece = getGhostPiece(state.board, state.activePiece);
@@ -181,16 +190,23 @@ export function GameplayScreen({
   const finishPromptOpen =
     state.canFinish &&
     !finishPromptDismissed &&
-    (state.phase === "playing" || state.phase === "placing-stencil") &&
     !helpOpen &&
-    !howItWorksOpen;
+    !howItWorksOpen &&
+    (state.phase === "playing" ||
+      state.phase === "placing-stencil" ||
+      (state.phase === "paused" && state.pauseReason === "finish-choice"));
 
   useEffect(() => {
     gameRef.current?.focus();
   }, []);
 
   useEffect(() => {
-    if (state.phase !== "paused" || helpOpen || howItWorksOpen) {
+    if (
+      state.phase !== "paused" ||
+      helpOpen ||
+      howItWorksOpen ||
+      state.pauseReason === "finish-choice"
+    ) {
       return;
     }
 
@@ -198,7 +214,29 @@ export function GameplayScreen({
       (restartConfirm ? confirmYesRef : pauseResumeRef).current?.focus();
     });
     return () => window.cancelAnimationFrame(frame);
-  }, [helpOpen, howItWorksOpen, restartConfirm, state.phase]);
+  }, [helpOpen, howItWorksOpen, restartConfirm, state.pauseReason, state.phase]);
+
+  useLayoutEffect(() => {
+    if (
+      !finishPromptOpen ||
+      state.phase === "paused" ||
+      state.phase === "won" ||
+      state.phase === "lost"
+    ) {
+      return;
+    }
+    dispatch({ type: "pause", reason: "finish-choice" });
+  }, [finishPromptOpen, state.phase]);
+
+  useEffect(() => {
+    if (!finishPromptOpen) {
+      return;
+    }
+    const frame = window.requestAnimationFrame(() => {
+      playOnRef.current?.focus();
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [finishPromptOpen]);
 
   useEffect(() => {
     const listener = (event: KeyboardEvent) => {
@@ -290,7 +328,7 @@ export function GameplayScreen({
       setAnnouncement(
         `Name reached ${Math.floor(
           (state.stencil.filledCells.size / state.stencil.mask.size) * 100,
-        )} percent. Finish is available; play continues.`,
+        )} percent. The board is paused. Finish, or play on.`,
       );
     } else if (state.phase === "won" && previous.phase !== "won") {
       setAnnouncement("Name complete. Run won.");
@@ -504,8 +542,11 @@ export function GameplayScreen({
     return () => window.clearTimeout(timeout);
   }, [flashLetters]);
 
-  useEffect(() => {
-    if (state.phase !== "playing" && state.phase !== "placing-stencil") {
+  useLayoutEffect(() => {
+    if (
+      finishPromptOpen ||
+      (state.phase !== "playing" && state.phase !== "placing-stencil")
+    ) {
       return;
     }
 
@@ -520,7 +561,7 @@ export function GameplayScreen({
     }, clockResolutionMilliseconds);
 
     return () => window.clearInterval(interval);
-  }, [state.phase]);
+  }, [finishPromptOpen, state.phase]);
 
   useEffect(() => {
     holdAudio("pause", state.phase === "paused");
@@ -585,6 +626,60 @@ export function GameplayScreen({
     };
   }, [emptySendId]);
 
+  function continuePastFinishPrompt() {
+    setFinishPromptDismissed(true);
+    setAnnouncement("Play continues. Finish stays available.");
+    dispatch({ type: "resume" });
+    window.requestAnimationFrame(() => gameRef.current?.focus());
+  }
+
+  function getOverlayMenuItems(root: HTMLElement | null): HTMLElement[] {
+    return [...(root?.querySelectorAll<HTMLElement>("button, input") ?? [])];
+  }
+
+  function moveOverlayMenuFocus(root: HTMLElement | null, delta: number) {
+    const items = getOverlayMenuItems(root);
+    if (items.length === 0) {
+      return;
+    }
+    const active = document.activeElement;
+    const index =
+      active instanceof HTMLElement ? items.indexOf(active) : -1;
+    const nextIndex =
+      index === -1
+        ? delta > 0
+          ? 0
+          : items.length - 1
+        : (index + delta + items.length) % items.length;
+    items[nextIndex]?.focus();
+  }
+
+  function trapOverlayMenuTab(event: KeyboardEvent, root: HTMLElement | null) {
+    const items = getOverlayMenuItems(root);
+    const first = items[0];
+    if (first === undefined) {
+      return;
+    }
+    const index = items.indexOf(document.activeElement as HTMLElement);
+    const delta = event.shiftKey ? -1 : 1;
+    const next =
+      index === -1 ? (event.shiftKey ? items.length - 1 : 0) : index + delta;
+    items[(next + items.length) % items.length]?.focus();
+  }
+
+  function handleOverlayMenuVerticalNav(
+    event: KeyboardEvent,
+    root: HTMLElement | null,
+  ): boolean {
+    if (event.key !== "ArrowUp" && event.key !== "ArrowDown") {
+      return false;
+    }
+    event.preventDefault();
+    event.stopPropagation();
+    moveOverlayMenuFocus(root, event.key === "ArrowDown" ? 1 : -1);
+    return true;
+  }
+
   function handleWindowKey(event: KeyboardEvent) {
     if (handledKeys.current.has(event)) {
       return;
@@ -617,6 +712,9 @@ export function GameplayScreen({
     }
 
     if (restartConfirm) {
+      if (handleOverlayMenuVerticalNav(event, pauseMenuRef.current)) {
+        return;
+      }
       if (event.key === "Escape" || event.key.toLowerCase() === "p") {
         event.preventDefault();
         event.stopPropagation();
@@ -627,7 +725,31 @@ export function GameplayScreen({
       return;
     }
 
+    if (finishPromptOpen) {
+      event.preventDefault();
+      event.stopPropagation();
+      if (event.key === "Tab") {
+        trapOverlayMenuTab(event, finishMenuRef.current);
+        return;
+      }
+      if (handleOverlayMenuVerticalNav(event, finishMenuRef.current)) {
+        return;
+      }
+      if (event.repeat) {
+        return;
+      }
+      if (event.key === " " || event.key === "Spacebar") {
+        continuePastFinishPrompt();
+      } else if (event.key === "Escape") {
+        dispatch({ type: "finish-run" });
+      }
+      return;
+    }
+
     if (state.phase === "paused") {
+      if (handleOverlayMenuVerticalNav(event, pauseMenuRef.current)) {
+        return;
+      }
       if (event.key === "Escape" || event.key.toLowerCase() === "p") {
         event.preventDefault();
         event.stopPropagation();
@@ -635,26 +757,6 @@ export function GameplayScreen({
         window.requestAnimationFrame(() => gameRef.current?.focus());
       }
       return;
-    }
-
-    if (finishPromptOpen) {
-      if (event.key === "Enter") {
-        event.preventDefault();
-        event.stopPropagation();
-        dispatch({ type: "finish-run" });
-        return;
-      }
-      if (event.key === "Escape") {
-        event.preventDefault();
-        event.stopPropagation();
-        setFinishPromptDismissed(true);
-        return;
-      }
-      const promptedAction = getGameAction(event.key, state.phase);
-      if (promptedAction?.type !== "hard-drop" && promptedAction?.type !== "pause") {
-        event.preventDefault();
-        return;
-      }
     }
 
     const action = getGameAction(event.key, state.phase);
@@ -669,7 +771,7 @@ export function GameplayScreen({
     }
   }
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     onWindowKeyRef.current = handleWindowKey;
   });
 
@@ -678,6 +780,22 @@ export function GameplayScreen({
   }
 
   function handleCabinetInput(key: string) {
+    if (finishPromptOpen) {
+      if (key === "ArrowUp" || key === "ArrowDown") {
+        moveOverlayMenuFocus(
+          finishMenuRef.current,
+          key === "ArrowDown" ? 1 : -1,
+        );
+      }
+      return;
+    }
+    if (
+      state.phase === "paused" &&
+      (key === "ArrowUp" || key === "ArrowDown")
+    ) {
+      moveOverlayMenuFocus(pauseMenuRef.current, key === "ArrowDown" ? 1 : -1);
+      return;
+    }
     if (document.activeElement instanceof HTMLElement) {
       document.activeElement.blur();
     }
@@ -693,11 +811,9 @@ export function GameplayScreen({
       return;
     }
 
-    const buttons = [
-      ...(pauseMenuRef.current?.querySelectorAll<HTMLElement>("button, input") ?? []),
-    ];
-    const first = buttons[0];
-    const last = buttons[buttons.length - 1];
+    const items = getOverlayMenuItems(pauseMenuRef.current);
+    const first = items[0];
+    const last = items[items.length - 1];
     if (first === undefined || last === undefined) {
       return;
     }
@@ -724,10 +840,15 @@ export function GameplayScreen({
 
   const controlDeck = (
     <ControlDeck
-      phase={state.phase}
+      phase={
+        finishPromptOpen
+          ? (state.pausedPhase ??
+            (state.phase === "placing-stencil" ? "placing-stencil" : "playing"))
+          : state.phase
+      }
       canRoute={state.transferCount === 0 || canRoute}
       canLock={canLock}
-      shiftReady={juiceFrame.shiftGlow}
+      shiftReady={!finishPromptOpen && juiceFrame.shiftGlow}
       onInput={helpOpen ? undefined : handleCabinetInput}
     />
   );
@@ -754,13 +875,21 @@ export function GameplayScreen({
             <button
               type="button"
               className="touch-only touch-pause"
-              aria-label={state.phase === "paused" ? "Touch resume" : "Touch pause"}
+              aria-label={
+                !finishPromptOpen && state.phase === "paused"
+                  ? "Touch resume"
+                  : "Touch pause"
+              }
+              disabled={finishPromptOpen}
               onPointerDown={(event) => {
                 event.preventDefault();
+                if (finishPromptOpen) {
+                  return;
+                }
                 handleCabinetInput("p");
               }}
             >
-              {state.phase === "paused" ? "Resume" : "Pause"}
+              {!finishPromptOpen && state.phase === "paused" ? "Resume" : "Pause"}
             </button>
           </div>
         </header>
@@ -808,7 +937,7 @@ export function GameplayScreen({
                 tooHigh={tooHigh}
                 tokenRow={tokenRow}
                 danger={juiceFrame.danger}
-                shiftReady={juiceFrame.shiftGlow}
+                shiftReady={!finishPromptOpen && juiceFrame.shiftGlow}
                 levelUp={juiceFrame.levelUp}
                 reducedMotion={juiceFrame.reduced}
                 lossGrey={
@@ -855,7 +984,11 @@ export function GameplayScreen({
             onRoute={() => handleCabinetInput("Shift")}
             onStencilLock={() => handleCabinetInput("Enter")}
             onStencilCancel={() => handleCabinetInput("Escape")}
-            onFinish={() => performPlayerAction({ type: "finish-run" })}
+            onFinish={() => {
+              if (!finishPromptOpen) {
+                performPlayerAction({ type: "finish-run" });
+              }
+            }}
             onHelp={openHelp}
             emptySendNotice={emptySendId !== 0}
             emptySendFlash={emptySendFlash}
@@ -870,26 +1003,32 @@ export function GameplayScreen({
 
           {finishPromptOpen && (
             <div
-              className="finish-prompt"
+              className="game-overlay finish-prompt"
               role="dialog"
               aria-modal="true"
               aria-labelledby="finish-prompt-title"
+              aria-describedby="finish-prompt-copy"
             >
               <h2 id="finish-prompt-title">80% reached</h2>
-              <div className="overlay-actions">
+              <p id="finish-prompt-copy">
+                Finish this run, or play on toward 100%. Shift and drops are held until
+                you choose.
+              </p>
+              <div className="overlay-actions" ref={finishMenuRef}>
                 <button
+                  ref={playOnRef}
                   type="button"
-                  className="primary-button compact"
-                  onClick={() => dispatch({ type: "finish-run" })}
+                  className="primary-button"
+                  onClick={continuePastFinishPrompt}
                 >
-                  Finish now · Enter
+                  Play on · Space
                 </button>
                 <button
                   type="button"
                   className="secondary-button"
-                  onClick={() => setFinishPromptDismissed(true)}
+                  onClick={() => dispatch({ type: "finish-run" })}
                 >
-                  Play on · Esc
+                  Finish now · Esc
                 </button>
               </div>
             </div>
@@ -916,85 +1055,90 @@ export function GameplayScreen({
             />
           )}
 
-          {state.phase === "paused" && !helpOpen && !howItWorksOpen && (
-            <div
-              className="game-overlay"
-              role="dialog"
-              aria-modal="true"
-              aria-labelledby="pause-dialog-title"
-              onKeyDown={trapPauseTab}
-            >
-              <p className="eyebrow">TAKE A BREATH</p>
-              {restartConfirm ? (
-                <>
-                  <h2 id="pause-dialog-title">End this run and start again?</h2>
-                  <div className="overlay-actions" ref={pauseMenuRef}>
-                    <button
-                      ref={confirmYesRef}
-                      type="button"
-                      className="primary-button compact"
-                      onClick={() => onRestart?.()}
-                    >
-                      Yes
-                    </button>
-                    <button
-                      type="button"
-                      className="secondary-button"
-                      onClick={() => setRestartConfirm(false)}
-                    >
-                      No
-                    </button>
+          {state.phase === "paused" &&
+            state.pauseReason !== "finish-choice" &&
+            !helpOpen &&
+            !howItWorksOpen && (
+              <div
+                className="game-overlay"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="pause-dialog-title"
+                onKeyDown={trapPauseTab}
+              >
+                {restartConfirm ? (
+                  <>
+                    <h2 id="pause-dialog-title">End this run and start again?</h2>
+                    <div className="overlay-actions" ref={pauseMenuRef}>
+                      <button
+                        ref={confirmYesRef}
+                        type="button"
+                        className="primary-button compact"
+                        onClick={() => onRestart?.()}
+                      >
+                        Yes
+                      </button>
+                      <button
+                        type="button"
+                        className="secondary-button"
+                        onClick={() => setRestartConfirm(false)}
+                      >
+                        No
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  <div className="pause-menu">
+                    <div className="pause-copy">
+                      <h2 id="pause-dialog-title">Game paused</h2>
+                      <p>
+                        {state.pauseReason === "hidden"
+                          ? "The tab was hidden. Resume when you are ready."
+                          : "Your stack is waiting."}
+                      </p>
+                      <p data-testid="run-seed">Seed {seed}</p>
+                    </div>
+                    <div className="pause-menu-controls" ref={pauseMenuRef}>
+                      <div className="pause-action-group">
+                        <button
+                          ref={pauseResumeRef}
+                          type="button"
+                          className="primary-button compact"
+                          onClick={() => handleCabinetInput("p")}
+                        >
+                          Resume game
+                        </button>
+                        <button
+                          type="button"
+                          className="secondary-button"
+                          onClick={() => setRestartConfirm(true)}
+                        >
+                          Restart run
+                        </button>
+                        <button
+                          type="button"
+                          className="secondary-button"
+                          onClick={() => onNewName?.()}
+                        >
+                          Quit to title screen
+                        </button>
+                        <button
+                          type="button"
+                          className="secondary-button"
+                          onClick={openHelp}
+                        >
+                          How to play
+                        </button>
+                      </div>
+                      <PauseSoundSettings />
+                    </div>
                   </div>
-                </>
-              ) : (
-                <>
-                  <h2 id="pause-dialog-title">Game paused</h2>
-                  <p>
-                    {state.pauseReason === "hidden"
-                      ? "The tab was hidden. Resume when you are ready."
-                      : "Your stack is waiting."}
-                  </p>
-                  <p data-testid="run-seed">Seed {seed}</p>
-                  <div className="overlay-actions" ref={pauseMenuRef}>
-                    <button
-                      ref={pauseResumeRef}
-                      type="button"
-                      className="primary-button compact"
-                      onClick={() => handleCabinetInput("p")}
-                    >
-                      Resume game
-                    </button>
-                    <button
-                      type="button"
-                      className="secondary-button"
-                      onClick={() => setRestartConfirm(true)}
-                    >
-                      Restart run
-                    </button>
-                    <button
-                      type="button"
-                      className="secondary-button"
-                      onClick={() => onNewName?.()}
-                    >
-                      New name
-                    </button>
-                    <button
-                      type="button"
-                      className="secondary-button"
-                      onClick={openHelp}
-                    >
-                      How to play
-                    </button>
-                    <PauseSoundSettings />
-                  </div>
-                </>
-              )}
-            </div>
-          )}
+                )}
+              </div>
+            )}
 
           {lossCard && state.phase === "lost" && (
             <div className="game-overlay" role="alert">
-              <p className="eyebrow">STACK OVERFLOW</p>
               <h2>Run over</h2>
               <p>Final score: {state.score.toLocaleString()}</p>
             </div>

@@ -199,16 +199,6 @@ summary:focus-visible {
   min-width: 54px;
 }
 
-.eyebrow {
-  margin: 0 0 12px;
-  color: var(--phosphor-red);
-  font-family: var(--font-ui);
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.22em;
-  line-height: 1.2;
-}
-
 h1 {
   margin: 0;
   font-family: var(--font-display);
@@ -236,17 +226,6 @@ h1 {
   font-weight: 700;
   letter-spacing: 0;
   line-height: 0.9;
-}
-
-.privacy-note {
-  color: var(--muted);
-  font-family: var(--font-ui);
-  font-size: 14px;
-  line-height: 1.4;
-}
-
-.privacy-note span {
-  color: var(--phosphor-red);
 }
 
 .primary-button {
@@ -284,7 +263,6 @@ h1 {
     inset 3px 0 2px rgb(255 255 255 / 25%);
 }
 
-.privacy-note > span[aria-hidden],
 .run-guidance > span[aria-hidden],
 .finish-ready-badge > span[aria-hidden] {
   display: inline-block;
@@ -296,7 +274,6 @@ h1 {
   vertical-align: 0.12em;
 }
 
-.privacy-note > span[aria-hidden]::before,
 .run-guidance > span[aria-hidden]::before,
 .finish-ready-badge > span[aria-hidden]::before {
   content: "";

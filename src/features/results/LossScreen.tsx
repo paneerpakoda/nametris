@@ -1,3 +1,5 @@
+import { Type } from "lucide-react";
+
 import { CabinetShell } from "../../components/CabinetShell";
 import { ControlDeck } from "../../components/ControlDeck";
 import type { LossResult } from "../../game/engine/result";
@@ -20,7 +22,6 @@ export function LossScreen({ result, onPlayAgain, onNewName }: LossScreenProps) 
     >
       <main className="result-shell loss-shell">
         <div className="loss-card">
-          <p className="eyebrow">RUN OVER</p>
           <h1>STACK OVERFLOW</h1>
           <p className="loss-name">{result.name}</p>
           <p className="loss-message">
@@ -57,6 +58,7 @@ export function LossScreen({ result, onPlayAgain, onNewName }: LossScreenProps) 
               Play again
             </button>
             <button type="button" className="secondary-button" onClick={onNewName}>
+              <Type aria-hidden="true" />
               Try another name
             </button>
           </div>

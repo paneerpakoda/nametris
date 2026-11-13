@@ -41,7 +41,7 @@ describe("App", () => {
     render(<App />);
 
     expect(screen.getByRole("heading", { name: "NAMETRIS" })).toBeInTheDocument();
-    expect(screen.getByText("Your name stays on this device.")).toBeInTheDocument();
+    expect(screen.getByLabelText("Your name")).toBeInTheDocument();
   });
 
   it("shows how it works on the first start, then a playable board", async () => {
@@ -90,7 +90,7 @@ describe("App", () => {
     await user.click(screen.getByRole("button", { name: "Start building" }));
     await user.click(screen.getByRole("button", { name: "Skip" }));
     await user.click(screen.getByRole("button", { name: "Pause game" }));
-    await user.click(screen.getByRole("button", { name: "New name" }));
+    await user.click(screen.getByRole("button", { name: "Quit to title screen" }));
 
     expect(screen.getByLabelText("Your name")).toHaveValue("JO");
   });

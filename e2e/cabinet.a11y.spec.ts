@@ -5,7 +5,7 @@ test("keeps core CRT copy legible and high contrast", async ({ page }) => {
   await expect(page.getByRole("region", { name: "Welcome display" })).toBeVisible();
   expect(
     await page
-      .locator(".privacy-note")
+      .locator(".welcome-tagline")
       .evaluate((element) => Number.parseFloat(getComputedStyle(element).fontSize)),
   ).toBeGreaterThanOrEqual(10);
 
@@ -97,6 +97,12 @@ test("completes onboarding, pause, finish, and replay with keyboard input", asyn
 
   await page.waitForFunction(() => window.__NAMETRIS_E2E__ !== undefined);
   await page.evaluate(() => window.__NAMETRIS_E2E__?.loadFixture("eighty"));
+  const decision = page.getByRole("dialog", { name: "80% reached" });
+  await expect(decision).toBeVisible();
+  await expect(page.getByRole("button", { name: "Play on · Space" })).toBeFocused();
+  await page.keyboard.press("Space");
+  await expect(decision).toBeHidden();
+  await expect(game).toBeFocused();
   await expect(page.getByRole("button", { name: /FINISH NAME/ })).toBeVisible();
 
   await page.keyboard.press("Tab");

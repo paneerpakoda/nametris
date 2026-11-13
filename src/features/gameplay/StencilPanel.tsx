@@ -39,6 +39,8 @@ export function StencilPanel({
 }: StencilPanelProps) {
   const completion = getStencilCompletion(state.stencil);
   const isPlacing = state.phase === "placing-stencil";
+  const holdingPlacement =
+    state.pauseReason === "finish-choice" && state.pausedPhase === "placing-stencil";
   const projection =
     state.stencilPiece === null
       ? null
@@ -64,7 +66,7 @@ export function StencilPanel({
           <h2 id="stencil-title">
             {state.phase === "won"
               ? "NAME COMPLETE"
-              : isPlacing
+              : isPlacing || holdingPlacement
                 ? `PLACE THE ${state.stencilPiece?.type ?? "PIECE"}`
                 : "NAME OUTLINE"}
           </h2>
@@ -138,20 +140,22 @@ export function StencilPanel({
         </div>
       ) : (
         <div className="stencil-actions">
-          <p>
-            Send a name piece while any part of it is still above the send line. You can
-            hold up to {maximumTransferCount}. Finish at 80%.
-          </p>
-          {emptySendNotice && (
-            <p
-              className={
-                emptySendFlash ? "empty-send-notice is-flash" : "empty-send-notice"
-              }
-              data-testid="empty-send-notice"
-            >
-              No name pieces yet. Clear a row first.
+          <div className="stencil-actions-copy">
+            <p>
+              Send a name piece while any part of it is still above the send line. You
+              can hold up to {maximumTransferCount}. Finish at 80%.
             </p>
-          )}
+            {emptySendNotice && (
+              <p
+                className={
+                  emptySendFlash ? "empty-send-notice is-flash" : "empty-send-notice"
+                }
+                data-testid="empty-send-notice"
+              >
+                No name pieces yet. Clear a row first.
+              </p>
+            )}
+          </div>
           <div className="stencil-action-buttons">
             {state.canFinish && state.phase === "playing" && (
               <button

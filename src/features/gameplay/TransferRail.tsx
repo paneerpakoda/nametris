@@ -23,7 +23,10 @@ export function TransferRail({
 
   return (
     <aside className="transfer-rail" aria-label="Name pieces and next piece">
-      <div className="transfer-arrows" aria-label={`${transferCount} name pieces`}>
+      <div
+        className={`transfer-arrows${isFull ? " is-full" : ""}`}
+        aria-label={`${transferCount} name pieces`}
+      >
         {Array.from({ length: maximumTransferCount }, (_, index) => (
           <span
             className={
@@ -36,7 +39,7 @@ export function TransferRail({
             key={index}
             aria-hidden="true"
           >
-            <ArrowRight aria-hidden="true" />
+            <ArrowRight aria-hidden="true" strokeWidth={3.75} />
           </span>
         ))}
       </div>
@@ -56,26 +59,28 @@ export function TransferRail({
         </button>
       )}
 
-      <div
-        className={`rail-transfer-metric${isFull ? " is-transfer-full" : ""}${
-          counterTick ? " is-ticking" : ""
-        }`}
-        data-testid="transfer-metric"
-        data-status={isFull ? "full" : "available"}
-        aria-label={`Name pieces: ${transferCount} of ${maximumTransferCount}${
-          isFull ? ". Send one." : ""
-        }`}
-      >
-        <span>NAME PIECES</span>
-        <strong data-testid="transfers">
-          {transferCount} <small>/ {maximumTransferCount}</small>
-        </strong>
-        {isFull && <em className="transfer-full-label">FULL</em>}
-      </div>
+      <div className="rail-footer">
+        <div
+          className={`rail-transfer-metric${isFull ? " is-transfer-full" : ""}${
+            counterTick ? " is-ticking" : ""
+          }`}
+          data-testid="transfer-metric"
+          data-status={isFull ? "full" : "available"}
+          aria-label={`Name pieces: ${transferCount} of ${maximumTransferCount}${
+            isFull ? ". Send one." : ""
+          }`}
+        >
+          <span>NAME PIECES</span>
+          <strong data-testid="transfers">
+            {transferCount} <small>/ {maximumTransferCount}</small>
+          </strong>
+          {isFull && <em className="transfer-full-label">FULL</em>}
+        </div>
 
-      <div className="rail-next-piece">
-        <span>NEXT</span>
-        <PiecePreview type={nextPiece} />
+        <div className="rail-next-piece">
+          <span>NEXT</span>
+          <PiecePreview type={nextPiece} />
+        </div>
       </div>
     </aside>
   );

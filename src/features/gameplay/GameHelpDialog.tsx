@@ -70,7 +70,8 @@ export function GameHelpDialog({
         <p id={descriptionId} className="help-intro">
           Clear a full row to earn a name piece. You can hold up to three. Press Shift
           to send one onto your name while it is still above the send line. Parts
-          outside the outline are lost. At 80% you may finish; 100% finishes on its own.
+          outside the outline are lost. At 80% the board pauses so you can finish or
+          play on; 100% finishes on its own.
         </p>
 
         <div className="help-columns">

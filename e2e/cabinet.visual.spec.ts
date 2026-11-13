@@ -138,7 +138,7 @@ test("help dialog cabinet", async ({ page }) => {
 test("success cabinet", async ({ page }) => {
   await startRun(page);
   await loadFixture(page, "eighty-real");
-  await page.getByRole("button", { name: /FINISH NAME/ }).click();
+  await page.getByRole("button", { name: "Finish now · Esc" }).click();
   await waitForDisplay(page, "Success display");
   await expectCabinetScreenshot(page, "success.png");
 });
@@ -146,6 +146,10 @@ test("success cabinet", async ({ page }) => {
 test("loss cabinet", async ({ page }) => {
   await startRun(page);
   await loadFixture(page, "topout-eighty");
+  const decision = page.getByRole("dialog", { name: "80% reached" });
+  await expect(decision).toBeVisible();
+  await page.keyboard.press("Space");
+  await expect(decision).toBeHidden();
   await page.keyboard.press("Space");
   await waitForDisplay(page, "Loss display");
   await expectCabinetScreenshot(page, "loss.png");

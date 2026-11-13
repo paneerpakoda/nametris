@@ -39,10 +39,6 @@
   text-align: center;
 }
 
-.result-heading .eyebrow {
-  margin-bottom: 3px;
-}
-
 .result-heading h1 {
   font-family: var(--font-display);
   font-size: clamp(2.5rem, 6vh, 4rem);
@@ -84,26 +80,13 @@
   text-align: center;
 }
 
-.reward-card::before,
-.reward-card::after {
-  position: absolute;
-  pointer-events: none;
-  content: "";
-}
-
 .reward-card::before {
+  position: absolute;
   z-index: -1;
   inset: 8px;
   border: 1px solid rgb(240 68 52 / 25%);
-}
-
-.reward-card::after {
-  top: 0;
-  right: 0;
-  width: 54px;
-  height: 8px;
-  background: var(--phosphor-amber);
-  box-shadow: -58px 0 0 var(--phosphor-red);
+  pointer-events: none;
+  content: "";
 }
 
 .reward-shine {
@@ -136,11 +119,17 @@
 
 .reward-brand {
   margin: 0;
-  color: var(--phosphor-red);
-  font-family: var(--font-ui);
-  font-size: 12px;
-  font-weight: 800;
-  letter-spacing: 0.24em;
+  color: transparent;
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  line-height: 0.9;
+  background: linear-gradient(to bottom, #fdfeec 0%, #f8e6a4 50%, #a87f49 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 1px 0 #893128) drop-shadow(0 0 10px rgb(181 28 28 / 70%));
 }
 
 .reward-card-header {
@@ -295,15 +284,26 @@
 .result-actions .secondary-button,
 .loss-actions .primary-button,
 .loss-actions .secondary-button {
+  display: inline-flex;
   width: auto;
   min-height: 38px;
   margin: 0;
   padding: 9px 14px;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
   font-family: var(--font-ui);
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 0;
   line-height: 1.2;
+}
+
+.result-actions .secondary-button svg,
+.loss-actions .secondary-button svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
 }
 
 .result-status {
@@ -341,10 +341,6 @@
   height: 1px;
   background: rgb(236 75 55 / 24%);
   content: "";
-}
-
-.loss-card .eyebrow {
-  margin-bottom: 5px;
 }
 
 .loss-card h1 {
@@ -420,10 +416,6 @@
 
   .result-heading h1 {
     font-size: 2.5rem;
-  }
-
-  .result-heading .eyebrow {
-    font-size: 12px;
   }
 
   .reward-card {
