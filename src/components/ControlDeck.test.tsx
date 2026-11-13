@@ -12,7 +12,9 @@ describe("ControlDeck", () => {
     expect(screen.getByText("SHIFT").closest("kbd")).not.toBeNull();
     expect(screen.getByText("SPACE").closest("kbd")).not.toBeNull();
     expect(
-      screen.getByLabelText("Cabinet controls").querySelectorAll("svg.cabinet-key-icon"),
+      screen
+        .getByLabelText("Cabinet controls")
+        .querySelectorAll("svg.cabinet-key-icon"),
     ).toHaveLength(8);
   });
 
