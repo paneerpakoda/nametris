@@ -1,4 +1,5 @@
 @import "tailwindcss" source("../");
+@import "./tokens.css";
 
 @font-face {
   font-family: "PP NeueBit";
@@ -54,55 +55,18 @@
 :root {
   font-family: var(--font-ui);
   font-size: 16px;
-  color: #fff5dc;
-  background: #161714;
+  color: var(--color-ivory-100);
+  background: var(--color-stage);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
-  --background: #161714;
-  --surface: #10120f;
-  --surface-high: #1c201b;
-  --text: #fff5dc;
-  --muted: #c7baa1;
-  --violet: #b261db;
-  --cyan: #3c9ef5;
-  --lime: #f5c546;
-  --danger: #ff6b54;
-  --focus: #ffd85c;
-  --cabinet-ivory: #f0d3a7;
-  --cabinet-plastic: #d6b88c;
-  --cabinet-highlight: #ffedcb;
-  --cabinet-ink: #49341c;
-  --cabinet-border: #ffedcb;
-  --cabinet-bezel-border: rgb(100 68 32 / 58%);
-  --cabinet-console-border: rgb(102 69 31 / 63%);
-  --crt-black: #080b09;
-  --crt-surface: #10140f;
-  --crt-text: #fff5dc;
-  --crt-muted: #c7baa1;
-  --crt-border: #15130f;
-  --phosphor-red: #ff6b54;
-  --phosphor-amber: #ffc45d;
-  --route-blue: #57b1ff;
-  --font-display: "PP NeueBit", "PP NeueBit Fallback", "Space Mono", monospace;
-  --font-ui: "Space Mono", "Space Mono Fallback", monospace;
   --default-font-family: var(--font-ui);
   --default-mono-font-family: var(--font-ui);
-  --radius-large: 14px;
-  --radius-medium: 7px;
-  --shadow-glow: 0 0 28px rgb(236 75 55 / 16%);
-  --chrome: 140px;
-  --side: clamp(300px, 42vw, 670px);
-  --cell: clamp(
-    14px,
-    min((100dvh - var(--chrome)) / 20, (100vw - var(--side)) / 10),
-    36px
-  );
 }
 
 @media (max-width: 699px) {
   :root {
-    --chrome: 374px;
-    --side: 96px;
+    --chrome: var(--chrome-compact);
+    --side: var(--side-compact);
   }
 }
 
@@ -132,8 +96,8 @@ input {
 button:focus-visible,
 input:focus-visible,
 summary:focus-visible {
-  outline: 3px solid var(--focus);
-  outline-offset: 3px;
+  outline: var(--focus-width) solid var(--focus);
+  outline-offset: var(--focus-offset);
 }
 
 .nametris-mark {
@@ -151,29 +115,29 @@ summary:focus-visible {
 }
 
 .nametris-mark-block {
-  border: 1px solid rgb(237 230 211 / 88%);
-  border-radius: 2px;
-  box-shadow: 2px 2px 0 #05060b;
+  border: 1px solid var(--color-mark-stroke);
+  border-radius: var(--radius-cell);
+  box-shadow: var(--shadow-block);
 }
 
 .nametris-mark-block.is-lime {
   grid-area: 1 / 1;
-  background: #8fd43d;
+  background: var(--color-mark-lime);
 }
 
 .nametris-mark-block.is-red {
   grid-area: 2 / 1;
-  background: #ff4b2b;
+  background: var(--color-mark-red);
 }
 
 .nametris-mark-block.is-yellow {
   grid-area: 2 / 2;
-  background: #ffc21c;
+  background: var(--color-mark-yellow);
 }
 
 .nametris-mark-block.is-blue {
   grid-area: 3 / 2;
-  background: #1e79d0;
+  background: var(--color-mark-blue);
 }
 
 .key-hint {
@@ -182,12 +146,12 @@ summary:focus-visible {
   height: 22px;
   padding: 0 6px;
   place-items: center;
-  border: 1px solid rgb(237 230 211 / 36%);
-  border-radius: 4px;
+  border: 1px solid var(--color-cream-36);
+  border-radius: var(--radius-hint);
   color: var(--text);
-  background: #292c2d;
+  background: var(--color-key-hint);
   box-shadow:
-    0 2px 0 #05060b,
+    0 2px 0 var(--color-void),
     inset 0 1px 0 rgb(255 255 255 / 12%);
   font-family: var(--font-ui);
   font-size: 12px;
@@ -218,7 +182,7 @@ h1 {
 
 .name-preview {
   padding: 20px;
-  border: 1px dashed rgb(66 232 224 / 60%);
+  border: 1px dashed var(--color-stencil-open-border);
   border-radius: var(--radius-medium);
   color: var(--lime);
   font-family: var(--font-display);
@@ -234,13 +198,9 @@ h1 {
   padding: 14px 24px;
   border: 0;
   border-radius: 8px;
-  color: #fff8e9;
-  background: #b93a28;
-  box-shadow:
-    inset 0 3px 2px rgb(255 255 255 / 25%),
-    inset 0 -3px 2px rgb(0 0 0 / 40%),
-    inset 3px 0 2px rgb(255 255 255 / 25%),
-    inset -3px 0 2px rgb(255 255 255 / 25%);
+  color: var(--color-ivory-50);
+  background: var(--color-button);
+  box-shadow: var(--button-primary-inset);
   cursor: pointer;
   font-family: var(--font-display);
   font-size: 20px;
@@ -251,16 +211,12 @@ h1 {
 }
 
 .primary-button:hover:not(:disabled) {
-  background: #c4402c;
+  background: var(--color-button-hover);
 }
 
 .primary-button:active:not(:disabled) {
   translate: 0 2px;
-  box-shadow:
-    inset 0 -3px 2px rgb(255 255 255 / 25%),
-    inset 0 3px 2px rgb(0 0 0 / 40%),
-    inset -3px 0 2px rgb(255 255 255 / 25%),
-    inset 3px 0 2px rgb(255 255 255 / 25%);
+  box-shadow: var(--button-primary-inset-pressed);
 }
 
 .run-guidance > span[aria-hidden],
@@ -280,7 +236,7 @@ h1 {
   display: block;
   width: 6px;
   height: 6px;
-  background: #ff6b54;
+  background: var(--color-phosphor);
   transform: rotate(45deg);
 }
 
@@ -327,7 +283,7 @@ h1 {
 
   .color-flash {
     animation-name: color-flash !important;
-    animation-duration: 150ms !important;
+    animation-duration: var(--duration-flash) !important;
     animation-iteration-count: 1 !important;
   }
 }

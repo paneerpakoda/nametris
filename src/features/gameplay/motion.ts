@@ -1,17 +1,18 @@
 import { HIDDEN_BOARD_ROWS } from "../../game/engine/board";
 import { getPieceCells } from "../../game/engine/pieces";
 import type { ActivePiece, Board } from "../../game/model/types";
+import { ms } from "../../design/tokens";
 
-export const lineClearVisibleMilliseconds = 900;
-export const lineClearReducedMilliseconds = 1_200;
-export const rowClearMilliseconds = 180;
-export const softLockFlashMilliseconds = 80;
-export const hardDropTrailMilliseconds = 120;
-export const hardDropBumpMilliseconds = 90;
-export const namePopMilliseconds = 180;
-export const pieceFlyMilliseconds = 250;
-export const letterFlashMilliseconds = 300;
-export const stackGreyMilliseconds = 600;
+export const lineClearVisibleMilliseconds = ms("duration-clear");
+export const lineClearReducedMilliseconds = ms("duration-clear-reduced");
+export const rowClearMilliseconds = ms("duration-pop");
+export const softLockFlashMilliseconds = ms("duration-lock");
+export const hardDropTrailMilliseconds = ms("duration-trail");
+export const hardDropBumpMilliseconds = ms("duration-bump");
+export const namePopMilliseconds = ms("duration-pop");
+export const pieceFlyMilliseconds = ms("duration-flight");
+export const letterFlashMilliseconds = ms("duration-letter");
+export const stackGreyMilliseconds = ms("duration-grey");
 
 export function prefersReducedMotion(): boolean {
   return (

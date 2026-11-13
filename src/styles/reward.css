@@ -1,8 +1,9 @@
 .result-crt-screen {
   color: var(--crt-text);
   background:
-    linear-gradient(rgb(240 68 52 / 2%) 1px, transparent 1px),
-    linear-gradient(90deg, rgb(240 68 52 / 2%) 1px, transparent 1px), var(--crt-black);
+    linear-gradient(var(--color-signal-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--color-signal-grid) 1px, transparent 1px),
+    var(--crt-black);
   background-size: 28px 28px;
 }
 
@@ -23,8 +24,8 @@
 .win-plaque {
   margin: 0;
   padding: 8px 14px;
-  color: #24180a;
-  background: #e6b422;
+  color: var(--color-plaque-ink);
+  background: var(--color-amber-deep);
   font-family: var(--font-ui);
   font-size: 12px;
   letter-spacing: 0.08em;
@@ -46,12 +47,12 @@
   letter-spacing: 0;
   line-height: 0.9;
   color: transparent;
-  background: linear-gradient(to bottom, #fdfeec 0%, #f8e6a4 50%, #a87f49 100%);
+  background: var(--fill-display-gold);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
   text-shadow: none;
-  filter: drop-shadow(0 3px 0 #893128) drop-shadow(0 0 20px rgb(181 28 28 / 80%));
+  filter: var(--shadow-display-gold);
 }
 
 .reward-card {
@@ -82,7 +83,7 @@
 
 .reward-card::before {
   position: absolute;
-  z-index: -1;
+  z-index: var(--z-below);
   inset: 8px;
   border: 1px solid rgb(240 68 52 / 25%);
   pointer-events: none;
@@ -91,7 +92,7 @@
 
 .reward-shine {
   position: absolute;
-  z-index: -1;
+  z-index: var(--z-below);
   inset: 0;
   background: radial-gradient(
     circle at var(--shine-x) var(--shine-y),
@@ -99,7 +100,7 @@
     transparent 31%
   );
   opacity: 0;
-  transition: opacity 160ms ease;
+  transition: opacity var(--duration-shine) var(--ease-press);
 }
 
 .reward-card[data-motion="interactive"]:hover .reward-shine {
@@ -125,11 +126,11 @@
   font-weight: 700;
   letter-spacing: 0;
   line-height: 0.9;
-  background: linear-gradient(to bottom, #fdfeec 0%, #f8e6a4 50%, #a87f49 100%);
+  background: var(--fill-display-gold);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
-  filter: drop-shadow(0 1px 0 #893128) drop-shadow(0 0 10px rgb(181 28 28 / 70%));
+  filter: var(--shadow-display-gold-compact);
 }
 
 .reward-card-header {
@@ -164,12 +165,12 @@
   letter-spacing: 0;
   line-height: 0.9;
   color: transparent;
-  background: linear-gradient(to bottom, #fdfeec 0%, #f8e6a4 50%, #a87f49 100%);
+  background: var(--fill-display-gold);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
   text-shadow: none;
-  filter: drop-shadow(0 3px 0 #893128) drop-shadow(0 0 20px rgb(181 28 28 / 80%));
+  filter: var(--shadow-display-gold);
 }
 
 .result-stencil {
@@ -350,12 +351,12 @@
   letter-spacing: 0;
   line-height: 0.9;
   color: transparent;
-  background: linear-gradient(to bottom, #fdfeec 0%, #f8e6a4 50%, #a87f49 100%);
+  background: var(--fill-display-gold);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
   text-shadow: none;
-  filter: drop-shadow(0 3px 0 #893128) drop-shadow(0 0 20px rgb(181 28 28 / 80%));
+  filter: var(--shadow-display-gold);
 }
 
 .loss-name {

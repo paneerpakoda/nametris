@@ -463,6 +463,9 @@ describe("GameplayScreen", () => {
     expect(screen.getByRole("dialog", { name: "80% reached" })).toBeInTheDocument();
 
     fireEvent.keyDown(window, { key: " " });
+    expect(screen.getByRole("dialog", { name: "80% reached" })).toBeInTheDocument();
+
+    fireEvent.keyDown(window, { key: "Enter" });
 
     expect(
       screen.queryByRole("dialog", { name: "80% reached" }),

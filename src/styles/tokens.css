@@ -1,0 +1,284 @@
+/* Nametris visual contract. Roles and approved values: docs/design/design-system.md */
+
+:root {
+  /* Palette. Stage and CRT */
+  --color-stage: #161714;
+  --color-void: #05060b;
+  --color-screen: #060806;
+  --color-crt: #080b09;
+  --color-crt-border: #15130f;
+  --color-surface: #10120f;
+  --color-crt-surface: #10140f;
+  --color-surface-high: #1c201b;
+  --color-overlay: rgb(5 8 5 / 94%);
+  --color-overlay-finish: rgb(5 8 5 / 97%);
+  --color-dialog: #0d110d;
+  --color-field: #1a1614;
+  --color-name: #ffffff;
+
+  /* Palette. Ivory, plastic, gold */
+  --color-ivory-50: #fff8e9;
+  --color-ivory-100: #fff5dc;
+  --color-ivory-200: #fff4df;
+  --color-ivory-300: #ffedcb;
+  --color-ivory-400: #f0d3a7;
+  --color-ivory-500: #d6b88c;
+  --color-cream: #ede6d3;
+  --color-cream-36: rgb(237 230 211 / 36%);
+  --color-muted: #c7baa1;
+  --color-muted-dim: #958a76;
+  --color-plastic-shine: #f1d3a0;
+  --color-plastic-shade: #cba675;
+  --color-bezel: #9f7a4e;
+  --color-gold-50: #fdfeec;
+  --color-gold-100: #f2e4d4;
+  --color-gold-200: #f8e6a4;
+  --color-gold-400: #f5c546;
+  --color-gold-500: #a87f49;
+  --color-amber: #ffc45d;
+  --color-amber-90: rgb(255 196 93 / 90%);
+  --color-amber-deep: #e6b422;
+  --color-focus: #ffd85c;
+  --color-lost: #c9842a;
+  --color-lost-90: rgb(201 132 42 / 90%);
+  --color-finish: #fff4d6;
+  --color-title: #f3a232;
+
+  /* Palette. Signal reds. Each red has one job. */
+  --color-phosphor: #ff6b54;
+  --color-signal: #f04434;
+  --color-signal-grid: rgb(240 68 52 / 2%);
+  --color-signal-hot: #ec4b37;
+  --color-button: #b93a28;
+  --color-button-hover: #c4402c;
+  --color-danger-solid: #9d2418;
+  --color-ember: #b51c1c;
+  --color-ember-shadow: #893128;
+  --color-button-disabled: #6e3a31;
+  --color-button-disabled-well: #3a2622;
+  --color-disabled-label: #a89a90;
+  --color-welcome: #e56d59;
+  --color-welcome-deep: #d4523d;
+  --color-welcome-wash: rgb(73 23 17 / 16%);
+  --color-error: #ff9d8e;
+  --color-welcome-line: rgb(229 109 89 / 28%);
+  --color-ember-22: rgb(181 28 28 / 22%);
+  --color-ember-40: rgb(181 28 28 / 40%);
+  --color-ember-70: rgb(181 28 28 / 70%);
+  --color-ember-80: rgb(181 28 28 / 80%);
+  --color-signal-hot-frame: #ec4b37cc;
+  --color-signal-hot-border: rgb(236 75 55 / 55%);
+  --color-signal-hot-fill: rgb(236 75 55 / 8%);
+  --color-signal-hot-hairline: rgb(236 75 55 / 28%);
+  --color-signal-hot-soft: rgb(236 75 55 / 18%);
+  --color-danger-edge: rgb(158 78 68 / 50%);
+
+  /* Palette. Route, ink, stencil, board */
+  --color-route: #57b1ff;
+  --color-route-deep: #145d9e;
+  --color-route-ink: #f4f9ff;
+  --color-ink: #49341c;
+  --color-plaque-ink: #24180a;
+  --color-slow-ink: #201406;
+  --color-focus-ink: #2b1d0e;
+  --color-stencil-open-border: #ff6b54b3;
+  --color-stencil-open: rgb(255 107 84 / 5%);
+  --color-stencil-edge: rgb(255 255 255 / 38%);
+  --color-ghost-border: rgb(237 230 211 / 50%);
+  --color-ghost: rgb(237 230 211 / 5%);
+  --color-board-line: rgb(237 230 211 / 9%);
+  --color-board-well: rgb(255 255 255 / 1.5%);
+  --color-mark-stroke: rgb(237 230 211 / 88%);
+  --color-metric-fill: rgb(237 230 211 / 3%);
+  --color-bezel-border: rgb(100 68 32 / 58%);
+  --color-console-border: rgb(102 69 31 / 63%);
+
+  /* Palette. Pieces. Shape carries identity; these fills are secondary. */
+  --color-piece-i: #36cdd7;
+  --color-piece-o: #f0c92e;
+  --color-piece-t: #a65bd5;
+  --color-piece-s: #46bf68;
+  --color-piece-z: #e85555;
+  --color-piece-j: #377bd7;
+  --color-piece-l: #ed762d;
+
+  /* Palette. Brand mark. Not the piece colors. */
+  --color-mark-lime: #8fd43d;
+  --color-mark-red: #ff4b2b;
+  --color-mark-yellow: #ffc21c;
+  --color-mark-blue: #1e79d0;
+  --color-mark-glow: #3b82f6;
+
+  /* Retired names from the first token pass. Do not use in new UI. */
+  --color-legacy-violet: #b261db;
+  --color-legacy-cyan: #3c9ef5;
+
+  /* Keycap plastic */
+  --color-keycap-top: #1a181b;
+  --color-keycap-bottom: #141317;
+  --color-keycap-face-start: #2d303d;
+  --color-keycap-face-end: #3d404a;
+  --color-keycap-edge: #111113;
+  --color-keycap-highlight: #444650;
+  --color-key-shadow: #040303;
+  --color-key-hint: #292c2d;
+
+  /* Type */
+  --font-display: "PP NeueBit", "PP NeueBit Fallback", "Space Mono", monospace;
+  --font-ui: "Space Mono", "Space Mono Fallback", monospace;
+
+  /* Materials */
+  --fill-display-gold: linear-gradient(
+    to bottom,
+    var(--color-gold-50) 0%,
+    var(--color-gold-200) 50%,
+    var(--color-gold-500) 100%
+  );
+  --fill-button-label: linear-gradient(var(--color-ivory-50), var(--color-gold-100));
+  --fill-keycap: linear-gradient(var(--color-keycap-top), var(--color-keycap-bottom));
+  --fill-keycap-face: linear-gradient(
+    90deg,
+    var(--color-keycap-face-start),
+    var(--color-keycap-face-end)
+  );
+  --shadow-display-gold: drop-shadow(0 3px 0 var(--color-ember-shadow))
+    drop-shadow(0 0 20px var(--color-ember-80));
+  --shadow-display-gold-compact: drop-shadow(0 1px 0 var(--color-ember-shadow))
+    drop-shadow(0 0 10px var(--color-ember-70));
+  --shadow-display-finish: drop-shadow(0 4px 0 var(--color-ember-shadow))
+    drop-shadow(0 0 32px var(--color-amber-90));
+  --shadow-glow: 0 0 28px rgb(236 75 55 / 16%);
+  --shadow-block: 2px 2px 0 var(--color-void);
+  --button-primary-inset:
+    inset 0 3px 2px rgb(255 255 255 / 25%), inset 0 -3px 2px rgb(0 0 0 / 40%),
+    inset 3px 0 2px rgb(255 255 255 / 25%), inset -3px 0 2px rgb(255 255 255 / 25%);
+  --button-primary-inset-pressed:
+    inset 0 -3px 2px rgb(255 255 255 / 25%), inset 0 3px 2px rgb(0 0 0 / 40%),
+    inset -3px 0 2px rgb(255 255 255 / 25%), inset 3px 0 2px rgb(255 255 255 / 25%);
+  --button-primary-glow: drop-shadow(0 0 20px var(--color-ember-80));
+
+  /* Shape */
+  --radius-cell: 2px;
+  --radius-hint: 4px;
+  --radius-control: 6px;
+  --radius-medium: 7px;
+  --radius-button: 8px;
+  --radius-card: 10px;
+  --radius-large: 14px;
+  --radius-bezel: 16px;
+  --radius-console: 22px;
+
+  /* Space. New layout uses this scale. */
+  --space-2xs: 2px;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 12px;
+  --space-lg: 16px;
+  --space-xl: 24px;
+  --space-2xl: 32px;
+  --space-3xl: 48px;
+
+  /* Focus */
+  --focus-width: 3px;
+  --focus-width-field: 2px;
+  --focus-offset: 3px;
+  --focus-offset-tight: 2px;
+
+  /* Layout. Media queries cannot read these; the matching @media rules repeat the breakpoints. */
+  --chrome: 140px;
+  --side: clamp(300px, 42vw, 670px);
+  --cell: clamp(
+    14px,
+    min((100dvh - var(--chrome)) / 20, (100vw - var(--side)) / 10),
+    36px
+  );
+  --chrome-compact: 374px;
+  --side-compact: 96px;
+  --cabinet-max: 1920px;
+  --breakpoint-compact: 699px;
+  --breakpoint-console: 1099px;
+  --breakpoint-short: 800px;
+  --breakpoint-design-width: 1180px;
+  --breakpoint-design-height: 720px;
+
+  /* Depth. 1–7 stay inside a board. 20 and above cover the screen. */
+  --z-below: -1;
+  --z-raised: 1;
+  --z-wash: 2;
+  --z-route: 3;
+  --z-tag: 4;
+  --z-flight: 5;
+  --z-feedback: 6;
+  --z-burst: 7;
+  --z-crt: 20;
+  --z-dialog: 30;
+  --z-modal: 40;
+
+  /* Motion */
+  --duration-instant: 30ms;
+  --duration-press: 80ms;
+  --duration-lock: 80ms;
+  --duration-bump: 90ms;
+  --duration-trail: 120ms;
+  --duration-key: 120ms;
+  --duration-flash: 150ms;
+  --duration-shine: 160ms;
+  --duration-pop: 180ms;
+  --duration-tick: 200ms;
+  --duration-sweep: 220ms;
+  --duration-flight: 250ms;
+  --duration-letter: 300ms;
+  --duration-level: 400ms;
+  --duration-grey: 600ms;
+  --duration-word: 700ms;
+  --duration-clear: 900ms;
+  --duration-clear-reduced: 1200ms;
+  --duration-pulse: 1500ms;
+  --duration-shift: 1600ms;
+  --duration-bank: 1800ms;
+  --ease-out: ease-out;
+  --ease-in: ease-in;
+  --ease-linear: linear;
+  --ease-in-out: ease-in-out;
+  --ease-press: ease;
+  --spring-tilt-stiffness: 230;
+  --spring-tilt-damping: 24;
+  --spring-tilt-degrees: 7;
+  --spring-tilt-perspective: 900;
+
+  /* Semantic aliases already used by the screens. */
+  --background: var(--color-stage);
+  --surface: var(--color-surface);
+  --surface-high: var(--color-surface-high);
+  --text: var(--color-ivory-100);
+  --muted: var(--color-muted);
+  --violet: var(--color-legacy-violet);
+  --cyan: var(--color-legacy-cyan);
+  --lime: var(--color-gold-400);
+  --danger: var(--color-phosphor);
+  --focus: var(--color-focus);
+  --cabinet-ivory: var(--color-ivory-400);
+  --cabinet-plastic: var(--color-ivory-500);
+  --cabinet-highlight: var(--color-ivory-300);
+  --cabinet-ink: var(--color-ink);
+  --cabinet-border: var(--color-ivory-300);
+  --cabinet-bezel-border: var(--color-bezel-border);
+  --cabinet-console-border: var(--color-console-border);
+  --crt-black: var(--color-crt);
+  --crt-surface: var(--color-crt-surface);
+  --crt-text: var(--color-ivory-100);
+  --crt-muted: var(--color-muted);
+  --crt-border: var(--color-crt-border);
+  --phosphor-red: var(--color-phosphor);
+  --phosphor-amber: var(--color-amber);
+  --route-blue: var(--color-route);
+}
+
+.type-gold {
+  color: transparent;
+  background: var(--fill-display-gold);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: var(--shadow-display-gold);
+}

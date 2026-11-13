@@ -99,8 +99,8 @@ test("completes onboarding, pause, finish, and replay with keyboard input", asyn
   await page.evaluate(() => window.__NAMETRIS_E2E__?.loadFixture("eighty"));
   const decision = page.getByRole("dialog", { name: "80% reached" });
   await expect(decision).toBeVisible();
-  await expect(page.getByRole("button", { name: "Play on · Space" })).toBeFocused();
-  await page.keyboard.press("Space");
+  await expect(page.getByRole("button", { name: "Play on · Enter" })).toBeFocused();
+  await page.keyboard.press("Enter");
   await expect(decision).toBeHidden();
   await expect(game).toBeFocused();
   await expect(page.getByRole("button", { name: /FINISH NAME/ })).toBeVisible();

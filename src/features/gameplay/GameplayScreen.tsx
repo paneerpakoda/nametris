@@ -731,7 +731,7 @@ export function GameplayScreen({
       if (event.repeat) {
         return;
       }
-      if (event.key === " " || event.key === "Spacebar") {
+      if (event.key === "Enter") {
         continuePastFinishPrompt();
       } else if (event.key === "Escape") {
         dispatch({ type: "finish-run" });
@@ -1008,7 +1008,7 @@ export function GameplayScreen({
                   className="primary-button"
                   onClick={continuePastFinishPrompt}
                 >
-                  Play on · Space
+                  Play on · Enter
                 </button>
                 <button
                   type="button"

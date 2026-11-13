@@ -1,6 +1,6 @@
 # Nametris Welcome Screen
 
-Status: Proposed
+Status: Layout proposal. Color, type, and motion follow the [design system](design-system.md). The amber and ice-blue explorations below are studies, not shipping colorways. The shipping colorway is Warm Ivory and Signal Red.
 
 ## Visual Concept
 

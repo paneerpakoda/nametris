@@ -5,6 +5,14 @@ import { defineConfig } from "vitest/config";
 export default defineConfig(({ command }) => ({
   base: command === "build" ? "/nametris/" : "/",
   plugins: [react(), tailwindcss()],
+  build: {
+    rollupOptions: {
+      input: {
+        main: "index.html",
+        design: "design.html",
+      },
+    },
+  },
   test: {
     environment: "jsdom",
     setupFiles: "./src/test/setup.ts",

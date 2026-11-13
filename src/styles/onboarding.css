@@ -1,6 +1,6 @@
 .welcome-cabinet-screen {
   background:
-    radial-gradient(circle at 50% 45%, rgb(73 23 17 / 16%), transparent 48%),
+    radial-gradient(circle at 50% 45%, var(--color-welcome-wash), transparent 48%),
     var(--crt-black);
 }
 
@@ -33,7 +33,7 @@
   display: block;
   width: max(48px, calc(80 * var(--u)));
   height: max(48px, calc(80 * var(--u)));
-  filter: drop-shadow(0 0 8px #3b82f6);
+  filter: drop-shadow(0 0 8px var(--color-mark-glow));
 }
 
 .welcome-screen h1 {
@@ -41,21 +41,21 @@
   font: 700 max(48px, calc(80 * var(--u))) / 0.714 var(--font-display);
   letter-spacing: 0;
   color: transparent;
-  background: linear-gradient(to bottom, #fdfeec 0%, #f8e6a4 50%, #a87f49 100%);
+  background: var(--fill-display-gold);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
   text-shadow: none;
-  filter: drop-shadow(0 3px 0 #893128) drop-shadow(0 0 20px rgb(181 28 28 / 80%));
+  filter: var(--shadow-display-gold);
 }
 
 .welcome-tagline {
   margin: 0 0 max(24px, calc(64 * var(--u)));
-  color: #e56d59;
+  color: var(--color-welcome);
   font: 700 max(16px, calc(32 * var(--u))) / 1.48 var(--font-ui);
   letter-spacing: 0;
   text-transform: uppercase;
-  text-shadow: 0 0 max(16px, calc(40 * var(--u))) rgb(181 28 28 / 80%);
+  text-shadow: 0 0 max(16px, calc(40 * var(--u))) var(--color-ember-80);
 }
 
 .welcome-tagline span {
@@ -82,16 +82,16 @@
 .welcome-form label {
   width: min(445px, 100%);
   margin: 0 0 max(8px, calc(16 * var(--u)));
-  color: #e56d59;
+  color: var(--color-welcome);
   font: 400 max(14px, calc(24 * var(--u))) / 1.48 var(--font-ui);
   letter-spacing: 0;
   text-transform: none;
-  text-shadow: 0 0 16px rgb(181 28 28 / 40%);
+  text-shadow: 0 0 16px var(--color-ember-40);
 }
 
 @media (min-width: 1280px) and (min-height: 860px) {
   .welcome-form label {
-    color: #d4523d;
+    color: var(--color-welcome-deep);
   }
 }
 
@@ -100,41 +100,41 @@
   width: min(445px, 100%);
   height: max(56px, calc(82 * var(--u)));
   padding: 7px 8px 0;
-  border: 1px solid rgb(229 109 89 / 28%);
-  border-bottom: 2px solid #d4523d;
-  border-radius: 8px;
-  background: #1a1614;
+  border: 1px solid var(--color-welcome-line);
+  border-bottom: 2px solid var(--color-welcome-deep);
+  border-radius: var(--radius-button);
+  background: var(--color-field);
   box-shadow:
     inset 0 0 0 1px rgb(255 248 233 / 4%),
-    0 0 18px rgb(181 28 28 / 22%);
-  filter: drop-shadow(0 9px 4px rgb(181 28 28 / 40%));
+    0 0 18px var(--color-ember-22);
+  filter: drop-shadow(0 9px 4px var(--color-ember-40));
   font: 700 max(40px, calc(64 * var(--u))) / 1 var(--font-display);
   letter-spacing: 0;
   text-shadow: none;
-  color: #fff;
-  caret-color: #fff8e9;
+  color: var(--color-name);
+  caret-color: var(--color-ivory-50);
   text-align: center;
   text-transform: uppercase;
 }
 
 .welcome-form input:focus-visible {
-  outline: 3px solid #fff8e9;
-  outline-offset: 3px;
+  outline: var(--focus-width) solid var(--color-ivory-50);
+  outline-offset: var(--focus-offset);
 }
 
 .welcome-form input[aria-invalid="true"] {
-  border-bottom: 3px solid #ff6b54;
+  border-bottom: var(--focus-width) solid var(--color-phosphor);
 }
 
 .welcome-form input:-webkit-autofill {
-  -webkit-text-fill-color: #fff;
-  box-shadow: inset 0 0 0 100px #1a1614;
-  caret-color: #fff8e9;
+  -webkit-text-fill-color: var(--color-name);
+  box-shadow: inset 0 0 0 100px var(--color-field);
+  caret-color: var(--color-ivory-50);
 }
 
 .welcome-form input::selection {
-  background: #b93a28;
-  color: #fff8e9;
+  background: var(--color-button);
+  color: var(--color-ivory-50);
 }
 
 .field-help,
@@ -156,7 +156,7 @@
 .field-error {
   width: min(445px, 100%);
   margin: 6px 0 0;
-  color: #ff9d8e;
+  color: var(--color-error);
 }
 
 .field-error span::before {
@@ -179,7 +179,7 @@
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background: #d4523d;
+  background: var(--color-welcome-deep);
   clip-path: polygon(
     evenodd,
     0 8px,
@@ -251,14 +251,10 @@
 .welcome-start-frame .primary-button .face {
   position: absolute;
   inset: 0;
-  border-radius: 8px;
-  background: #b93a28;
-  filter: drop-shadow(0 0 20px rgb(181 28 28 / 80%));
-  box-shadow:
-    inset 0 3px 2px rgb(255 255 255 / 25%),
-    inset 0 -3px 2px rgb(0 0 0 / 40%),
-    inset 3px 0 2px rgb(255 255 255 / 25%),
-    inset -3px 0 2px rgb(255 255 255 / 25%);
+  border-radius: var(--radius-button);
+  background: var(--color-button);
+  filter: var(--button-primary-glow);
+  box-shadow: var(--button-primary-inset);
   pointer-events: none;
 }
 
@@ -276,7 +272,7 @@
   text-box: trim-both cap alphabetic;
   text-transform: uppercase;
   color: transparent;
-  background: linear-gradient(#fff8e9, #f2e4d4);
+  background: var(--fill-button-label);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -288,12 +284,12 @@
 }
 
 .welcome-start-frame .primary-button:hover:not(:disabled) .face {
-  background: #c4402c;
+  background: var(--color-button-hover);
 }
 
 .welcome-start-frame .primary-button:focus-visible {
-  outline: 3px solid #fff8e9;
-  outline-offset: 2px;
+  outline: var(--focus-width) solid var(--color-ivory-50);
+  outline-offset: var(--focus-offset-tight);
 }
 
 .welcome-start-frame .primary-button:active:not(:disabled) {
@@ -302,17 +298,13 @@
 }
 
 .welcome-start-frame .primary-button:active:not(:disabled) .face {
-  background: #b93a28;
+  background: var(--color-button);
   translate: 0 2px;
-  box-shadow:
-    inset 0 -3px 2px rgb(255 255 255 / 25%),
-    inset 0 3px 2px rgb(0 0 0 / 40%),
-    inset -3px 0 2px rgb(255 255 255 / 25%),
-    inset 3px 0 2px rgb(255 255 255 / 25%);
+  box-shadow: var(--button-primary-inset-pressed);
 }
 
 .welcome-start-frame:has(.primary-button:disabled)::before {
-  background: #6e3a31;
+  background: var(--color-button-disabled);
 }
 
 .welcome-start-frame .primary-button:disabled {
@@ -322,15 +314,15 @@
 }
 
 .welcome-start-frame .primary-button:disabled .face {
-  background: #3a2622;
+  background: var(--color-button-disabled-well);
   filter: none;
   box-shadow: none;
 }
 
 .welcome-start-frame .primary-button:disabled .label {
-  color: #a89a90;
+  color: var(--color-disabled-label);
   background: none;
-  -webkit-text-fill-color: #a89a90;
+  -webkit-text-fill-color: var(--color-disabled-label);
   filter: none;
 }
 
@@ -371,12 +363,12 @@
   letter-spacing: 0;
   line-height: 1.15;
   color: transparent;
-  background: linear-gradient(to bottom, #fdfeec 0%, #f8e6a4 50%, #a87f49 100%);
+  background: var(--fill-display-gold);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
   text-shadow: none;
-  filter: drop-shadow(0 3px 0 #893128) drop-shadow(0 0 20px rgb(181 28 28 / 80%));
+  filter: var(--shadow-display-gold);
 }
 
 .how-it-works-keys {

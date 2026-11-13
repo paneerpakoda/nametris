@@ -2,6 +2,7 @@ import { motion, useMotionValue, useReducedMotion, useSpring } from "motion/reac
 import { useRef, type CSSProperties, type PointerEvent } from "react";
 
 import { NametrisMark } from "../../components/NametrisMark";
+import { unitless } from "../../design/tokens";
 import type { RunResult } from "../../game/engine/result";
 import { formatActiveTime } from "./exportCard";
 import { ResultStencil } from "./ResultStencil";
@@ -17,8 +18,13 @@ export function RewardCard({ result, reducedMotion }: RewardCardProps) {
   const cardRef = useRef<HTMLElement>(null);
   const tiltX = useMotionValue(0);
   const tiltY = useMotionValue(0);
-  const rotateX = useSpring(tiltX, { stiffness: 230, damping: 24 });
-  const rotateY = useSpring(tiltY, { stiffness: 230, damping: 24 });
+  const tiltSpring = {
+    stiffness: unitless("spring-tilt-stiffness"),
+    damping: unitless("spring-tilt-damping"),
+  };
+  const tiltDegrees = unitless("spring-tilt-degrees");
+  const rotateX = useSpring(tiltX, tiltSpring);
+  const rotateY = useSpring(tiltY, tiltSpring);
   const badge =
     result.displayPercent === 100
       ? "PERFECT · 100%"
@@ -26,7 +32,7 @@ export function RewardCard({ result, reducedMotion }: RewardCardProps) {
   const cardStyle = {
     rotateX,
     rotateY,
-    transformPerspective: 900,
+    transformPerspective: unitless("spring-tilt-perspective"),
     "--shine-x": "50%",
     "--shine-y": "50%",
   } as CSSProperties;
@@ -48,8 +54,8 @@ export function RewardCard({ result, reducedMotion }: RewardCardProps) {
     }
     const horizontal = (event.clientX - bounds.left) / bounds.width;
     const vertical = (event.clientY - bounds.top) / bounds.height;
-    tiltX.set((0.5 - vertical) * 7);
-    tiltY.set((horizontal - 0.5) * 7);
+    tiltX.set((0.5 - vertical) * tiltDegrees);
+    tiltY.set((horizontal - 0.5) * tiltDegrees);
     event.currentTarget.style.setProperty("--shine-x", `${horizontal * 100}%`);
     event.currentTarget.style.setProperty("--shine-y", `${vertical * 100}%`);
   }

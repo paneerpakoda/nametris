@@ -19,7 +19,7 @@ The product intent is confirmed. The product owner approved the following implem
 9. Automatically finish the run at 100%.
 10. Do not include piece hold, audio, a leaderboard, or saved game restoration in the first release.
 11. Keep the entered name in memory only. Do not persist it to `localStorage` in the first release.
-12. Use a replaceable modern-retro visual token set until a specific art direction is approved.
+12. Follow the Warm Ivory cabinet and Signal Red CRT design system in [`docs/design/design-system.md`](../design/design-system.md). Change appearance through `src/styles/tokens.css`.
 
 These defaults are binding for the first implementation unless changed through an approved spec update.
 
@@ -396,7 +396,9 @@ Use the Unlumen UI Tilt Card as an interaction reference:
 
 ## Visual and Interaction Design
 
-Proposed direction until separately approved:
+The shipping art direction is the Warm Ivory cabinet and Signal Red CRT defined in [`docs/design/design-system.md`](../design/design-system.md). Implement visual changes through those tokens.
+
+The direction is:
 
 - Modern-retro arcade character without imitating the visual design of the reference repo
 - Dark neutral background

@@ -21,7 +21,7 @@
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
   gap: 18px;
-  border-bottom: 1px solid rgb(236 75 55 / 28%);
+  border-bottom: 1px solid var(--color-signal-hot-hairline);
 }
 
 .game-header-actions {
@@ -41,8 +41,8 @@
   gap: 6px;
   border: 1px solid rgb(255 245 220 / 55%);
   border-radius: 4px;
-  color: #fff5dc;
-  background: #1c201b;
+  color: var(--color-ivory-100);
+  background: var(--color-surface-high);
   cursor: pointer;
   font-family: var(--font-ui);
   font-size: 12px;
@@ -127,8 +127,8 @@
 
 .pause-settings .sound-toggle[aria-pressed="true"],
 .pause-settings .pause-pref-toggle[aria-pressed="true"] {
-  border-color: #ffc45d;
-  color: #ffc45d;
+  border-color: var(--color-amber);
+  color: var(--color-amber);
   background: rgb(255 196 93 / 12%);
 }
 
@@ -142,7 +142,7 @@
   display: grid;
   gap: 6px;
   padding: 4px 2px 2px;
-  color: #fff5dc;
+  color: var(--color-ivory-100);
   font-family: var(--font-ui);
   font-size: 12px;
   font-weight: 700;
@@ -153,7 +153,7 @@
 .pause-volume input {
   width: 100%;
   min-height: 28px;
-  accent-color: #ffc45d;
+  accent-color: var(--color-amber);
 }
 
 .game-title-lockup {
@@ -256,16 +256,16 @@
 }
 
 .game-surface:focus-visible {
-  outline: 2px solid var(--focus);
+  outline: var(--focus-width-field) solid var(--focus);
   outline-offset: 3px;
 }
 
 .game-surface.is-hard-drop-impact-a .board-frame {
-  animation: hard-drop-bump-a 90ms ease-out;
+  animation: hard-drop-bump-a var(--duration-bump) var(--ease-out);
 }
 
 .game-surface.is-hard-drop-impact-b .board-frame {
-  animation: hard-drop-bump-b 90ms ease-out;
+  animation: hard-drop-bump-b var(--duration-bump) var(--ease-out);
 }
 
 @keyframes hard-drop-bump-a {
@@ -359,9 +359,9 @@
   margin: 0 auto;
   padding: 5px;
   overflow: hidden;
-  border: 2px solid #ec4b37cc;
+  border: 2px solid var(--color-signal-hot-frame);
   touch-action: none;
-  background: #060806;
+  background: var(--color-screen);
   box-shadow:
     0 0 14px rgb(236 75 55 / 7%),
     inset 0 0 12px #000;
@@ -453,50 +453,50 @@
   width: var(--cell);
   height: var(--cell);
   aspect-ratio: auto;
-  border-right: 1px solid rgb(237 230 211 / 9%);
-  border-bottom: 1px solid rgb(237 230 211 / 9%);
-  background: rgb(255 255 255 / 1.5%);
+  border-right: 1px solid var(--color-board-line);
+  border-bottom: 1px solid var(--color-board-line);
+  background: var(--color-board-well);
 }
 
 .board-cell[data-piece],
 .preview-cell[data-piece] {
-  border: 1px solid rgb(255 255 255 / 38%);
+  border: 1px solid var(--color-stencil-edge);
   box-shadow:
     inset 0 0 0 2px rgb(0 0 0 / 18%),
     0 0 5px rgb(255 255 255 / 8%);
 }
 
 [data-piece="I"] {
-  background: #36cdd7;
+  background: var(--color-piece-i);
 }
 
 [data-piece="O"] {
-  background: #f0c92e;
+  background: var(--color-piece-o);
 }
 
 [data-piece="T"] {
-  background: #a65bd5;
+  background: var(--color-piece-t);
 }
 
 [data-piece="S"] {
-  background: #46bf68;
+  background: var(--color-piece-s);
 }
 
 [data-piece="Z"] {
-  background: #e85555;
+  background: var(--color-piece-z);
 }
 
 [data-piece="J"] {
-  background: #377bd7;
+  background: var(--color-piece-j);
 }
 
 [data-piece="L"] {
-  background: #ed762d;
+  background: var(--color-piece-l);
 }
 
 .board-cell.is-ghost {
-  border: 1px dashed rgb(237 230 211 / 50%);
-  background: rgb(237 230 211 / 5%);
+  border: 1px dashed var(--color-ghost-border);
+  background: var(--color-ghost);
 }
 
 .board-grid.is-slow-zone::before {
@@ -548,7 +548,7 @@
   box-shadow: 0 4px 0 rgb(0 0 0 / 58%);
   pointer-events: none;
   text-align: center;
-  animation: transfer-receipt 900ms ease-out forwards;
+  animation: transfer-receipt var(--duration-clear) var(--ease-out) forwards;
 }
 
 .line-clear-feedback[data-kind="wasted"] {
@@ -591,12 +591,12 @@
 
 .score-delta {
   justify-self: center;
-  color: #ffc45d;
+  color: var(--color-amber);
   font-family: var(--font-ui);
   font-size: 0.75rem;
   font-style: normal;
   pointer-events: none;
-  animation: score-rise 180ms ease-out forwards;
+  animation: score-rise var(--duration-pop) var(--ease-out) forwards;
 }
 
 @keyframes score-rise {
@@ -607,7 +607,7 @@
 }
 
 .metric.is-score-pop strong {
-  animation: score-pop 180ms ease-out;
+  animation: score-pop var(--duration-pop) var(--ease-out);
 }
 
 @keyframes score-pop {
@@ -630,9 +630,9 @@
   left: 0;
   width: 58%;
   height: var(--board-cell);
-  background: #fff4df;
+  background: var(--color-ivory-200);
   pointer-events: none;
-  animation: row-sweep 220ms ease-out forwards;
+  animation: row-sweep var(--duration-sweep) var(--ease-out) forwards;
 }
 
 .clear-row[data-tier="2"],
@@ -660,13 +660,13 @@
   right: 4px;
   margin: 0;
   padding: 3px 6px;
-  color: #24180a;
-  background: #fff4df;
+  color: var(--color-plaque-ink);
+  background: var(--color-ivory-200);
   font-family: var(--font-ui);
   font-size: 12px;
   letter-spacing: 0.06em;
   pointer-events: none;
-  animation: clear-word 700ms linear forwards;
+  animation: clear-word var(--duration-word) var(--ease-linear) forwards;
 }
 
 @keyframes clear-word {
@@ -689,7 +689,7 @@
   background: rgb(92 90 84 / 88%);
   opacity: 0;
   pointer-events: none;
-  animation: grey-in 30ms linear forwards;
+  animation: grey-in var(--duration-instant) var(--ease-linear) forwards;
   animation-delay: calc(var(--grey-index) * 30ms);
 }
 
@@ -711,31 +711,31 @@
   pointer-events: none;
   content: "";
   inset: 0;
-  animation: edge-pulse 180ms ease-out;
+  animation: edge-pulse var(--duration-pop) var(--ease-out);
 }
 
 @keyframes edge-pulse {
   40% {
-    border-color: #ffc45d;
+    border-color: var(--color-amber);
     box-shadow: inset 0 0 12px rgb(255 196 93 / 55%);
   }
 }
 
 .board-cell.is-lock-flash {
-  animation: lock-flash 80ms linear;
+  animation: lock-flash var(--duration-lock) var(--ease-linear);
 }
 
 @keyframes lock-flash {
   0%,
   40% {
-    background: #fff4df;
+    background: var(--color-ivory-200);
     filter: brightness(1.8);
   }
 }
 
 .board-cell.is-drop-trail {
   background: rgb(255 244 223 / 55%);
-  animation: drop-trail 120ms linear forwards;
+  animation: drop-trail var(--duration-trail) var(--ease-linear) forwards;
 }
 
 @keyframes drop-trail {
@@ -761,8 +761,8 @@
   top: 2px;
   left: 50%;
   padding: 2px 6px;
-  color: #fff8e9;
-  background: #9d2418;
+  color: var(--color-ivory-50);
+  background: var(--color-danger-solid);
   font-family: var(--font-ui);
   font-size: 12px;
   letter-spacing: 0.08em;
@@ -780,7 +780,7 @@
   border-radius: 2px;
   background: var(--phosphor-red);
   pointer-events: none;
-  animation: token-fly 180ms ease-in forwards;
+  animation: token-fly var(--duration-pop) var(--ease-in) forwards;
 }
 
 @keyframes token-fly {
@@ -791,14 +791,14 @@
 }
 
 .stencil-cell.is-pop {
-  animation: name-pop 180ms ease-out;
-  border-color: #ffc45d;
+  animation: name-pop var(--duration-pop) var(--ease-out);
+  border-color: var(--color-amber);
 }
 
 @keyframes name-pop {
   0% {
     transform: scale(1.15);
-    border-color: #ffc45d;
+    border-color: var(--color-amber);
   }
 
   100% {
@@ -919,7 +919,7 @@
   box-shadow:
     inset 0 0 18px rgb(236 75 55 / 8%),
     0 0 13px rgb(236 75 55 / 10%);
-  animation: transfer-bank-pulse 1.8s ease-in-out infinite;
+  animation: transfer-bank-pulse var(--duration-bank) var(--ease-in-out) infinite;
 }
 
 @keyframes transfer-bank-pulse {
@@ -1131,7 +1131,7 @@
   inset: 0;
   grid-template-columns: repeat(var(--stencil-columns), minmax(0, 1fr));
   gap: inherit;
-  animation: piece-fly 250ms ease-in forwards;
+  animation: piece-fly var(--duration-flight) var(--ease-in) forwards;
 }
 
 @keyframes piece-fly {
@@ -1152,11 +1152,11 @@
 }
 
 .fly-cell.is-kept {
-  animation: kept-flare 250ms ease-out;
+  animation: kept-flare var(--duration-flight) var(--ease-out);
 }
 
 .fly-cell.is-lost {
-  animation: dust-crumble 180ms linear forwards;
+  animation: dust-crumble var(--duration-pop) var(--ease-linear) forwards;
 }
 
 @keyframes kept-flare {
@@ -1178,7 +1178,7 @@
 
 .stencil-cell.is-letter-done::after {
   position: absolute;
-  background: #fff4df;
+  background: var(--color-ivory-200);
   content: "";
   opacity: 0.28;
   pointer-events: none;
@@ -1186,7 +1186,7 @@
 }
 
 .stencil-cell.is-letter-flash::after {
-  animation: letter-cream 300ms linear;
+  animation: letter-cream var(--duration-letter) var(--ease-linear);
 }
 
 @keyframes letter-cream {
@@ -1212,13 +1212,13 @@
   width: 4px;
   height: 4px;
   opacity: 0.9;
-  animation: speck-drift 250ms linear forwards;
+  animation: speck-drift var(--duration-flight) var(--ease-linear) forwards;
 }
 
 .speck.is-confetti {
   width: 6px;
   height: 6px;
-  animation-duration: 1.5s;
+  animation-duration: var(--duration-pulse);
 }
 
 @keyframes speck-drift {
@@ -1238,13 +1238,13 @@
 }
 
 .stencil-cell[data-status="open"] {
-  border: 1px solid #ff6b54b3;
-  background: rgb(255 107 84 / 5%);
+  border: 1px solid var(--color-stencil-open-border);
+  background: var(--color-stencil-open);
 }
 
 .stencil-cell[data-status="filled"],
 .stencil-cell[data-status="preview-valid"] {
-  border: 1px solid rgb(255 255 255 / 38%);
+  border: 1px solid var(--color-stencil-edge);
   box-shadow: inset 0 0 0 1px rgb(0 0 0 / 22%);
 }
 
@@ -1253,11 +1253,11 @@
 }
 
 .stencil-cell[data-status="preview-lost"] {
-  border: 1px dashed #c9842a;
+  border: 1px dashed var(--color-lost);
   background: repeating-linear-gradient(
     -45deg,
     transparent 0 2px,
-    rgb(201 132 42 / 90%) 2px 3px
+    var(--color-lost-90) 2px 3px
   );
   opacity: 1;
 }
@@ -1271,7 +1271,7 @@
 }
 
 .empty-send-notice.is-flash {
-  animation: empty-send-flash 150ms linear;
+  animation: empty-send-flash var(--duration-flash) var(--ease-linear);
 }
 
 @keyframes empty-send-flash {
@@ -1287,7 +1287,7 @@
 
 .how-it-works-overlay {
   position: absolute;
-  z-index: 40;
+  z-index: var(--z-modal);
   display: grid;
   inset: 0;
   padding: 16px;
@@ -1351,10 +1351,10 @@
 .route-button,
 .secondary-button {
   padding: 8px 10px;
-  border: 1px solid rgb(236 75 55 / 55%);
-  border-radius: 8px;
+  border: 1px solid var(--color-signal-hot-border);
+  border-radius: var(--radius-button);
   color: var(--crt-text);
-  background: rgb(236 75 55 / 8%);
+  background: var(--color-signal-hot-fill);
   cursor: pointer;
   font-family: var(--font-ui);
   font-size: 12px;
@@ -1365,18 +1365,14 @@
 
 .route-button {
   border: 0;
-  border-radius: 8px;
-  color: #fff8e9;
-  background: #b93a28;
-  box-shadow:
-    inset 0 3px 2px rgb(255 255 255 / 25%),
-    inset 0 -3px 2px rgb(0 0 0 / 40%),
-    inset 3px 0 2px rgb(255 255 255 / 25%),
-    inset -3px 0 2px rgb(255 255 255 / 25%);
+  border-radius: var(--radius-button);
+  color: var(--color-ivory-50);
+  background: var(--color-button);
+  box-shadow: var(--button-primary-inset);
 }
 
 .route-button:hover:not(:disabled) {
-  background: #c4402c;
+  background: var(--color-button-hover);
 }
 
 .route-button:disabled,
@@ -1400,9 +1396,9 @@
   padding: 8px 10px;
   align-content: center;
   gap: 2px;
-  border: 1px solid rgb(236 75 55 / 18%);
-  border-radius: 4px;
-  background: rgb(237 230 211 / 3%);
+  border: 1px solid var(--color-signal-hot-soft);
+  border-radius: var(--radius-hint);
+  background: var(--color-metric-fill);
 }
 
 .metric span {
@@ -1422,7 +1418,7 @@
 .game-overlay,
 .help-overlay {
   position: absolute;
-  z-index: 30;
+  z-index: var(--z-dialog);
   display: grid;
   inset: 0;
   place-items: center;
@@ -1462,9 +1458,9 @@
 }
 
 .finish-prompt {
-  z-index: 40;
+  z-index: var(--z-modal);
   gap: 16px;
-  border-color: #ffc45d;
+  border-color: var(--color-amber);
   background:
     repeating-linear-gradient(0deg, rgb(255 196 93 / 8%) 0 1px, transparent 1px 4px),
     rgb(5 8 5 / 97%);
@@ -1517,7 +1513,7 @@
 .freeze-budget span {
   display: block;
   height: 100%;
-  background: #ffc45d;
+  background: var(--color-amber);
 }
 
 .game-overlay h2 {
@@ -1528,12 +1524,12 @@
   letter-spacing: 0;
   line-height: 1.05;
   color: transparent;
-  background: linear-gradient(to bottom, #fdfeec 0%, #f8e6a4 50%, #a87f49 100%);
+  background: var(--fill-display-gold);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
   text-shadow: none;
-  filter: drop-shadow(0 3px 0 #893128) drop-shadow(0 0 20px rgb(181 28 28 / 80%));
+  filter: var(--shadow-display-gold);
 }
 
 .game-overlay p {
@@ -1542,7 +1538,7 @@
 
 .finish-prompt h2 {
   font-size: clamp(4rem, 10vh, 6.5rem);
-  filter: drop-shadow(0 4px 0 #893128) drop-shadow(0 0 32px rgb(255 196 93 / 90%));
+  filter: var(--shadow-display-finish);
 }
 
 .finish-prompt p {
@@ -1569,9 +1565,9 @@
   padding: clamp(20px, 3vh, 30px);
   overflow-y: auto;
   border: 2px solid var(--phosphor-red);
-  border-radius: 6px;
+  border-radius: var(--radius-control);
   color: var(--crt-text);
-  background: #0d110d;
+  background: var(--color-dialog);
   box-shadow:
     10px 10px 0 rgb(82 24 16 / 52%),
     inset 0 0 24px #000;
@@ -1585,12 +1581,12 @@
   letter-spacing: 0;
   line-height: 1.1;
   color: transparent;
-  background: linear-gradient(to bottom, #fdfeec 0%, #f8e6a4 50%, #a87f49 100%);
+  background: var(--fill-display-gold);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
   text-shadow: none;
-  filter: drop-shadow(0 3px 0 #893128) drop-shadow(0 0 20px rgb(181 28 28 / 80%));
+  filter: var(--shadow-display-gold);
 }
 
 .help-intro {
@@ -1899,7 +1895,7 @@ button.touch-only {
   .color-flash,
   .board-frame.is-clear-pulse::after {
     animation-name: color-flash !important;
-    animation-duration: 150ms !important;
+    animation-duration: var(--duration-flash) !important;
     animation-iteration-count: 1 !important;
     animation-timing-function: linear !important;
   }
@@ -1937,7 +1933,7 @@ button.touch-only {
 .is-reduced-motion .color-flash,
 .is-reduced-motion .board-frame.is-clear-pulse::after {
   animation-name: color-flash !important;
-  animation-duration: 150ms !important;
+  animation-duration: var(--duration-flash) !important;
   animation-iteration-count: 1 !important;
   animation-timing-function: linear !important;
 }
@@ -1962,7 +1958,7 @@ button.touch-only {
 .start-count,
 .level-up,
 .shift-ready-tag {
-  color: #24180a;
+  color: var(--color-plaque-ink);
   font-family: var(--font-ui);
   font-size: 12px;
   letter-spacing: 0.06em;
@@ -1971,7 +1967,7 @@ button.touch-only {
 
 .start-count {
   min-width: 4.5em;
-  color: #fff5dc;
+  color: var(--color-ivory-100);
   text-align: center;
 }
 
@@ -1981,7 +1977,7 @@ button.touch-only {
   top: 6px;
   left: 50%;
   margin: 0;
-  color: #fff5dc;
+  color: var(--color-ivory-100);
   text-shadow: 0 1px 0 #000;
   transform: translateX(-50%);
 }
@@ -1993,7 +1989,7 @@ button.touch-only {
   border-radius: 50%;
   pointer-events: none;
   inset: 16%;
-  animation: level-ripple 400ms ease-out forwards;
+  animation: level-ripple var(--duration-level) var(--ease-out) forwards;
 }
 
 @keyframes level-ripple {
@@ -2011,13 +2007,14 @@ button.touch-only {
 .danger-edge {
   position: absolute;
   z-index: 4;
-  box-shadow: inset 0 0 0 3px rgb(158 78 68 / 50%);
+  box-shadow: inset 0 0 0 3px var(--color-danger-edge);
   opacity: 0;
   pointer-events: none;
   inset: 0;
   animation:
-    danger-in 300ms ease forwards,
-    danger-pulse 1.5s ease-in-out 300ms infinite;
+    danger-in var(--duration-letter) var(--ease-press) forwards,
+    danger-pulse var(--duration-pulse) var(--ease-in-out) var(--duration-letter)
+      infinite;
 }
 
 .danger-edge.is-static,
@@ -2044,12 +2041,12 @@ button.touch-only {
   top: calc(var(--route-zone-end) - 22px);
   left: 4px;
   padding: 2px 6px;
-  background: #ffc45d;
+  background: var(--color-amber);
 }
 
 .cabinet-key.is-shift-ready {
-  outline: 2px solid #ffc45d;
-  animation: shift-glow 1.6s ease-in-out infinite;
+  outline: var(--focus-width-field) solid var(--color-amber);
+  animation: shift-glow var(--duration-shift) var(--ease-in-out) infinite;
 }
 
 .is-reduced-motion .cabinet-key.is-shift-ready,
@@ -2068,7 +2065,7 @@ button.touch-only {
 
 .transfer-arrow.is-filling {
   transform-origin: left center;
-  animation: arrow-fill 200ms ease-out;
+  animation: arrow-fill var(--duration-tick) var(--ease-out);
 }
 
 @keyframes arrow-fill {
@@ -2084,7 +2081,7 @@ button.touch-only {
 }
 
 .rail-transfer-metric.is-ticking strong {
-  animation: counter-tick 200ms ease-out;
+  animation: counter-tick var(--duration-tick) var(--ease-out);
 }
 
 @keyframes counter-tick {
@@ -2098,7 +2095,7 @@ button.touch-only {
 }
 
 .completion-threshold.is-pop {
-  animation: marker-pop 400ms ease-out;
+  animation: marker-pop var(--duration-level) var(--ease-out);
 }
 
 @keyframes marker-pop {
