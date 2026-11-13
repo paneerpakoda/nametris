@@ -217,12 +217,7 @@ export function GameplayScreen({
   }, [helpOpen, howItWorksOpen, restartConfirm, state.pauseReason, state.phase]);
 
   useLayoutEffect(() => {
-    if (
-      !finishPromptOpen ||
-      state.phase === "paused" ||
-      state.phase === "won" ||
-      state.phase === "lost"
-    ) {
+    if (!finishPromptOpen || state.phase === "paused") {
       return;
     }
     dispatch({ type: "pause", reason: "finish-choice" });
@@ -643,8 +638,7 @@ export function GameplayScreen({
       return;
     }
     const active = document.activeElement;
-    const index =
-      active instanceof HTMLElement ? items.indexOf(active) : -1;
+    const index = active instanceof HTMLElement ? items.indexOf(active) : -1;
     const nextIndex =
       index === -1
         ? delta > 0
@@ -662,8 +656,7 @@ export function GameplayScreen({
     }
     const index = items.indexOf(document.activeElement as HTMLElement);
     const delta = event.shiftKey ? -1 : 1;
-    const next =
-      index === -1 ? (event.shiftKey ? items.length - 1 : 0) : index + delta;
+    const next = index === -1 ? (event.shiftKey ? items.length - 1 : 0) : index + delta;
     items[(next + items.length) % items.length]?.focus();
   }
 
@@ -782,17 +775,11 @@ export function GameplayScreen({
   function handleCabinetInput(key: string) {
     if (finishPromptOpen) {
       if (key === "ArrowUp" || key === "ArrowDown") {
-        moveOverlayMenuFocus(
-          finishMenuRef.current,
-          key === "ArrowDown" ? 1 : -1,
-        );
+        moveOverlayMenuFocus(finishMenuRef.current, key === "ArrowDown" ? 1 : -1);
       }
       return;
     }
-    if (
-      state.phase === "paused" &&
-      (key === "ArrowUp" || key === "ArrowDown")
-    ) {
+    if (state.phase === "paused" && (key === "ArrowUp" || key === "ArrowDown")) {
       moveOverlayMenuFocus(pauseMenuRef.current, key === "ArrowDown" ? 1 : -1);
       return;
     }

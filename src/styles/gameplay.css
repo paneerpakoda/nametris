@@ -839,8 +839,7 @@
 .transfer-arrow[data-status="stored"] {
   color: #ff6a4c;
   opacity: 1;
-  filter:
-    drop-shadow(0 0 5px rgb(255 107 84 / 55%))
+  filter: drop-shadow(0 0 5px rgb(255 107 84 / 55%))
     drop-shadow(0 0 12px rgb(236 75 55 / 35%));
 }
 
@@ -850,8 +849,7 @@
 
 .transfer-arrows.is-full .transfer-arrow[data-status="stored"] {
   color: #ffb08a;
-  filter:
-    drop-shadow(0 0 6px rgb(255 176 138 / 85%))
+  filter: drop-shadow(0 0 6px rgb(255 176 138 / 85%))
     drop-shadow(0 0 16px rgb(255 107 84 / 65%))
     drop-shadow(0 0 28px rgb(236 75 55 / 45%));
   transform: scale(1.08);
