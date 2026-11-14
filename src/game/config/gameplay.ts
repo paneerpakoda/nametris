@@ -3,12 +3,13 @@ export const spawnColumn = 3;
 export const lockDelayMilliseconds = 500;
 export const lockResetLimit = 15;
 export const minimumGravityMilliseconds = 80;
+export const level1GravityMilliseconds = 1500;
 export const maximumTransferCount = 3;
 export const routeZoneVisibleRows = 7;
 export const fullBankSlowZoneGravityMultiplier = 0.5;
 export const FREEZE_BUDGET_MS = 5_000;
 
 export function getGravityMilliseconds(level: number): number {
-  const interval = 800 * 0.85 ** Math.max(0, level - 1);
+  const interval = level1GravityMilliseconds * 0.85 ** Math.max(0, level - 1);
   return Math.max(minimumGravityMilliseconds, Math.round(interval));
 }

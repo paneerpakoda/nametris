@@ -180,9 +180,10 @@ describe("normal-board session", () => {
 
   it("applies gravity from injected elapsed time", () => {
     const state = createBoardSession(queue);
+    const interval = getGravityMilliseconds(1);
     const ticked = reduceBoardSession(state, {
       type: "tick",
-      elapsedMilliseconds: 800,
+      elapsedMilliseconds: interval,
     });
 
     expect(ticked.activePiece.row).toBe(state.activePiece.row + 1);
@@ -193,20 +194,21 @@ describe("normal-board session", () => {
       ...createBoardSession(queue),
       transferCount: 3,
     };
+    const interval = getGravityMilliseconds(1);
     const slowed = reduceBoardSession(state, {
       type: "tick",
-      elapsedMilliseconds: 800,
+      elapsedMilliseconds: interval,
     });
     const moved = reduceBoardSession(slowed, {
       type: "tick",
-      elapsedMilliseconds: 800,
+      elapsedMilliseconds: interval,
     });
 
     expect(slowed.activePiece.row).toBe(state.activePiece.row);
-    expect(slowed.gravityAccumulatorMilliseconds).toBe(400);
-    expect(slowed.activeMilliseconds).toBe(800);
+    expect(slowed.gravityAccumulatorMilliseconds).toBe(interval / 2);
+    expect(slowed.activeMilliseconds).toBe(interval);
     expect(moved.activePiece.row).toBe(state.activePiece.row + 1);
-    expect(moved.activeMilliseconds).toBe(1_600);
+    expect(moved.activeMilliseconds).toBe(interval * 2);
   });
 
   it("restores normal gravity after a full-bank piece leaves the route zone", () => {
@@ -218,9 +220,10 @@ describe("normal-board session", () => {
         row: 9,
       },
     };
+    const interval = getGravityMilliseconds(1);
     const ticked = reduceBoardSession(state, {
       type: "tick",
-      elapsedMilliseconds: 800,
+      elapsedMilliseconds: interval,
     });
 
     expect(ticked.activePiece.row).toBe(state.activePiece.row + 1);
