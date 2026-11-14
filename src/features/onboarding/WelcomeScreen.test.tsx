@@ -68,9 +68,7 @@ describe("WelcomeScreen", () => {
   });
 
   it("shows the maximum-length alert once when a stored name was trimmed", () => {
-    render(
-      <WelcomeScreen onStart={vi.fn()} initialName="HARSH" initialNameTrimmed />,
-    );
+    render(<WelcomeScreen onStart={vi.fn()} initialName="HARSH" initialNameTrimmed />);
 
     expect(screen.getByLabelText("Your name")).toHaveValue("HARSH");
     expect(screen.getByRole("alert")).toHaveTextContent(/^Maximum 5 letters$/);
