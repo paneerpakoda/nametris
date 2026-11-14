@@ -104,7 +104,7 @@ Think-time seconds are `#ffc45d` on `#060806`: 12.73:1. Reset copy is `#fff5dc` 
 
 ## What I could not test
 
-- A live GitHub Actions run is recorded after the push.
+- Deploy of `0f50ef5` succeeded. [Run 43615024620](https://github.com/paneerpakoda/nametris/actions/runs/43615024620): build passed `npm run check`, then GitHub Pages deployed. This file's own commit is a record of that run.
 - I did not re-run the name-length bot. The table above is the one from the prompt.
 - Phone coarse-pointer emulation did not turn on the touch Pause control in this browser. The CSS sets that control to 44×44 when `(hover: none) and (pointer: coarse)` matches.
 - Cabinet before/after was compared by eye on the live cabinet with the screen filled. The frame, bezel, grilles, POWER lamp, cream body, and key panel match the existing cabinet. I did not take a masked screenshot pair.
