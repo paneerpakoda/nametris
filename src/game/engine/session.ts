@@ -184,6 +184,10 @@ function spawnNextPiece(
   };
 }
 
+function terminalPhase(state: BoardSession, proposed: BoardPhase): BoardPhase {
+  return proposed === "lost" && state.canFinish ? "won" : proposed;
+}
+
 function lockActivePiece(state: BoardSession, extraScore = 0): BoardSession {
   const lockResult = lockAndClearPiece(state.board, state.activePiece, state.level);
   const linesCleared = state.linesCleared + lockResult.linesCleared;
@@ -192,7 +196,7 @@ function lockActivePiece(state: BoardSession, extraScore = 0): BoardSession {
   return {
     ...state,
     ...spawned,
-    phase: lockResult.toppedOut ? "lost" : spawned.phase,
+    phase: terminalPhase(state, lockResult.toppedOut ? "lost" : spawned.phase),
     pauseReason: null,
     pausedPhase: null,
     board: lockResult.board,

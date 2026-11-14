@@ -481,6 +481,42 @@ describe("GameplayScreen", () => {
     expect(Number(screen.getByTestId("score").textContent)).toBeGreaterThan(0);
   });
 
+  it("wins instead of losing when play continues past 80% and the stack tops out", async () => {
+    const onWon = vi.fn();
+    const onLost = vi.fn();
+    const base = createBoardSession(["O", "I", "T"]);
+    const board = base.board.map((row, rowIndex) =>
+      row.map((cell, columnIndex) =>
+        rowIndex === 1 && columnIndex === 3 ? "J" : cell,
+      ),
+    );
+    const initialSession = {
+      ...base,
+      canFinish: true,
+      board,
+      activePiece: {
+        type: "O" as const,
+        rotation: 0 as const,
+        row: BOARD_HEIGHT - 2,
+        column: 3,
+      },
+    };
+
+    render(
+      <GameplayScreen initialSession={initialSession} onWon={onWon} onLost={onLost} />,
+    );
+
+    fireEvent.keyDown(window, { key: "Enter" });
+    fireEvent.keyDown(window, { key: " " });
+
+    await waitFor(() => expect(onWon).toHaveBeenCalledOnce());
+    expect(onLost).not.toHaveBeenCalled();
+    expect(onWon.mock.calls[0]?.[0]).toMatchObject({ outcome: "won" });
+    expect(screen.getByRole("status")).toHaveTextContent("Name complete. Run won.");
+    expect(screen.queryByText("The stack topped out. Run lost.")).not.toBeInTheDocument();
+    expect(screen.queryByText("Run over")).not.toBeInTheDocument();
+  });
+
   it("shows the remaining think time beside the piece", () => {
     const initialSession = {
       ...createBoardSession(["O", "I", "T", "J"]),

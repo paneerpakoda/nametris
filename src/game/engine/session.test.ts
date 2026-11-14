@@ -454,26 +454,59 @@ describe("piece routing", () => {
     expect(reduceBoardSession(playerPaused, { type: "finish-run" })).toBe(playerPaused);
   });
 
-  it("still loses after 80% if the next spawn tops out before finish", () => {
+  it("wins after 80% if the next spawn tops out before finish", () => {
     const state = createBoardSession(["O", "I", "T"]);
     const board = state.board.map((row, rowIndex) =>
       row.map((cell, columnIndex) =>
         rowIndex === 1 && columnIndex === 3 ? "J" : cell,
       ),
     );
+    const piece = {
+      type: "O" as const,
+      rotation: 0 as const,
+      row: BOARD_HEIGHT - 2,
+      column: 3,
+    };
     const atRisk = {
       ...state,
       canFinish: true,
       board,
-      activePiece: {
-        type: "O" as const,
-        rotation: 0 as const,
-        row: BOARD_HEIGHT - 2,
-        column: 3,
-      },
+      activePiece: piece,
     };
 
-    expect(reduceBoardSession(atRisk, { type: "hard-drop" }).phase).toBe("lost");
+    expect(reduceBoardSession(atRisk, { type: "hard-drop" }).phase).toBe("won");
+    expect(
+      reduceBoardSession({ ...atRisk, canFinish: false }, { type: "hard-drop" }).phase,
+    ).toBe("lost");
+  });
+
+  it("wins when a grounded lock occupies hidden rows after 80%", () => {
+    const state = createBoardSession(["O", "I", "T"]);
+    const board = state.board.map((row, rowIndex) =>
+      row.map((cell, columnIndex) =>
+        rowIndex === 2 && (columnIndex === 4 || columnIndex === 5) ? "J" : cell,
+      ),
+    );
+    const grounded = { ...state, canFinish: true, board };
+
+    expect(
+      reduceBoardSession(grounded, { type: "tick", elapsedMilliseconds: 500 }).phase,
+    ).toBe("won");
+    expect(reduceBoardSession(grounded, { type: "hard-drop" }).phase).toBe("won");
+    expect(
+      reduceBoardSession({ ...grounded, canFinish: false }, { type: "hard-drop" }).phase,
+    ).toBe("lost");
+  });
+
+  it("wins when the queue is exhausted after 80%", () => {
+    const first = reduceBoardSession(
+      { ...createBoardSession(["T", "I"]), canFinish: true },
+      { type: "hard-drop" },
+    );
+    const exhausted = reduceBoardSession(first, { type: "hard-drop" });
+
+    expect(first.phase).toBe("playing");
+    expect(exhausted.phase).toBe("won");
   });
 
   it("moves, rotates, and counts time during stencil placement", () => {
