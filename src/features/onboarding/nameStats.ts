@@ -1,6 +1,7 @@
 import { composeNameMask } from "../../game/glyphs/alphabet";
+import { describedNamePattern } from "./nameValidation";
 
-export const shortNameMaxCells = 50;
+export const shortNameMaxCells = 60;
 export const mediumNameMaxCells = 100;
 export const linesPerNameCell = 0.22;
 
@@ -28,7 +29,7 @@ export function minimumLinesForName(cellCount: number): number {
 }
 
 export function describePlayerName(name: string): PlayerNameStats | null {
-  if (!/^[A-Z]{1,10}$/.test(name)) {
+  if (!describedNamePattern.test(name)) {
     return null;
   }
 

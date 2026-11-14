@@ -94,9 +94,12 @@ export function App({ initialOutcome }: AppProps) {
     );
   }
 
+  const storedName = readStoredPlayerName();
+
   return (
     <WelcomeScreen
-      initialName={readStoredPlayerName()}
+      initialName={storedName.name}
+      initialNameTrimmed={storedName.trimmed}
       onStart={(name) => {
         storePlayerName(name);
         setOutcome(null);

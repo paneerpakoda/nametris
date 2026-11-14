@@ -18,7 +18,7 @@ The name stencil turns a familiar game into something personal. A successful run
 
 - At the beginning, the player may enter a name.
 - If they skip name entry, the default name is `HARSH`.
-- The first release accepts 2–10 English letters and renders them as uppercase block lettering.
+- The first release accepts 2–5 English letters and renders them as uppercase block lettering.
 - Normal Tetris runs on one side of the screen; the name stencil is shown on the other.
 - Clearing one line earns one transfer.
 - When a new Tetris piece appears, the player decides whether to use it on the normal board or spend a transfer to use it in the name.

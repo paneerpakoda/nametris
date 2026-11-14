@@ -18,12 +18,22 @@ describe("Nametris glyph alphabet", () => {
     },
   );
 
-  it.each(["AB", "HARSH", "ABCDEFGHIJ"])("composes a tileable mask for %s", (name) => {
-    const mask = composeNameMask(name);
+  it.each(["II", "AB", "HARSH", "MMMMM"])(
+    "composes a tileable mask for %s",
+    (name) => {
+      const mask = composeNameMask(name);
 
-    expect(mask.cells.size % 4).toBe(0);
-    expect(isMaskTileable(mask.cells)).toBe(true);
-    expect(mask.columns).toBe(name.length * 5 + (name.length - 1));
+      expect(mask.cells.size % 4).toBe(0);
+      expect(isMaskTileable(mask.cells)).toBe(true);
+      expect(mask.columns).toBe(name.length * 5 + (name.length - 1));
+    },
+  );
+
+  it("builds the shortest and densest outlines inside the 5-letter cap", () => {
+    expect(composeNameMask("II").cells.size).toBe(24);
+    const dense = composeNameMask("MMMMM");
+    expect(dense.cells.size).toBe(100);
+    expect(dense.columns).toBe(29);
   });
 
   it("keeps a reviewable glyph fixture", () => {

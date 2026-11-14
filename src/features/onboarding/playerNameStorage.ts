@@ -1,4 +1,12 @@
+import { nameLengthLimit, playerNamePattern } from "./nameValidation";
+
 export const playerNameKey = "nametris.playerName";
+const nameTrimNoticeKey = "nametris.nameTrimNotice";
+
+export interface StoredPlayerName {
+  readonly name: string;
+  readonly trimmed: boolean;
+}
 
 function storage(): Storage | null {
   try {
@@ -8,17 +16,52 @@ function storage(): Storage | null {
   }
 }
 
-export function readStoredPlayerName(): string {
+function trimNoticePending(): boolean {
+  try {
+    return window.sessionStorage.getItem(nameTrimNoticeKey) === "1";
+  } catch {
+    return false;
+  }
+}
+
+function markTrimNotice(): void {
+  try {
+    window.sessionStorage.setItem(nameTrimNoticeKey, "1");
+  } catch {
+    // The trimmed name is still saved if the notice cannot be stored.
+  }
+}
+
+export function clearStoredNameTrimNotice(): void {
+  try {
+    window.sessionStorage.removeItem(nameTrimNoticeKey);
+  } catch {
+    // The notice can stay until the tab closes.
+  }
+}
+
+export function readStoredPlayerName(): StoredPlayerName {
   try {
     const value = storage()?.getItem(playerNameKey) ?? "";
-    return /^[A-Z]{2,10}$/.test(value) ? value : "";
+    if (playerNamePattern.test(value)) {
+      return { name: value, trimmed: trimNoticePending() };
+    }
+
+    if (/^[A-Z]+$/.test(value) && value.length > nameLengthLimit) {
+      const name = value.slice(0, nameLengthLimit);
+      storage()?.setItem(playerNameKey, name);
+      markTrimNotice();
+      return { name, trimmed: true };
+    }
+
+    return { name: "", trimmed: false };
   } catch {
-    return "";
+    return { name: "", trimmed: false };
   }
 }
 
 export function storePlayerName(name: string): void {
-  if (!/^[A-Z]{2,10}$/.test(name)) {
+  if (!playerNamePattern.test(name)) {
     return;
   }
 

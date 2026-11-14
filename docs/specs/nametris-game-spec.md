@@ -70,7 +70,7 @@ Input rules:
 - Trim leading and trailing whitespace.
 - Convert valid input to uppercase.
 - Accept only `A`–`Z`.
-- Accept 2–10 letters.
+- Accept 2–5 letters.
 - Starting with an empty input uses `HARSH`.
 - Invalid non-empty input shows an inline, accessible error and does not start.
 - Never include the entered value in a URL, log statement, analytics payload, error-reporting context, or network request.
@@ -220,7 +220,7 @@ This gives the player several visible gravity steps to make the decision and mak
 - Render the complete uppercase name as a grid mask.
 - A mask cell is either outside the stencil, empty and fillable, or filled.
 - Keep visible spacing between letters while presenting the name as one composition.
-- Scale cell size to fit 2–10 letters in the available desktop area.
+- Scale cell size to fit 2–5 letters in the available desktop area.
 - Never allow horizontal page scrolling during play.
 
 ### Tileability requirement
@@ -439,7 +439,7 @@ Do not make the reward card's shine or gameplay state depend on color alone.
 - Keep the name in React memory for the active session only.
 - Do not write the name to `localStorage`, `sessionStorage`, IndexedDB, cookies, URLs, service-worker caches, console logs, telemetry, or error-reporting metadata.
 - Do not add analytics or remote error reporting without explicit approval and a privacy review.
-- Validate by allowlist (`A`–`Z`, length 2–10), not by attempting to remove unsafe characters.
+- Validate by allowlist (`A`–`Z`, length 2–5), not by attempting to remove unsafe characters.
 - Render player input as text/data, never as HTML.
 - Keep export generation local.
 - Audit third-party components before installation.
@@ -722,7 +722,7 @@ Use Playwright with deterministic test hooks/seeds for:
 ### Name and privacy
 
 - Empty input starts a run with `HARSH`.
-- Valid 2–10-character `A`–`Z` names start successfully and render uppercase.
+- Valid 2–5-character `A`–`Z` names start successfully and render uppercase.
 - Invalid names show an accessible inline error.
 - No network request, storage entry, URL, or log contains the name.
 
@@ -740,7 +740,7 @@ Use Playwright with deterministic test hooks/seeds for:
 - Stencil locks keep open-mask cells, trim the rest, and spend one transfer.
 - Zero-progress locks spend nothing.
 - Cancel returns the same piece to the board and spends nothing.
-- Every valid 2–10-letter name is capable of reaching 100%.
+- Every valid 2–5-letter name is capable of reaching 100%.
 
 ### Completion
 

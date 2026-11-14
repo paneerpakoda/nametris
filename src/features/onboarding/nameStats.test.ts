@@ -10,11 +10,13 @@ import {
 } from "./nameStats";
 
 describe("name length bands", () => {
-  it("splits short, medium, and long at the provisional cell cut-offs", () => {
-    expect(nameLengthBand(shortNameMaxCells)).toBe("Short");
-    expect(nameLengthBand(shortNameMaxCells + 1)).toBe("Medium");
-    expect(nameLengthBand(mediumNameMaxCells)).toBe("Medium");
-    expect(nameLengthBand(mediumNameMaxCells + 1)).toBe("Long");
+  it("splits short and medium at 60 and 100 cells", () => {
+    expect(shortNameMaxCells).toBe(60);
+    expect(mediumNameMaxCells).toBe(100);
+    expect(nameLengthBand(60)).toBe("Short");
+    expect(nameLengthBand(61)).toBe("Medium");
+    expect(nameLengthBand(100)).toBe("Medium");
+    expect(nameLengthBand(101)).toBe("Long");
   });
 
   it("estimates lines as at least ceil(0.22 × cells)", () => {
@@ -34,5 +36,6 @@ describe("name length bands", () => {
       band: nameLengthBand(cells),
       minimumLines: minimumLinesForName(cells),
     });
+    expect(describePlayerName("HARSHD")).toBeNull();
   });
 });

@@ -33,19 +33,47 @@ describe("WelcomeScreen", () => {
     expect(onStart).toHaveBeenCalledWith("JO");
   });
 
-  it("strips non-letters, caps the field at 10, and explains the rule briefly", async () => {
+  it("strips non-letters, caps the field at 5, and explains the specific rule", async () => {
     const user = userEvent.setup();
-    render(<WelcomeScreen onStart={vi.fn()} />);
+    const onStart = vi.fn();
+    render(<WelcomeScreen onStart={onStart} />);
     const input = screen.getByLabelText("Your name");
+    const start = screen.getByRole("button", { name: "Start building" });
 
     await user.type(input, "A1");
     expect(input).toHaveValue("A");
-    expect(screen.getByRole("alert")).toHaveTextContent("Letters A-Z only (2-10)");
+    expect(screen.getByRole("alert")).toHaveTextContent(/^Letters A-Z only$/);
+    expect(start).toBeDisabled();
 
     await user.clear(input);
-    await user.type(input, "ABCDEFGHIJKL");
-    expect(input).toHaveValue("ABCDEFGHIJ");
-    expect(input).toHaveAttribute("maxLength", "10");
+    await user.type(input, "ABCDEF");
+    expect(input).toHaveValue("ABCDE");
+    expect(screen.getByRole("alert")).toHaveTextContent(/^Maximum 5 letters$/);
+
+    await user.clear(input);
+    await user.click(input);
+    await user.paste("ABCDEF");
+    expect(input).toHaveValue("ABCDE");
+    expect(screen.getByRole("alert")).toHaveTextContent(/^Maximum 5 letters$/);
+
+    await user.clear(input);
+    await user.click(input);
+    await user.paste("AB1");
+    expect(input).toHaveValue("AB");
+    expect(screen.getByRole("alert")).toHaveTextContent(/^Letters A-Z only$/);
+
+    expect(start).toBeEnabled();
+    await user.click(start);
+    expect(onStart).toHaveBeenCalledWith("AB");
+  });
+
+  it("shows the maximum-length alert once when a stored name was trimmed", () => {
+    render(
+      <WelcomeScreen onStart={vi.fn()} initialName="HARSH" initialNameTrimmed />,
+    );
+
+    expect(screen.getByLabelText("Your name")).toHaveValue("HARSH");
+    expect(screen.getByRole("alert")).toHaveTextContent(/^Maximum 5 letters$/);
   });
 
   it("shows a live cell count, length band, and a minimum line estimate", async () => {

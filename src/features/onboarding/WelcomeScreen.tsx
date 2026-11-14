@@ -4,43 +4,68 @@ import logoUrl from "../../assets/logo-160.png";
 import { CabinetShell } from "../../components/CabinetShell";
 import { primeAudio } from "../juice/audio";
 import { ControlDeck } from "../../components/ControlDeck";
+import { clearStoredNameTrimNotice } from "./playerNameStorage";
 import { describePlayerName } from "./nameStats";
-import { lettersOnlyName, nameLengthLimit, nameRuleMessage } from "./nameValidation";
+import {
+  lettersOnlyAlert,
+  lettersOnlyName,
+  nameLengthLimit,
+  nameTooLongMessage,
+  playerNamePattern,
+} from "./nameValidation";
 import "../../styles/onboarding.css";
 
 interface WelcomeScreenProps {
   readonly onStart: (name: string) => void;
   readonly initialName?: string;
+  readonly initialNameTrimmed?: boolean;
 }
 
-export function WelcomeScreen({ onStart, initialName = "" }: WelcomeScreenProps) {
+export function WelcomeScreen({
+  onStart,
+  initialName = "",
+  initialNameTrimmed = false,
+}: WelcomeScreenProps) {
   const [input, setInput] = useState(() => lettersOnlyName(initialName));
-  const [ruleAlert, setRuleAlert] = useState(false);
+  const [ruleAlert, setRuleAlert] = useState<string | null>(() =>
+    initialNameTrimmed ? nameTooLongMessage : null,
+  );
+  const [alertGeneration, setAlertGeneration] = useState(0);
   const stats = describePlayerName(input);
 
   useEffect(() => {
-    if (!ruleAlert) {
+    if (ruleAlert === null) {
       return;
     }
 
-    const timeout = window.setTimeout(() => setRuleAlert(false), 2_000);
+    const timeout = window.setTimeout(() => {
+      clearStoredNameTrimNotice();
+      setRuleAlert(null);
+    }, 2_000);
     return () => window.clearTimeout(timeout);
-  }, [ruleAlert]);
+  }, [alertGeneration, ruleAlert]);
+
+  function showRuleAlert(message: string) {
+    setRuleAlert(message);
+    setAlertGeneration((current) => current + 1);
+  }
 
   function handleNameChange(value: string) {
-    const stripped = lettersOnlyName(value);
+    const letters = value.toUpperCase().replace(/[^A-Z]/g, "");
     const typedNonLetter = /[^A-Za-z]/.test(value);
-    const overLimit = value.replace(/[^A-Za-z]/g, "").length > nameLengthLimit;
-    if (typedNonLetter || overLimit) {
-      setRuleAlert(true);
+    const overLimit = letters.length > nameLengthLimit;
+    if (overLimit) {
+      showRuleAlert(nameTooLongMessage);
+    } else if (typedNonLetter) {
+      showRuleAlert(lettersOnlyAlert);
     }
-    setInput(stripped);
+    setInput(letters.slice(0, nameLengthLimit));
   }
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!/^[A-Z]{2,10}$/.test(input)) {
-      setRuleAlert(true);
+    if (!playerNamePattern.test(input)) {
+      showRuleAlert(lettersOnlyAlert);
       return;
     }
 
@@ -69,13 +94,12 @@ export function WelcomeScreen({ onStart, initialName = "" }: WelcomeScreenProps)
             <input
               id="player-name"
               value={input}
-              maxLength={nameLengthLimit}
               onChange={(event) => handleNameChange(event.target.value)}
               autoComplete="off"
               autoCapitalize="characters"
               spellCheck={false}
               aria-describedby="name-stats"
-              aria-invalid={ruleAlert}
+              aria-invalid={ruleAlert !== null}
             />
             <div id="name-stats" className="name-stats">
               {stats !== null && (
@@ -87,9 +111,9 @@ export function WelcomeScreen({ onStart, initialName = "" }: WelcomeScreenProps)
                 </>
               )}
             </div>
-            {ruleAlert && (
+            {ruleAlert !== null && (
               <p className="field-error" role="alert">
-                <span aria-hidden="true" /> {nameRuleMessage}
+                {ruleAlert}
               </p>
             )}
             <div className="welcome-start-frame">

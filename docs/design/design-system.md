@@ -337,7 +337,7 @@ Gold heading, plaque, card, then actions. Loss shows progress without a success 
 - Labels are short and uppercase: `SCORE`, `LINES`, `TRANSFERS`.
 - The name is never described as a form field in the headline. The headline is the game.
 - Success titles are flattering. Loss does not borrow them.
-- Errors say what to fix. The name rule is `2–10 letters · A–Z only`.
+- Errors say what to fix. The name rule is `2–5 letters · A–Z only`.
 - The privacy line stays exact: `Your name stays on this device.`
 - Do not put the name in a URL, a log, or the exported filename's metadata beyond the card the player asked to save.
 

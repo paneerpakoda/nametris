@@ -19,19 +19,19 @@ describe("player-name privacy boundary", () => {
     const consoleError = vi.spyOn(console, "error").mockImplementation(() => undefined);
 
     render(<App />);
-    await user.type(screen.getByLabelText("Your name"), "Private");
+    await user.type(screen.getByLabelText("Your name"), "Privy");
     await user.click(screen.getByRole("button", { name: "Start building" }));
     await user.click(screen.getByRole("button", { name: "Skip" }));
 
     expect(
-      screen.getByRole("grid", { name: "Name outline for PRIVATE" }),
+      screen.getByRole("grid", { name: "Name outline for PRIVY" }),
     ).toBeInTheDocument();
     const storedKeys = storageWrite.mock.calls.map(([key]) => key);
     if (storedKeys.length > 0) {
       expect([...storedKeys].sort()).toEqual([howItWorksSeenKey, playerNameKey].sort());
     }
     expect(localStorage.getItem(howItWorksSeenKey)).toBe("1");
-    expect(localStorage.getItem(playerNameKey)).toBe("PRIVATE");
+    expect(localStorage.getItem(playerNameKey)).toBe("PRIVY");
     expect(localStorage.length).toBe(2);
     for (let index = 0; index < localStorage.length; index += 1) {
       expect([howItWorksSeenKey, playerNameKey]).toContain(localStorage.key(index));
@@ -39,7 +39,7 @@ describe("player-name privacy boundary", () => {
     expect(pushState).not.toHaveBeenCalled();
     expect(replaceState).not.toHaveBeenCalled();
     expect(xhrOpen).not.toHaveBeenCalled();
-    expect(window.location.href).not.toContain("PRIVATE");
+    expect(window.location.href).not.toContain("PRIVY");
     for (const logger of [consoleLog, consoleInfo, consoleWarn, consoleError]) {
       expect(logger).not.toHaveBeenCalled();
     }

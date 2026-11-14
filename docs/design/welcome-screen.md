@@ -52,7 +52,7 @@ This screen should answer three questions within a few seconds:
 │ ┌───────────────────────┐ │                                                 │
 │ │ HARSH                 │ │                                                 │
 │ └───────────────────────┘ │                                                 │
-│ 2–10 letters · A–Z only   │                                                 │
+│ 2–5 letters · A–Z only   │                                                 │
 │ Your name stays on this   │                                                 │
 │ device.                   │                                                 │
 │                           │                                                 │
@@ -86,7 +86,7 @@ At the minimum 1180 × 720 viewport:
 
 - Label: `YOUR NAME (OPTIONAL)`
 - Empty-state default: `HARSH`
-- Helper: `2–10 letters · A–Z only`
+- Helper: `2–5 letters · A–Z only`
 - Privacy: `Your name stays on this device.`
 - Default CTA: `START WITH HARSH`
 - Entered-name CTA: `START WITH {NAME}`
@@ -126,7 +126,7 @@ must erase.
 Use specific errors rather than one generic message:
 
 - One letter: `Add 1 more letter.`
-- More than ten letters: `Keep it to 10 letters.`
+- More than five letters: `Maximum 5 letters.`
 - Unsupported characters: `Use letters A–Z only.`
 
 Keep the error associated with the field, announce it accessibly, and retain focus
