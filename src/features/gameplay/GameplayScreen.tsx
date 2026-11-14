@@ -631,14 +631,16 @@ export function GameplayScreen({
       state.phase === "paused" &&
       (state.pauseReason === "player" || state.pauseReason === "hidden");
     if (!coversBoard) {
-      setPauseCovered(false);
       return;
     }
     const timeout = window.setTimeout(
       () => setPauseCovered(true),
       pauseBoardCoverMilliseconds,
     );
-    return () => window.clearTimeout(timeout);
+    return () => {
+      window.clearTimeout(timeout);
+      setPauseCovered(false);
+    };
   }, [state.pauseReason, state.phase]);
 
   function showStencilTimeout() {

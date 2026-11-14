@@ -14,6 +14,7 @@ Work is on `main`. Design-site files that were already dirty were left unstaged.
 | F | `c383933` | Name-field border and help keyboard |
 | G | `a10d78c` | Tutorial on every Start, and reset |
 | Check | `1a68985` | Test types so `tsc` passes |
+| Check | this commit | Pause-cover state is cleared in the effect cleanup so lint passes |
 
 ## Status
 
