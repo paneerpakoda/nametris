@@ -70,6 +70,7 @@ interface GameplayScreenProps {
   readonly onLost?: (result: LossResult) => void;
   readonly onRestart?: () => void;
   readonly onNewName?: () => void;
+  readonly onReset?: () => void;
 }
 
 const clockResolutionMilliseconds = 50;
@@ -119,6 +120,7 @@ export function GameplayScreen({
   onLost,
   onRestart,
   onNewName,
+  onReset,
 }: GameplayScreenProps) {
   const queue = useMemo(() => createPieceQueue(createSeededRandom(seed), 100), [seed]);
   const startingSession = useMemo(
@@ -178,8 +180,11 @@ export function GameplayScreen({
   const [emptySendFlash, setEmptySendFlash] = useState(false);
   const [finishPromptDismissed, setFinishPromptDismissed] = useState(false);
   const [restartConfirm, setRestartConfirm] = useState(false);
+  const [resetConfirm, setResetConfirm] = useState(false);
   const pauseResumeRef = useRef<HTMLButtonElement>(null);
   const confirmYesRef = useRef<HTMLButtonElement>(null);
+  const resetConfirmRef = useRef<HTMLButtonElement>(null);
+  const resetGameRef = useRef<HTMLButtonElement>(null);
   const pauseMenuRef = useRef<HTMLDivElement>(null);
   const playOnRef = useRef<HTMLButtonElement>(null);
   const finishMenuRef = useRef<HTMLDivElement>(null);
@@ -226,6 +231,14 @@ export function GameplayScreen({
     });
     return () => window.cancelAnimationFrame(frame);
   }, [helpOpen, howItWorksOpen, restartConfirm, state.pauseReason, state.phase]);
+
+  useEffect(() => {
+    if (!resetConfirm) {
+      return;
+    }
+    const frame = window.requestAnimationFrame(() => resetConfirmRef.current?.focus());
+    return () => window.cancelAnimationFrame(frame);
+  }, [resetConfirm]);
 
   useLayoutEffect(() => {
     if (!finishPromptOpen || state.phase === "paused") {
@@ -763,6 +776,19 @@ export function GameplayScreen({
       return;
     }
 
+    if (resetConfirm) {
+      if (handleOverlayMenuVerticalNav(event, pauseMenuRef.current)) {
+        return;
+      }
+      if (event.key === "Escape") {
+        event.preventDefault();
+        event.stopPropagation();
+        setResetConfirm(false);
+        window.requestAnimationFrame(() => resetGameRef.current?.focus());
+      }
+      return;
+    }
+
     if (restartConfirm) {
       if (handleOverlayMenuVerticalNav(event, pauseMenuRef.current)) {
         return;
@@ -1052,7 +1078,13 @@ export function GameplayScreen({
             fillingFrom={juiceFrame.fillingFrom}
             counterTick={juiceFrame.counterTick}
             onTouchSend={() => {
-              if (helpOpen || howItWorksOpen || restartConfirm || finishPromptOpen) {
+              if (
+                helpOpen ||
+                howItWorksOpen ||
+                restartConfirm ||
+                resetConfirm ||
+                finishPromptOpen
+              ) {
                 return;
               }
               handleCabinetInput("Shift");
@@ -1171,6 +1203,34 @@ export function GameplayScreen({
                       </button>
                     </div>
                   </>
+                ) : resetConfirm ? (
+                  <>
+                    <h2 id="pause-dialog-title">
+                      Reset everything? This clears the saved name and settings.
+                    </h2>
+                    <div className="overlay-actions" ref={pauseMenuRef}>
+                      <button
+                        ref={resetConfirmRef}
+                        type="button"
+                        className="secondary-button reset-game-button"
+                        onClick={() => onReset?.()}
+                      >
+                        Reset
+                      </button>
+                      <button
+                        type="button"
+                        className="secondary-button reset-game-button"
+                        onClick={() => {
+                          setResetConfirm(false);
+                          window.requestAnimationFrame(() =>
+                            resetGameRef.current?.focus(),
+                          );
+                        }}
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </>
                 ) : (
                   <div className="pause-menu">
                     <div className="pause-copy">
@@ -1209,6 +1269,16 @@ export function GameplayScreen({
                         >
                           Quit to title screen
                         </button>
+                        {onReset !== undefined && (
+                          <button
+                            ref={resetGameRef}
+                            type="button"
+                            className="secondary-button reset-game-button"
+                            onClick={() => setResetConfirm(true)}
+                          >
+                            Reset game
+                          </button>
+                        )}
                         <button
                           type="button"
                           className="secondary-button"
@@ -1237,7 +1307,13 @@ export function GameplayScreen({
           <TouchPad
             phase={state.phase}
             onInput={(key) => {
-              if (helpOpen || howItWorksOpen || restartConfirm || finishPromptOpen) {
+              if (
+                helpOpen ||
+                howItWorksOpen ||
+                restartConfirm ||
+                resetConfirm ||
+                finishPromptOpen
+              ) {
                 return;
               }
               handleCabinetInput(key);

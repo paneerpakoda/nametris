@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import logoUrl from "../../assets/logo-160.png";
 import { CabinetShell } from "../../components/CabinetShell";
@@ -17,12 +17,14 @@ import "../../styles/onboarding.css";
 
 interface WelcomeScreenProps {
   readonly onStart: (name: string) => void;
+  readonly onReset?: () => void;
   readonly initialName?: string;
   readonly initialNameTrimmed?: boolean;
 }
 
 export function WelcomeScreen({
   onStart,
+  onReset,
   initialName = "",
   initialNameTrimmed = false,
 }: WelcomeScreenProps) {
@@ -31,7 +33,18 @@ export function WelcomeScreen({
     initialNameTrimmed ? nameTooLongMessage : null,
   );
   const [alertGeneration, setAlertGeneration] = useState(0);
+  const [resetConfirm, setResetConfirm] = useState(false);
+  const resetButtonRef = useRef<HTMLButtonElement>(null);
+  const resetConfirmRef = useRef<HTMLButtonElement>(null);
   const stats = describePlayerName(input);
+
+  useEffect(() => {
+    if (!resetConfirm) {
+      return;
+    }
+    const frame = window.requestAnimationFrame(() => resetConfirmRef.current?.focus());
+    return () => window.cancelAnimationFrame(frame);
+  }, [resetConfirm]);
 
   useEffect(() => {
     if (ruleAlert === null) {
@@ -126,6 +139,41 @@ export function WelcomeScreen({
                 <span className="label">Start building</span>
               </button>
             </div>
+            {onReset !== undefined &&
+              (resetConfirm ? (
+                <div className="welcome-reset-confirm">
+                  <p>Reset everything? This clears the saved name and settings.</p>
+                  <button
+                    ref={resetConfirmRef}
+                    type="button"
+                    className="welcome-reset"
+                    onClick={onReset}
+                  >
+                    Reset
+                  </button>
+                  <button
+                    type="button"
+                    className="welcome-reset"
+                    onClick={() => {
+                      setResetConfirm(false);
+                      window.requestAnimationFrame(() =>
+                        resetButtonRef.current?.focus(),
+                      );
+                    }}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              ) : (
+                <button
+                  ref={resetButtonRef}
+                  type="button"
+                  className="welcome-reset"
+                  onClick={() => setResetConfirm(true)}
+                >
+                  Reset game
+                </button>
+              ))}
           </form>
         </section>
       </main>

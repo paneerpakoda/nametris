@@ -163,6 +163,41 @@
   content: "!";
 }
 
+.welcome-reset-confirm {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.welcome-reset-confirm p {
+  margin: 0;
+  color: var(--crt-text);
+  font-family: var(--font-ui);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.welcome-reset {
+  min-width: 44px;
+  min-height: 44px;
+  margin-top: 8px;
+  padding: 8px 12px;
+  border: 0;
+  background: transparent;
+  color: var(--crt-text);
+  cursor: pointer;
+  font-family: var(--font-ui);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.welcome-reset:focus-visible {
+  outline: var(--focus-width) solid var(--color-ivory-50);
+  outline-offset: var(--focus-offset);
+}
+
 .welcome-start-frame {
   position: relative;
   width: min(445px, 100%);

@@ -90,6 +90,11 @@
 }
 
 .pause-action-group .primary-button,
+.reset-game-button {
+  min-width: 44px;
+  min-height: 44px;
+}
+
 .pause-action-group .secondary-button {
   width: 100%;
   margin-top: 0;

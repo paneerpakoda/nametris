@@ -130,6 +130,14 @@ export function resetJuicePreferenceMemory(): void {
   syncFromStorage();
 }
 
+export function restoreDefaultJuicePreferences(): void {
+  memory = { ...defaultJuicePreferences };
+  storageDisabled = false;
+  for (const listener of listeners) {
+    listener();
+  }
+}
+
 export function updateJuicePreferences(patch: Partial<JuicePreferences>): void {
   syncFromStorage();
   memory = sanitizeJuicePreferences({ ...memory, ...patch });

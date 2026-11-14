@@ -2,10 +2,7 @@ import { useEffect, useState } from "react";
 
 import { GameplayScreen } from "../features/gameplay/GameplayScreen";
 import { HowItWorks } from "../features/onboarding/HowItWorks";
-import {
-  hasSeenHowItWorks,
-  markHowItWorksSeen,
-} from "../features/onboarding/howItWorksStorage";
+import { markHowItWorksSeen } from "../features/onboarding/howItWorksStorage";
 import {
   readStoredPlayerName,
   storePlayerName,
@@ -16,6 +13,7 @@ import { LossScreen } from "../features/results/LossScreen";
 import { SuccessScreen } from "../features/results/SuccessScreen";
 import type { LossResult, RunResult } from "../game/engine/result";
 import { createRunSeed } from "../game/runtime/seed";
+import { resetAllGameData } from "./resetGameData";
 
 interface AppProps {
   readonly initialOutcome?: RunResult | LossResult;
@@ -31,6 +29,7 @@ export function App({ initialOutcome }: AppProps) {
   const [runNumber, setRunNumber] = useState(0);
   const [seed, setSeed] = useState(() => createRunSeed(window.location.search));
   const [showIntro, setShowIntro] = useState(false);
+  const [welcomeEpoch, setWelcomeEpoch] = useState(0);
   const reducedMotion = useReducedMotion();
 
   useEffect(() => {
@@ -51,6 +50,15 @@ export function App({ initialOutcome }: AppProps) {
   function tryAnotherName() {
     setOutcome(null);
     setSessionName(null);
+  }
+
+  function resetGame() {
+    resetAllGameData();
+    setOutcome(null);
+    setSessionName(null);
+    setShowIntro(false);
+    nextSeed();
+    setWelcomeEpoch((current) => current + 1);
   }
 
   if (outcome?.outcome === "won") {
@@ -90,6 +98,7 @@ export function App({ initialOutcome }: AppProps) {
         onLost={setOutcome}
         onRestart={nextSeed}
         onNewName={() => setSessionName(null)}
+        onReset={resetGame}
       />
     );
   }
@@ -98,13 +107,15 @@ export function App({ initialOutcome }: AppProps) {
 
   return (
     <WelcomeScreen
+      key={welcomeEpoch}
       initialName={storedName.name}
       initialNameTrimmed={storedName.trimmed}
+      onReset={resetGame}
       onStart={(name) => {
         storePlayerName(name);
         setOutcome(null);
         setSessionName(name);
-        setShowIntro(!hasSeenHowItWorks());
+        setShowIntro(true);
       }}
     />
   );

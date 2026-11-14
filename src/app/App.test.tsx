@@ -1,6 +1,11 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
+
+import {
+  getJuicePreferences,
+  updateJuicePreferences,
+} from "../features/juice/preferences";
 
 import { playerTitles } from "../game/config/titles";
 import type { RunResult } from "../game/engine/result";
@@ -134,5 +139,81 @@ describe("App", () => {
     await user.click(screen.getByRole("button", { name: "Pause game" }));
     expect(screen.getByTestId("run-seed")).toHaveTextContent("Seed 400000000");
     random.mockRestore();
+  });
+
+  it("shows how it works again on the next start after quitting", async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    await user.type(screen.getByLabelText("Your name"), "JO");
+    await user.click(screen.getByRole("button", { name: "Start building" }));
+    await user.click(screen.getByRole("button", { name: "Skip" }));
+    await user.click(screen.getByRole("button", { name: "Pause game" }));
+    await user.click(screen.getByRole("button", { name: "Quit to title screen" }));
+    await user.click(screen.getByRole("button", { name: "Start building" }));
+
+    expect(
+      screen.getByRole("heading", { name: "Fill your name to 80% to win." }),
+    ).toBeVisible();
+  });
+
+  it("clears saved data from the welcome reset and leaves cancel alone", async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    await user.type(screen.getByLabelText("Your name"), "JO");
+    await user.click(screen.getByRole("button", { name: "Start building" }));
+    await user.click(screen.getByRole("button", { name: "Skip" }));
+    updateJuicePreferences({ muted: true });
+    await user.click(screen.getByRole("button", { name: "Pause game" }));
+    await user.click(screen.getByRole("button", { name: "Quit to title screen" }));
+
+    expect(localStorage.getItem("nametris.playerName")).toBe("JO");
+    expect(localStorage.getItem("nametris.howItWorksSeen")).toBe("1");
+    expect(getJuicePreferences().muted).toBe(true);
+
+    await user.click(screen.getByRole("button", { name: "Reset game" }));
+    await user.click(screen.getByRole("button", { name: "Cancel" }));
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "Reset game" })).toHaveFocus(),
+    );
+    expect(localStorage.getItem("nametris.playerName")).toBe("JO");
+    expect(getJuicePreferences().muted).toBe(true);
+
+    await user.click(screen.getByRole("button", { name: "Reset game" }));
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "Reset" })).toHaveFocus(),
+    );
+    await user.keyboard("{Enter}");
+
+    expect(localStorage.getItem("nametris.playerName")).toBeNull();
+    expect(localStorage.getItem("nametris.howItWorksSeen")).toBeNull();
+    expect(localStorage.getItem("nametris.juice")).toBeNull();
+    expect(
+      [...Array(localStorage.length)].every(
+        (_, index) => !localStorage.key(index)?.startsWith("nametris."),
+      ),
+    ).toBe(true);
+    expect(screen.getByLabelText("Your name")).toHaveValue("");
+    expect(getJuicePreferences().muted).toBe(false);
+    expect(screen.queryByText(/Run over|STACK OVERFLOW/)).not.toBeInTheDocument();
+  });
+
+  it("resets a paused run back to welcome without a loss screen", async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    await user.type(screen.getByLabelText("Your name"), "JO");
+    await user.click(screen.getByRole("button", { name: "Start building" }));
+    await user.click(screen.getByRole("button", { name: "Skip" }));
+    await user.click(screen.getByRole("button", { name: "Pause game" }));
+    await user.click(screen.getByRole("button", { name: "Reset game" }));
+    await user.click(screen.getByRole("button", { name: "Reset" }));
+
+    expect(screen.getByLabelText("Your name")).toHaveValue("");
+    expect(screen.queryByRole("heading", { name: "Run over" })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("heading", { name: "STACK OVERFLOW" }),
+    ).not.toBeInTheDocument();
   });
 });
