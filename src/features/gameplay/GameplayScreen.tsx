@@ -1223,6 +1223,7 @@ export function GameplayScreen({
           {lossCard && state.phase === "lost" && (
             <div className="game-overlay" role="alert">
               <h2>Run over</h2>
+              <p>The stack reached the top before you claimed the name.</p>
               <p>Final score: {state.score.toLocaleString()}</p>
             </div>
           )}

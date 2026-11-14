@@ -317,11 +317,12 @@
 .loss-card {
   position: relative;
   display: grid;
-  width: min(680px, 76%);
+  width: min(680px, 92%);
   min-height: 0;
-  padding: clamp(20px, 3vh, 32px) clamp(30px, 3vw, 48px);
+  max-height: 100%;
+  padding: clamp(12px, 2vh, 28px) clamp(14px, 2.4vw, 40px);
   justify-items: center;
-  overflow: hidden;
+  overflow: auto;
   border: 2px solid var(--phosphor-red);
   border-radius: 10px;
   background:
@@ -345,8 +346,9 @@
 }
 
 .loss-card h1 {
+  max-width: 100%;
   font-family: var(--font-display);
-  font-size: clamp(2.75rem, 8.5vh, 5.3125rem);
+  font-size: clamp(20px, 8.5vh, 5.3125rem);
   font-weight: 700;
   letter-spacing: 0;
   line-height: 0.9;
@@ -409,6 +411,71 @@
   gap: 8px;
 }
 
+@media (max-width: 480px) {
+  .result-shell {
+    padding: 8px;
+    overflow: auto;
+  }
+
+  .loss-card {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    padding: 12px 10px;
+    overflow: visible;
+  }
+
+  .loss-card > * {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .loss-card .result-stencil {
+    width: 100%;
+    grid-template-columns: repeat(var(--result-columns), minmax(0, 1fr));
+    grid-template-rows: none;
+  }
+
+  .loss-card .result-stencil span {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1;
+  }
+
+  .loss-card h1 {
+    font-size: clamp(20px, 11vw, 2.5rem);
+    line-height: 0.95;
+  }
+
+  .loss-message {
+    font-size: 0.75rem;
+  }
+
+  .loss-progress {
+    font-size: clamp(1.6rem, 8vw, 2.4rem);
+  }
+
+  .loss-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .loss-metrics div + div {
+    border-left: 0;
+  }
+
+  .loss-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .loss-actions .primary-button,
+  .loss-actions .secondary-button {
+    width: 100%;
+    min-height: 44px;
+  }
+}
+
 @media (max-height: 800px) {
   .result-shell {
     gap: 7px;
@@ -444,6 +511,24 @@
 
   .loss-progress {
     font-size: 2.6rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .loss-card {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    padding: 12px 10px;
+  }
+
+  .loss-card h1 {
+    font-size: clamp(20px, 11vw, 2.5rem);
+  }
+
+  .loss-progress {
+    font-size: clamp(1.6rem, 8vw, 2.4rem);
   }
 }
 

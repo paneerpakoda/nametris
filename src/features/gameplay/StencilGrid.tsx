@@ -55,6 +55,7 @@ export function StencilGrid({
   );
   const style = {
     "--stencil-columns": stencil.columns,
+    "--stencil-rows": stencil.rows,
   } as CSSProperties;
 
   return (

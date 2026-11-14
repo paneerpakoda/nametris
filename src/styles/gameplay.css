@@ -248,9 +248,9 @@
   min-width: 0;
   min-height: 0;
   grid-template-columns:
-    min(420px, max(180px, calc((100dvh - 280px) / 2)))
-    minmax(72px, 104px)
-    minmax(240px, 1fr);
+    minmax(220px, 360px)
+    minmax(64px, 92px)
+    minmax(220px, 1fr);
   gap: clamp(10px, 1.25vw, 18px);
   outline: none;
 }
@@ -350,7 +350,7 @@
 }
 
 .board-frame {
-  --cell: clamp(14px, min((100cqh - 48px) / 20, (100cqw - 18px) / 10), 36px);
+  --cell: clamp(14px, min((100cqh - 16px) / 20, (100cqw - 14px) / 10), 36px);
   --board-cell: var(--cell);
   position: relative;
   width: max-content;
@@ -389,16 +389,23 @@
 }
 
 .transfer-route-zone {
+  position: absolute;
+  z-index: 4;
+  top: var(--route-zone-end);
+  right: auto;
+  left: 4px;
   display: flex;
-  width: calc(var(--board-cell) * 10);
-  min-height: 22px;
-  margin-bottom: 4px;
-  padding: 3px 5px;
+  width: max-content;
+  max-width: calc(100% - 16px);
+  min-height: 0;
+  margin: 0;
+  padding: 1px 4px;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   gap: 6px;
-  border: 1px solid rgb(87 177 255 / 60%);
   pointer-events: none;
+  transform: translateY(calc(-100% - 1px));
+  border: 1px solid rgb(87 177 255 / 60%);
   color: var(--route-blue);
   background: rgb(6 15 22 / 88%);
   font-family: var(--font-ui);
@@ -438,8 +445,9 @@
 
 .transfer-route-deadline small {
   position: absolute;
-  right: 4px;
-  bottom: 3px;
+  top: 3px;
+  right: 2px;
+  bottom: auto;
   padding: 2px 4px;
   color: #f4f9ff;
   background: #145d9e;
@@ -759,7 +767,8 @@
   position: absolute;
   z-index: 4;
   top: 2px;
-  left: 50%;
+  right: auto;
+  left: 2px;
   padding: 2px 6px;
   color: var(--color-ivory-50);
   background: var(--color-danger-solid);
@@ -767,7 +776,6 @@
   font-size: 12px;
   letter-spacing: 0.08em;
   pointer-events: none;
-  transform: translateX(-50%);
 }
 
 .name-piece-token {
@@ -1102,10 +1110,12 @@
 
 .stencil-frame {
   display: grid;
+  height: 100%;
   min-height: 0;
-  padding: clamp(7px, 1.2vh, 12px);
+  padding: clamp(4px, 0.8vh, 8px);
   place-items: center;
   overflow: hidden;
+  container-type: size;
   border: 1px solid rgb(236 75 55 / 23%);
   background:
     linear-gradient(rgb(237 230 211 / 2.5%) 1px, transparent 1px),
@@ -1115,12 +1125,22 @@
 }
 
 .stencil-grid {
+  --stencil-cell: max(
+    4px,
+    min(
+      (100cqw - 8px) / var(--stencil-columns, 11),
+      (100cqh - 4px) / var(--stencil-rows, 7)
+    )
+  );
   position: relative;
   display: grid;
-  width: 100%;
+  width: calc(var(--stencil-cell) * var(--stencil-columns, 11));
+  max-width: 100%;
+  height: calc(var(--stencil-cell) * var(--stencil-rows, 7));
   max-height: 100%;
-  grid-template-columns: repeat(var(--stencil-columns), minmax(0, 1fr));
-  gap: clamp(1px, 0.2vw, 3px);
+  grid-template-columns: repeat(var(--stencil-columns, 11), var(--stencil-cell));
+  grid-template-rows: repeat(var(--stencil-rows, 7), var(--stencil-cell));
+  gap: 1px;
 }
 
 .piece-fly {
@@ -1229,8 +1249,10 @@
 }
 
 .stencil-cell {
+  width: var(--stencil-cell, 100%);
+  height: var(--stencil-cell, auto);
   min-width: 0;
-  aspect-ratio: 1;
+  aspect-ratio: auto;
 }
 
 .stencil-cell[data-status="void"] {
@@ -1748,6 +1770,54 @@
   }
 }
 
+@media (min-width: 960px) {
+  .game-shell {
+    padding: 2px 12px;
+    gap: 2px;
+  }
+
+  .game-header {
+    min-height: 0;
+    border-bottom-width: 0;
+  }
+
+  .game-title-lockup h1 {
+    font-size: 14px;
+    line-height: 1;
+  }
+
+  .game-header .nametris-mark.is-compact {
+    --mark-cell: 4px;
+  }
+
+  .game-header .sound-toggle,
+  .game-header .help-button {
+    min-height: 0;
+    padding: 1px 6px;
+    line-height: 1;
+  }
+
+  .board-panel {
+    padding: 0 4px;
+    grid-template-rows: minmax(0, 1fr);
+  }
+
+  .board-frame {
+    padding: 3px;
+    --cell: clamp(14px, min((100cqh - 12px) / 20, (100cqw - 10px) / 10), 36px);
+  }
+
+  .panel-heading {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+  }
+}
+
 .board-feedback {
   position: absolute;
   z-index: 6;
@@ -1824,7 +1894,9 @@ button.touch-only {
 
 .touch-pause {
   width: 44px;
+  min-width: 44px;
   height: 44px;
+  min-height: 44px;
   justify-self: end;
 }
 
@@ -1838,20 +1910,21 @@ button.touch-only {
   }
 }
 
-@media (max-width: 699px) {
+@media (max-width: 959px) {
   .game-header,
   .game-surface {
     display: contents;
   }
 
   .game-shell {
-    grid-template-columns: minmax(0, 1fr) 96px;
+    grid-template-columns: minmax(0, 1fr) 72px;
     grid-template-areas:
       "title mode"
       "name name"
       "board rail"
       "touch touch";
-    grid-template-rows: auto minmax(0, 150px) minmax(0, 1fr) auto;
+    grid-template-rows: auto auto minmax(0, 1fr) auto;
+    overflow: hidden;
   }
 
   .game-title-lockup,
@@ -1882,9 +1955,35 @@ button.touch-only {
   }
 
   .game-sidebar {
+    display: flex;
+    flex-direction: column;
     grid-area: name;
-    max-height: 150px;
+    max-height: 240px;
     overflow: auto;
+  }
+
+  .stencil-panel {
+    height: auto;
+    min-height: max-content;
+    overflow: visible;
+    grid-template-rows: auto auto auto auto auto;
+  }
+
+  .stencil-frame {
+    height: auto;
+    min-height: max-content;
+    align-self: start;
+    overflow: visible;
+    container-type: inline-size;
+  }
+
+  .stencil-grid {
+    --stencil-cell: min(12px, (100cqi - 8px) / var(--stencil-columns, 11));
+    gap: 0;
+    width: min(100%, calc(var(--stencil-cell) * var(--stencil-columns, 11)));
+    max-width: 100%;
+    max-height: none;
+    height: calc(var(--stencil-cell) * var(--stencil-rows, 7));
   }
 
   .board-panel {
@@ -1893,7 +1992,7 @@ button.touch-only {
   }
 
   .board-frame {
-    --cell: clamp(14px, min((100cqh - 48px) / 20, (100cqw - 18px) / 10), 36px);
+    --cell: clamp(8px, min((100cqh - 16px) / 20, (100cqw - 14px) / 10), 36px);
   }
 
   .transfer-rail {
@@ -1915,6 +2014,36 @@ button.touch-only {
   .finish-banner {
     grid-area: auto;
     position: static;
+  }
+}
+
+@media (max-width: 959px) and (max-height: 640px) {
+  .game-sidebar {
+    max-height: 188px;
+  }
+
+  .stencil-grid {
+    --stencil-cell: min(9px, (100cqi - 8px) / var(--stencil-columns, 11));
+  }
+
+  .board-panel {
+    padding: 0;
+    grid-template-rows: minmax(0, 1fr);
+  }
+
+  .panel-heading {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+  }
+
+  .board-frame {
+    padding: 2px;
+    --cell: clamp(4px, min((100cqh - 8px) / 20, (100cqw - 8px) / 10), 36px);
   }
 }
 
@@ -2077,8 +2206,9 @@ button.touch-only {
 .shift-ready-tag {
   position: absolute;
   z-index: 5;
-  top: calc(var(--route-zone-end) - 22px);
-  left: 4px;
+  top: 2px;
+  right: 2px;
+  left: auto;
   padding: 2px 6px;
   background: var(--color-amber);
 }
