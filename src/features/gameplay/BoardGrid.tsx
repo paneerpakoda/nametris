@@ -100,15 +100,21 @@ export function BoardGrid({
             aria-valuemin={0}
             aria-valuemax={FREEZE_BUDGET_MS}
             aria-valuenow={Math.max(0, freezeRemaining)}
+            aria-valuetext={`${Math.max(1, Math.ceil(Math.max(0, freezeRemaining) / 1000))} seconds left`}
             style={{
               top: `calc(${Math.max(0, activePiece.row - HIDDEN_BOARD_ROWS)} * var(--board-cell))`,
             }}
           >
-            <span
-              style={{
-                width: `${Math.max(0, Math.min(100, (freezeRemaining / FREEZE_BUDGET_MS) * 100))}%`,
-              }}
-            />
+            <span className="freeze-budget-track">
+              <span
+                style={{
+                  width: `${Math.max(0, Math.min(100, (freezeRemaining / FREEZE_BUDGET_MS) * 100))}%`,
+                }}
+              />
+            </span>
+            <span className="freeze-seconds">
+              {Math.max(1, Math.ceil(Math.max(0, freezeRemaining) / 1000))}
+            </span>
           </div>
         )}
         {board.slice(HIDDEN_BOARD_ROWS).map((row, visibleRow) =>

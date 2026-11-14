@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import { FREEZE_BUDGET_MS, getGravityMilliseconds } from "../config/gameplay";
+import {
+  FREEZE_BUDGET_MS,
+  getGravityMilliseconds,
+  lockDelayMilliseconds,
+  lockResetLimit,
+} from "../config/gameplay";
 import type { PieceType } from "../model/types";
 import { BOARD_HEIGHT } from "./board";
 import {
@@ -255,6 +260,106 @@ describe("normal-board session", () => {
     expect(capped.lockResetCount).toBe(15);
   });
 
+  it("locks a floor-kicking piece once 15 resets are used, even after it leaves the ground", () => {
+    const session = createBoardSession(["T", "I", "O"]);
+    const board = session.board.map((row, rowIndex) =>
+      row.map(() => (rowIndex === BOARD_HEIGHT - 1 ? "J" : null)),
+    );
+    let state = {
+      ...session,
+      board,
+      activePiece: {
+        type: "T" as const,
+        rotation: 3 as const,
+        row: BOARD_HEIGHT - 4,
+        column: 3,
+      },
+    };
+
+    const onGround = (current: typeof state) =>
+      reduceBoardSession(current, { type: "soft-drop" }) === current;
+
+    expect(onGround(state)).toBe(true);
+
+    let lifts = 0;
+    for (
+      let attempt = 0;
+      attempt < 40 && state.lockResetCount < lockResetLimit;
+      attempt += 1
+    ) {
+      const rotated = reduceBoardSession(state, {
+        type: "rotate",
+        direction: "clockwise",
+      });
+      if (rotated.lockResetCount > state.lockResetCount && !onGround(rotated)) {
+        lifts += 1;
+      }
+      state = rotated;
+      for (let drop = 0; drop < 4 && !onGround(state); drop += 1) {
+        state = reduceBoardSession(state, { type: "soft-drop" });
+      }
+    }
+
+    expect(lifts).toBeGreaterThan(0);
+    expect(state.lockResetCount).toBe(lockResetLimit);
+    expect(onGround(state)).toBe(true);
+
+    const kicked = reduceBoardSession(state, {
+      type: "rotate",
+      direction: "clockwise",
+    });
+    expect(kicked.lockResetCount).toBe(lockResetLimit);
+    expect(kicked.lockAccumulatorMilliseconds).toBe(state.lockAccumulatorMilliseconds);
+
+    const airborne = onGround(kicked)
+      ? {
+          ...kicked,
+          activePiece: {
+            ...kicked.activePiece,
+            row: Math.max(0, kicked.activePiece.row - 2),
+          },
+        }
+      : kicked;
+    const carried = {
+      ...airborne,
+      lockAccumulatorMilliseconds: 200,
+    };
+    const ticked = reduceBoardSession(carried, {
+      type: "tick",
+      elapsedMilliseconds: 40,
+    });
+
+    expect(onGround(carried)).toBe(false);
+    expect(ticked.lockAccumulatorMilliseconds).toBe(200);
+    expect(ticked.lockResetCount).toBe(lockResetLimit);
+    expect(ticked.activePiece.row).toBe(carried.activePiece.row);
+
+    let elapsed = 0;
+    let locked = {
+      ...state,
+      lockResetCount: lockResetLimit,
+      lockAccumulatorMilliseconds: 0,
+    };
+    while (locked.activePiece.type === "T" && elapsed <= 2_000) {
+      locked = reduceBoardSession(locked, {
+        type: "rotate",
+        direction: "clockwise",
+      });
+      for (let drop = 0; drop < 4 && !onGround(locked); drop += 1) {
+        locked = reduceBoardSession(locked, { type: "soft-drop" });
+      }
+      locked = reduceBoardSession(locked, {
+        type: "tick",
+        elapsedMilliseconds: 100,
+      });
+      elapsed += 100;
+    }
+
+    expect(locked.activePiece.type).toBe("I");
+    expect(locked.lockResetCount).toBe(0);
+    expect(elapsed).toBeLessThanOrEqual(lockDelayMilliseconds);
+  });
+
   it("loses safely when the injected queue is exhausted", () => {
     const first = reduceBoardSession(createBoardSession(["T", "I"]), {
       type: "hard-drop",
@@ -494,7 +599,8 @@ describe("piece routing", () => {
     ).toBe("won");
     expect(reduceBoardSession(grounded, { type: "hard-drop" }).phase).toBe("won");
     expect(
-      reduceBoardSession({ ...grounded, canFinish: false }, { type: "hard-drop" }).phase,
+      reduceBoardSession({ ...grounded, canFinish: false }, { type: "hard-drop" })
+        .phase,
     ).toBe("lost");
   });
 

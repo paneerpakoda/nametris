@@ -73,6 +73,10 @@ interface GameplayScreenProps {
 }
 
 const clockResolutionMilliseconds = 50;
+const pauseBoardCoverMilliseconds = 15_000;
+const stencilTimeoutMessage =
+  "Time's up. Your name piece was kept. Lock this piece, then press Shift to send again.";
+const pauseBoardCoverLabel = "Board hidden — resume when you are ready.";
 type HardDropImpact = "idle" | "a" | "b";
 
 interface ClearFx {
@@ -162,6 +166,13 @@ export function GameplayScreen({
   const pendingHardDrop = useRef(false);
   const motionId = useRef(0);
   const [helpOpen, setHelpOpen] = useState(false);
+  const [stencilNotice, setStencilNotice] = useState<string | null>(null);
+  const [stencilNoticeTick, setStencilNoticeTick] = useState(0);
+  const [pauseCovered, setPauseCovered] = useState(false);
+  const previousPlacement = useRef({
+    phase: state.phase,
+    freeze: state.freezeRemainingMilliseconds,
+  });
   const [howItWorksOpen, setHowItWorksOpen] = useState(false);
   const [emptySendId, setEmptySendId] = useState(0);
   const [emptySendFlash, setEmptySendFlash] = useState(false);
@@ -574,6 +585,54 @@ export function GameplayScreen({
     return () => document.removeEventListener("visibilitychange", handleVisibility);
   }, []);
 
+  useEffect(() => {
+    const previous = previousPlacement.current;
+    if (
+      previous.phase === "placing-stencil" &&
+      state.phase === "playing" &&
+      previous.freeze > 0 &&
+      state.freezeRemainingMilliseconds === 0
+    ) {
+      setStencilNotice(stencilTimeoutMessage);
+      setStencilNoticeTick((current) => current + 1);
+    }
+    previousPlacement.current = {
+      phase: state.phase,
+      freeze: state.freezeRemainingMilliseconds,
+    };
+  }, [state.freezeRemainingMilliseconds, state.phase]);
+
+  useEffect(() => {
+    if (stencilNotice === null) {
+      return;
+    }
+    const timeout = window.setTimeout(
+      () => setStencilNotice(null),
+      prefersReducedMotion() ? 1_200 : 1_500,
+    );
+    return () => window.clearTimeout(timeout);
+  }, [stencilNotice, stencilNoticeTick]);
+
+  useEffect(() => {
+    const coversBoard =
+      state.phase === "paused" &&
+      (state.pauseReason === "player" || state.pauseReason === "hidden");
+    if (!coversBoard) {
+      setPauseCovered(false);
+      return;
+    }
+    const timeout = window.setTimeout(
+      () => setPauseCovered(true),
+      pauseBoardCoverMilliseconds,
+    );
+    return () => window.clearTimeout(timeout);
+  }, [state.pauseReason, state.phase]);
+
+  function showStencilTimeout() {
+    setStencilNotice(stencilTimeoutMessage);
+    setStencilNoticeTick((current) => current + 1);
+  }
+
   function performPlayerAction(action: BoardAction, isRepeat = false) {
     if (
       isRepeat &&
@@ -752,6 +811,19 @@ export function GameplayScreen({
       return;
     }
 
+    if (
+      !event.repeat &&
+      event.key === "Enter" &&
+      state.phase === "playing" &&
+      state.stencilPiece === null &&
+      state.freezeRemainingMilliseconds === 0
+    ) {
+      event.preventDefault();
+      event.stopPropagation();
+      showStencilTimeout();
+      return;
+    }
+
     const action = getGameAction(event.key, state.phase);
     if (action === null) {
       return;
@@ -785,6 +857,16 @@ export function GameplayScreen({
     }
     if (document.activeElement instanceof HTMLElement) {
       document.activeElement.blur();
+    }
+    if (
+      key === "Enter" &&
+      state.phase === "playing" &&
+      state.stencilPiece === null &&
+      state.freezeRemainingMilliseconds === 0
+    ) {
+      showStencilTimeout();
+      window.requestAnimationFrame(() => gameRef.current?.focus());
+      return;
     }
     const action = getGameAction(key, state.phase);
     if (action !== null) {
@@ -883,11 +965,13 @@ export function GameplayScreen({
 
         <div
           ref={gameRef}
-          className={
-            hardDropImpact === "idle"
-              ? "game-surface"
-              : `game-surface is-hard-drop-impact-${hardDropImpact}`
-          }
+          className={[
+            "game-surface",
+            hardDropImpact === "idle" ? "" : `is-hard-drop-impact-${hardDropImpact}`,
+            pauseCovered ? "is-board-hidden" : "",
+          ]
+            .filter(Boolean)
+            .join(" ")}
           data-impact={hardDropImpact}
           role="application"
           aria-label="Nametris game"
@@ -904,6 +988,15 @@ export function GameplayScreen({
               <p className="panel-kicker">01 / CLEAR LINES</p>
               <h2 id="normal-board-title">TETRIS BOARD</h2>
             </div>
+            {stencilNotice !== null && (
+              <p
+                className="stencil-timeout"
+                role="status"
+                data-testid="stencil-timeout"
+              >
+                {stencilNotice}
+              </p>
+            )}
             <div className="board-fit">
               <BoardGrid
                 board={state.board}
@@ -1084,6 +1177,9 @@ export function GameplayScreen({
                           : "Your stack is waiting."}
                       </p>
                       <p data-testid="run-seed">Seed {seed}</p>
+                      {pauseCovered && (
+                        <p data-testid="pause-board-cover">{pauseBoardCoverLabel}</p>
+                      )}
                     </div>
                     <div className="pause-menu-controls" ref={pauseMenuRef}>
                       <div className="pause-action-group">

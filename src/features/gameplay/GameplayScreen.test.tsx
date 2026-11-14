@@ -513,7 +513,9 @@ describe("GameplayScreen", () => {
     expect(onLost).not.toHaveBeenCalled();
     expect(onWon.mock.calls[0]?.[0]).toMatchObject({ outcome: "won" });
     expect(screen.getByRole("status")).toHaveTextContent("Name complete. Run won.");
-    expect(screen.queryByText("The stack topped out. Run lost.")).not.toBeInTheDocument();
+    expect(
+      screen.queryByText("The stack topped out. Run lost."),
+    ).not.toBeInTheDocument();
     expect(screen.queryByText("Run over")).not.toBeInTheDocument();
   });
 
@@ -530,6 +532,104 @@ describe("GameplayScreen", () => {
     expect(meter).toHaveAttribute("aria-valuemax", "5000");
     expect(Number(meter.getAttribute("aria-valuenow"))).toBeGreaterThan(0);
     expect(Number(meter.getAttribute("aria-valuenow"))).toBeLessThanOrEqual(5000);
+    expect(meter).toHaveAttribute("aria-valuetext", "5 seconds left");
+    expect(meter).toHaveTextContent("5");
+    expect(meter.querySelector(".freeze-seconds")).toHaveTextContent("5");
+  });
+
+  it("explains when think time expires and when Enter is pressed afterwards", () => {
+    vi.useFakeTimers();
+    try {
+      const initialSession = {
+        ...createBoardSession(["O", "I", "T", "J"]),
+        transferCount: 1,
+        phase: "placing-stencil" as const,
+        stencilPiece: { type: "O" as const, row: 0, column: 0, rotation: 0 },
+        freezeRemainingMilliseconds: 20,
+      };
+      render(<GameplayScreen initialSession={initialSession} />);
+
+      act(() => {
+        vi.advanceTimersByTime(50);
+      });
+
+      const message =
+        "Time's up. Your name piece was kept. Lock this piece, then press Shift to send again.";
+      expect(screen.getByTestId("stencil-timeout")).toHaveTextContent(message);
+      expect(screen.queryByText("PLACE THE O")).not.toBeInTheDocument();
+
+      fireEvent.keyDown(window, { key: "Enter" });
+      expect(screen.getByTestId("stencil-timeout")).toHaveTextContent(message);
+
+      act(() => {
+        vi.advanceTimersByTime(1_499);
+      });
+      expect(screen.getByTestId("stencil-timeout")).toBeInTheDocument();
+      act(() => {
+        vi.advanceTimersByTime(1);
+      });
+      expect(screen.queryByTestId("stencil-timeout")).not.toBeInTheDocument();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("covers the playfield after 15 seconds of pause and stays paused", () => {
+    vi.useFakeTimers();
+    try {
+      const initialSession = {
+        ...createBoardSession(["T", "I", "O", "J"]),
+        transferCount: 1,
+        activePiece: { type: "T" as const, rotation: 0 as const, row: 4, column: 3 },
+        freezeRemainingMilliseconds: 4_000,
+      };
+      render(<GameplayScreen initialSession={initialSession} />);
+      const stackCells = () =>
+        screen
+          .getAllByRole("gridcell")
+          .filter((cell) => cell.getAttribute("data-piece") === "T")
+          .map((cell) => cell.getAttribute("aria-label"));
+      const before = stackCells();
+
+      fireEvent.click(screen.getByRole("button", { name: "Pause game" }));
+      expect(screen.getByRole("dialog", { name: "Game paused" })).toBeVisible();
+      expect(screen.queryByTestId("pause-board-cover")).not.toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "Resume game" })).toBeEnabled();
+
+      act(() => {
+        vi.advanceTimersByTime(14_999);
+      });
+      expect(screen.queryByTestId("pause-board-cover")).not.toBeInTheDocument();
+      expect(screen.getByRole("dialog", { name: "Game paused" })).toBeVisible();
+
+      act(() => {
+        vi.advanceTimersByTime(15_001);
+      });
+      expect(screen.getByTestId("pause-board-cover")).toHaveTextContent(
+        "Board hidden — resume when you are ready.",
+      );
+      expect(screen.getByRole("button", { name: "Resume game" })).toBeEnabled();
+      expect(screen.getByRole("button", { name: "How to play" })).toBeEnabled();
+      expect(document.querySelector(".game-surface")).toHaveClass("is-board-hidden");
+
+      fireEvent.click(screen.getByRole("button", { name: "Resume game" }));
+      expect(
+        screen.queryByRole("dialog", { name: "Game paused" }),
+      ).not.toBeInTheDocument();
+      expect(stackCells()).toEqual(before);
+
+      fireEvent.click(screen.getByRole("button", { name: "Send" }));
+      expect(screen.getByRole("meter", { name: "Think time" })).toHaveAttribute(
+        "aria-valuenow",
+        "4000",
+      );
+      expect(screen.getByRole("meter", { name: "Think time" })).toHaveAttribute(
+        "aria-valuetext",
+        "4 seconds left",
+      );
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it("asks before restarting, resumes on Escape, and can leave for a new name", async () => {

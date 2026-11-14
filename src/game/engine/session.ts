@@ -277,7 +277,8 @@ function tickPlayingSession(
     ...state,
     activePiece,
     gravityAccumulatorMilliseconds,
-    lockAccumulatorMilliseconds: 0,
+    lockAccumulatorMilliseconds:
+      state.lockResetCount >= lockResetLimit ? state.lockAccumulatorMilliseconds : 0,
   };
 }
 
