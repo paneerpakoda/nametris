@@ -1127,6 +1127,10 @@ export function GameplayScreen({
           {howItWorksOpen && (
             <HowItWorks
               overlay
+              onEscape={() => {
+                setHowItWorksOpen(false);
+                setHelpOpen(true);
+              }}
               onDone={() => {
                 setHowItWorksOpen(false);
                 dispatch({ type: "resume" });

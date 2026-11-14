@@ -39,6 +39,7 @@ export function GameHelpDialog({
   const titleId = useId();
   const descriptionId = useId();
   const closeRef = useRef<HTMLButtonElement>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     closeRef.current?.focus();
@@ -49,14 +50,31 @@ export function GameHelpDialog({
       event.preventDefault();
       event.stopPropagation();
       onClose();
-    } else if (event.key === "Tab") {
+      return;
+    }
+    if (event.key !== "Tab") {
+      return;
+    }
+    const items = [
+      ...(dialogRef.current?.querySelectorAll<HTMLButtonElement>("button") ?? []),
+    ].filter((button) => !button.disabled);
+    const first = items[0];
+    const last = items[items.length - 1];
+    if (first === undefined || last === undefined) {
+      return;
+    }
+    if (event.shiftKey && document.activeElement === first) {
       event.preventDefault();
-      closeRef.current?.focus();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
     }
   }
 
   return (
     <div
+      ref={dialogRef}
       className="help-overlay"
       role="dialog"
       aria-modal="true"

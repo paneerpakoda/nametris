@@ -245,6 +245,31 @@ describe("GameplayScreen", () => {
     expect(screen.getByText("PLACE THE O")).toBeInTheDocument();
   });
 
+  it("tabs from help resume to how it works and escape returns there", async () => {
+    const user = userEvent.setup();
+    render(<GameplayScreen initialSession={createBoardSession(["O", "I"])} />);
+
+    await user.click(screen.getByRole("button", { name: "Open controls help" }));
+    const resume = screen.getByRole("button", { name: "Resume game" });
+    await waitFor(() => expect(resume).toHaveFocus());
+
+    await user.tab();
+    const howItWorks = screen.getByRole("button", { name: "How it works" });
+    expect(howItWorks).toHaveFocus();
+    await user.tab({ shift: true });
+    expect(resume).toHaveFocus();
+
+    await user.click(howItWorks);
+    expect(
+      screen.getByRole("heading", { name: "Fill your name to 80% to win." }),
+    ).toBeVisible();
+    await user.keyboard("{Escape}");
+    expect(screen.getByRole("dialog", { name: "How to play Nametris" })).toBeVisible();
+    expect(
+      screen.queryByRole("heading", { name: "Game paused" }),
+    ).not.toBeInTheDocument();
+  });
+
   it("routes with Shift, shows stencil controls, and locks with Enter", () => {
     const initialSession = {
       ...createBoardSession(["O", "I", "T", "J"]),

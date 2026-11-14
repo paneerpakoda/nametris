@@ -100,7 +100,7 @@
   width: min(445px, 100%);
   height: max(56px, calc(82 * var(--u)));
   padding: 7px 8px 0;
-  border: 1px solid var(--color-welcome-line);
+  border: 1px solid var(--color-welcome-deep);
   border-bottom: 2px solid var(--color-welcome-deep);
   border-radius: var(--radius-button);
   background: var(--color-field);

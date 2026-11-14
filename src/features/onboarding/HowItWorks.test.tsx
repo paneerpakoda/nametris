@@ -32,4 +32,30 @@ describe("HowItWorks", () => {
     await user.click(screen.getByRole("button", { name: "Skip" }));
     expect(onDone).toHaveBeenCalledOnce();
   });
+
+  it("lets escape skip the first-run screens", async () => {
+    const user = userEvent.setup();
+    const onDone = vi.fn();
+    render(<HowItWorks onDone={onDone} />);
+
+    await user.keyboard("{Escape}");
+    expect(onDone).toHaveBeenCalledOnce();
+  });
+
+  it("traps tab in the overlay and returns escape to help", async () => {
+    const user = userEvent.setup();
+    const onDone = vi.fn();
+    const onEscape = vi.fn();
+    render(<HowItWorks overlay onDone={onDone} onEscape={onEscape} />);
+
+    expect(screen.getByRole("button", { name: "Next" })).toHaveFocus();
+    await user.tab();
+    expect(screen.getByRole("button", { name: "Skip" })).toHaveFocus();
+    await user.tab({ shift: true });
+    expect(screen.getByRole("button", { name: "Next" })).toHaveFocus();
+
+    await user.keyboard("{Escape}");
+    expect(onEscape).toHaveBeenCalledOnce();
+    expect(onDone).not.toHaveBeenCalled();
+  });
 });

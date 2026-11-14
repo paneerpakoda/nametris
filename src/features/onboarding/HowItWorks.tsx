@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { CabinetShell } from "../../components/CabinetShell";
 import { ControlDeck } from "../../components/ControlDeck";
@@ -6,6 +6,7 @@ import { KeyHint } from "../../components/KeyHint";
 
 interface HowItWorksProps {
   readonly onDone: () => void;
+  readonly onEscape?: () => void;
   readonly overlay?: boolean;
 }
 
@@ -33,16 +34,28 @@ const keyRows = [
   { keys: ["P", "ESC"], label: "Pause" },
 ] as const;
 
-export function HowItWorks({ onDone, overlay = false }: HowItWorksProps) {
+export function HowItWorks({ onDone, onEscape, overlay = false }: HowItWorksProps) {
   const [index, setIndex] = useState(0);
   const screen = screens[index] ?? screens[0];
   const lastScreen = index === screens.length - 1;
+  const actionsRef = useRef<HTMLDivElement>(null);
+  const primaryRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (overlay) {
+      primaryRef.current?.focus();
+    }
+  }, [index, overlay]);
 
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape") {
         event.preventDefault();
-        onDone();
+        if (overlay && onEscape !== undefined) {
+          onEscape();
+        } else {
+          onDone();
+        }
       } else if (event.key === "Enter") {
         event.preventDefault();
         if (lastScreen) {
@@ -50,12 +63,28 @@ export function HowItWorks({ onDone, overlay = false }: HowItWorksProps) {
         } else {
           setIndex((current) => Math.min(screens.length - 1, current + 1));
         }
+      } else if (event.key === "Tab" && overlay) {
+        const items = [
+          ...(actionsRef.current?.querySelectorAll<HTMLButtonElement>("button") ?? []),
+        ];
+        const first = items[0];
+        const last = items[items.length - 1];
+        if (first === undefined || last === undefined) {
+          return;
+        }
+        if (event.shiftKey && document.activeElement === first) {
+          event.preventDefault();
+          last.focus();
+        } else if (!event.shiftKey && document.activeElement === last) {
+          event.preventDefault();
+          first.focus();
+        }
       }
     }
 
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [lastScreen, onDone]);
+  }, [lastScreen, onDone, onEscape, overlay]);
 
   const card = (
     <section
@@ -84,16 +113,22 @@ export function HowItWorks({ onDone, overlay = false }: HowItWorksProps) {
           ))}
         </ul>
       )}
-      <div className="how-it-works-actions">
+      <div className="how-it-works-actions" ref={actionsRef}>
         <button type="button" className="secondary-button" onClick={onDone}>
           Skip
         </button>
         {lastScreen ? (
-          <button type="button" className="primary-button compact" onClick={onDone}>
+          <button
+            ref={primaryRef}
+            type="button"
+            className="primary-button compact"
+            onClick={onDone}
+          >
             Play
           </button>
         ) : (
           <button
+            ref={primaryRef}
             type="button"
             className="primary-button compact"
             onClick={() => setIndex((current) => current + 1)}
