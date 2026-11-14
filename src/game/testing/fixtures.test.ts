@@ -63,11 +63,19 @@ describe("deterministic browser fixtures", () => {
     expect(getStencilCompletion(locked.stencil).perfect).toBe(true);
   });
 
-  it("loses the topout fixture despite finish already being available", () => {
+  it("wins a top-out once finish is already available", () => {
     const fixture = createE2EFixture(baseSession, "topout-eighty");
-    const lost = reduceBoardSession(fixture, { type: "hard-drop" });
+    const won = reduceBoardSession(fixture, { type: "hard-drop" });
 
     expect(fixture.canFinish).toBe(true);
+    expect(won.phase).toBe("won");
+  });
+
+  it("still loses a top-out before the name can be finished", () => {
+    const fixture = createE2EFixture(baseSession, "topout");
+    const lost = reduceBoardSession(fixture, { type: "hard-drop" });
+
+    expect(fixture.canFinish).toBe(false);
     expect(lost.phase).toBe("lost");
   });
 });

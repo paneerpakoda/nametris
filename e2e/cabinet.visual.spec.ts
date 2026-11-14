@@ -145,11 +145,7 @@ test("success cabinet", async ({ page }) => {
 
 test("loss cabinet", async ({ page }) => {
   await startRun(page);
-  await loadFixture(page, "topout-eighty");
-  const decision = page.getByRole("dialog", { name: "80% reached" });
-  await expect(decision).toBeVisible();
-  await page.keyboard.press("Enter");
-  await expect(decision).toBeHidden();
+  await loadFixture(page, "topout");
   await page.keyboard.press("Space");
   await waitForDisplay(page, "Loss display");
   await expectCabinetScreenshot(page, "loss.png");

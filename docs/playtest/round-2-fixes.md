@@ -129,3 +129,5 @@ Think-time seconds are `#ffc45d` on `#060806`: 12.73:1. Reset copy is `#fff5dc` 
 - Reset restores sound in memory (on, 50%, unmuted) and notifies the audio engine. It does not reload the page.
 - Reset clears the sessionStorage trim notice as well as every `nametris.` localStorage key.
 - The floor-kick and stencil-timeout tests needed explicit types so `tsc -b` accepts them. Behaviour is unchanged.
+- The pause-cover flag is cleared in the effect cleanup. The cover still appears after 15 seconds and clears as soon as the pause ends.
+- The `topout-eighty` browser fixture now wins, because finish is already available. A `topout` fixture with finish unavailable still loses, and the loss cabinet screenshot uses that fixture.

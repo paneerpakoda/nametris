@@ -10,6 +10,7 @@ export type E2EFixtureKind =
   | "eighty"
   | "eighty-real"
   | "perfect-ready"
+  | "topout"
   | "topout-eighty";
 
 function progressStencil(filledCount: number) {
@@ -120,6 +121,7 @@ export function createE2EFixture(
         canFinish: true,
         stencil: progressStencil(16),
       };
+    case "topout":
     case "topout-eighty": {
       const board = base.board.map((row, rowIndex) =>
         row.map((cell, columnIndex) =>
@@ -135,7 +137,7 @@ export function createE2EFixture(
           row: BOARD_HEIGHT - 2,
           column: 3,
         },
-        canFinish: true,
+        canFinish: kind === "topout-eighty",
         stencil: progressStencil(16),
       };
     }
