@@ -569,7 +569,7 @@ describe("GameplayScreen", () => {
         ...createBoardSession(["O", "I", "T", "J"]),
         transferCount: 1,
         phase: "placing-stencil" as const,
-        stencilPiece: { type: "O" as const, row: 0, column: 0, rotation: 0 },
+        stencilPiece: { type: "O" as const, row: 0, column: 0, rotation: 0 as const },
         freezeRemainingMilliseconds: 20,
       };
       render(<GameplayScreen initialSession={initialSession} />);

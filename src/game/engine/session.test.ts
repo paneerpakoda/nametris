@@ -13,6 +13,7 @@ import {
   createBoardSession,
   getGhostPiece,
   reduceBoardSession,
+  type BoardSession,
 } from "./session";
 import { createStencilState, getStencilCompletion } from "./stencil";
 
@@ -265,7 +266,7 @@ describe("normal-board session", () => {
     const board = session.board.map((row, rowIndex) =>
       row.map(() => (rowIndex === BOARD_HEIGHT - 1 ? "J" : null)),
     );
-    let state = {
+    let state: BoardSession = {
       ...session,
       board,
       activePiece: {
@@ -276,7 +277,7 @@ describe("normal-board session", () => {
       },
     };
 
-    const onGround = (current: typeof state) =>
+    const onGround = (current: BoardSession) =>
       reduceBoardSession(current, { type: "soft-drop" }) === current;
 
     expect(onGround(state)).toBe(true);
