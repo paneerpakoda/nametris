@@ -2,6 +2,7 @@ import {
   getStencilCompletion,
   getStencilPieceProjection,
 } from "../../game/engine/stencil";
+import { ShortcutLabel } from "../../components/ShortcutLabel";
 import { maximumTransferCount } from "../../game/config/gameplay";
 import { canRouteActivePiece, type BoardSession } from "../../game/engine/session";
 import { StencilGrid, type NameFly } from "./StencilGrid";
@@ -125,16 +126,20 @@ export function StencilPanel({
             <small>Parts outside the outline are lost.</small>
           </div>
           <div className="stencil-action-buttons">
-            <button type="button" className="secondary-button" onClick={onCancel}>
-              CANCEL · ESC
+            <button
+              type="button"
+              className="secondary-button has-shortcut"
+              onClick={onCancel}
+            >
+              <ShortcutLabel label="Cancel" keys={["Esc"]} />
             </button>
             <button
               type="button"
-              className="primary-button compact"
+              className="primary-button compact has-shortcut"
               onClick={onLock}
               disabled={!canLock}
             >
-              LOCK · ENTER
+              <ShortcutLabel label="Lock" keys={["Enter", "Space"]} />
             </button>
           </div>
         </div>
@@ -169,7 +174,11 @@ export function StencilPanel({
             {state.phase === "playing" && (
               <button
                 type="button"
-                className="route-button"
+                className={
+                  state.transferCount > 0 && canRoute
+                    ? "route-button has-shortcut"
+                    : "route-button"
+                }
                 aria-label={
                   state.transferCount === 0
                     ? "Clear a row first"
@@ -180,11 +189,13 @@ export function StencilPanel({
                 onClick={onRoute}
                 disabled={state.transferCount > 0 && !canRoute}
               >
-                {state.transferCount === 0
-                  ? "Clear a row first"
-                  : canRoute
-                    ? "SEND · SHIFT"
-                    : "PAST THE SEND LINE"}
+                {state.transferCount === 0 ? (
+                  "Clear a row first"
+                ) : canRoute ? (
+                  <ShortcutLabel label="Send" keys={["Shift"]} />
+                ) : (
+                  "Past the send line"
+                )}
               </button>
             )}
           </div>

@@ -306,7 +306,9 @@ describe("GameplayScreen", () => {
     fireEvent.keyDown(game, { key: "Shift" });
 
     expect(screen.getByText("1 kept, 3 lost")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "LOCK · ENTER" })).toBeEnabled();
+    expect(screen.getByRole("button", { name: "Lock Enter Space" })).toBeEnabled();
+    expect(screen.getByText("Enter").closest("kbd")).not.toBeNull();
+    expect(screen.getByText("Space").closest("kbd")).not.toBeNull();
 
     fireEvent.keyDown(game, { key: "Enter" });
 
@@ -420,7 +422,7 @@ describe("GameplayScreen", () => {
     expect(screen.queryByText("PLACE THE O")).not.toBeInTheDocument();
     expect(screen.getByRole("dialog", { name: "80% reached" })).toBeInTheDocument();
 
-    await user.click(screen.getByRole("button", { name: "Finish now · Esc" }));
+    await user.click(screen.getByRole("button", { name: "Finish now Esc" }));
     await waitFor(() => expect(onWon).toHaveBeenCalledOnce());
     expect(onWon.mock.calls[0]?.[0]).toMatchObject({ displayPercent: 80 });
   });

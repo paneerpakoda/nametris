@@ -324,6 +324,8 @@
   min-width: 0;
   min-height: 0;
   height: 100%;
+  /* Last explicit row, so the banner can sit above without taking the board's track. */
+  grid-row: -2 / -1;
   place-items: center;
   container-type: size;
 }
@@ -1145,39 +1147,40 @@
   max-height: 100%;
   grid-template-columns: repeat(var(--stencil-columns, 11), var(--stencil-cell));
   grid-template-rows: repeat(var(--stencil-rows, 7), var(--stencil-cell));
-  gap: 1px;
+  --stencil-gap: 1px;
+  gap: var(--stencil-gap);
 }
 
 .piece-fly {
   position: absolute;
   z-index: 5;
-  display: grid;
   pointer-events: none;
   inset: 0;
-  grid-template-columns: repeat(var(--stencil-columns), minmax(0, 1fr));
-  gap: inherit;
-  animation: piece-fly var(--duration-flight) var(--ease-in) forwards;
 }
 
-@keyframes piece-fly {
-  0% {
-    transform: translate(16px, -26px) scale(1);
-    opacity: 1;
-  }
-
-  55% {
-    transform: translate(-10px, -8px) scale(0.62);
-    opacity: 0.92;
-  }
-
-  100% {
-    transform: translate(0, 0) scale(0.2);
-    opacity: 0;
-  }
+.fly-cell {
+  position: absolute;
+  width: var(--stencil-cell);
+  height: var(--stencil-cell);
+  border: 1px solid var(--color-stencil-edge);
+  box-shadow: inset 0 0 0 1px rgb(0 0 0 / 22%);
 }
 
 .fly-cell.is-kept {
-  animation: kept-flare var(--duration-flight) var(--ease-out);
+  animation: plant-stamp var(--duration-flight) var(--ease-out) forwards;
+}
+
+@keyframes plant-stamp {
+  0% {
+    transform: scale(1.4);
+    filter: brightness(1.8);
+  }
+
+  100% {
+    transform: scale(1);
+    filter: brightness(1);
+    opacity: 0;
+  }
 }
 
 .fly-cell.is-lost {
@@ -1375,6 +1378,41 @@
   gap: 6px;
 }
 
+.primary-button.has-shortcut,
+.secondary-button.has-shortcut,
+.route-button.has-shortcut {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.has-shortcut .shortcut-label {
+  text-align: start;
+}
+
+.has-shortcut .shortcut-keys {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.has-shortcut .key-hint {
+  height: 20px;
+  min-width: 20px;
+  padding: 0 5px;
+  border-color: rgb(255 245 220 / 48%);
+  color: var(--crt-text);
+  background: rgb(8 11 9 / 78%);
+  box-shadow:
+    0 1px 0 rgb(0 0 0 / 55%),
+    inset 0 1px 0 rgb(255 255 255 / 18%);
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  pointer-events: none;
+}
+
 .route-button,
 .secondary-button {
   padding: 8px 10px;
@@ -1463,8 +1501,13 @@
   text-align: center;
 }
 
-.board-panel:has(.finish-banner) {
+.board-panel:has(.finish-banner),
+.board-panel:has(.stencil-timeout) {
   grid-template-rows: auto auto minmax(0, 1fr);
+}
+
+.board-panel:has(.finish-banner):has(.stencil-timeout) {
+  grid-template-rows: auto auto auto minmax(0, 1fr);
 }
 
 .finish-banner {
@@ -1984,6 +2027,7 @@ button.touch-only {
 
   .stencil-grid {
     --stencil-cell: min(12px, (100cqi - 8px) / var(--stencil-columns, 11));
+    --stencil-gap: 0px;
     gap: 0;
     width: min(100%, calc(var(--stencil-cell) * var(--stencil-columns, 11)));
     max-width: 100%;

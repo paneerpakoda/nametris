@@ -124,7 +124,10 @@ export function StencilGrid({
                     fly.kept.has(key) ? "fly-cell is-kept" : "fly-cell is-lost"
                   }
                   data-piece={fly.piece.type}
-                  style={{ gridRow: cell.row + 1, gridColumn: cell.column + 1 }}
+                  style={{
+                    left: `calc(${cell.column} * (var(--stencil-cell) + var(--stencil-gap)))`,
+                    top: `calc(${cell.row} * (var(--stencil-cell) + var(--stencil-gap)))`,
+                  }}
                 />
               );
             })}

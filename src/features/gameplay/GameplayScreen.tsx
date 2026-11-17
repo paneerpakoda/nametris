@@ -8,6 +8,7 @@ import {
 } from "react";
 
 import { CabinetShell } from "../../components/CabinetShell";
+import { ShortcutLabel } from "../../components/ShortcutLabel";
 import { ControlDeck } from "../../components/ControlDeck";
 import { TouchPad } from "../../components/TouchPad";
 import { NametrisMark } from "../../components/NametrisMark";
@@ -1132,17 +1133,17 @@ export function GameplayScreen({
                 <button
                   ref={playOnRef}
                   type="button"
-                  className="primary-button"
+                  className="primary-button has-shortcut"
                   onClick={continuePastFinishPrompt}
                 >
-                  Play on · Enter
+                  <ShortcutLabel label="Play on" keys={["Enter"]} />
                 </button>
                 <button
                   type="button"
-                  className="secondary-button"
+                  className="secondary-button has-shortcut"
                   onClick={() => dispatch({ type: "finish-run" })}
                 >
-                  Finish now · Esc
+                  <ShortcutLabel label="Finish now" keys={["Esc"]} />
                 </button>
               </div>
             </div>
