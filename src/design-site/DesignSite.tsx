@@ -57,21 +57,17 @@ export function DesignSite() {
       <a className="ds-skip" href="#materials">
         Skip to foundations
       </a>
-      <header className="ds-masthead">
-        <div>
-          <div className="ds-brand">
-            <NametrisMark />
+      <header className="ds-header">
+        <div className="ds-header-bar">
+          <div className="ds-header-lockup">
+            <NametrisMark compact />
             <p className="ds-kicker">Nametris</p>
+            <h1>Design system</h1>
           </div>
-          <h1>Design system</h1>
-          <p>
-            Warm ivory cabinet, signal red CRT. Foundations, components, and patterns
-            use the tokens the game ships with.
-          </p>
+          <a className="ds-play-link" href={import.meta.env.BASE_URL}>
+            Play the game
+          </a>
         </div>
-        <a className="ds-play-link" href={import.meta.env.BASE_URL}>
-          Play the game
-        </a>
       </header>
       <div className="ds-layout">
         <nav className="ds-nav" aria-label="Design system">
@@ -112,7 +108,6 @@ export function DesignSite() {
           <Result />
           <Voice />
           <footer className="ds-footer">
-            <p>Values live in tokens.css. This catalog reads the approved contract.</p>
             <a href={import.meta.env.BASE_URL}>Play the game</a>
           </footer>
         </main>
@@ -123,21 +118,15 @@ export function DesignSite() {
 
 function Materials() {
   return (
-    <Section
-      id="materials"
-      kicker="Foundations"
-      title="Materials"
-      lede="A control belongs to one material. The room is the stage, the shell is ivory plastic, the bezel is metal, and the glass emits phosphor."
-    >
+    <Section id="materials" kicker="Foundations" title="Materials">
       <div className="ds-grid">
         <article className="ds-panel ds-stage-sample">
           <h3>Stage</h3>
-          <p>The page behind the machine. A warm glow sits at the top.</p>
           <TokenNameLine token="color-stage" />
         </article>
         <article className="ds-panel ds-cabinet-sample">
           <h3>Cabinet</h3>
-          <p>SCORE</p>
+          <p className="ds-ink-sample">SCORE</p>
           <TokenNameLine token="color-ivory-400" />
         </article>
         <article className="ds-material-screen">
@@ -148,7 +137,7 @@ function Materials() {
               <div className="crt-vignette" />
               <div className="cabinet-screen-content ds-screen-copy">
                 <div>
-                  <h3>Bezel and CRT</h3>
+                  <h3>Bezel</h3>
                   <strong>MAYA</strong>
                 </div>
               </div>
@@ -157,21 +146,22 @@ function Materials() {
         </article>
         <article className="ds-panel">
           <h3>Phosphor</h3>
-          <p>Red labels, amber warns, route blue sends a piece to the name.</p>
-          <div className="ds-phosphor-row" aria-hidden="true">
-            <span
-              style={{
-                background: "var(--color-phosphor)",
-                color: "var(--color-phosphor)",
-              }}
-            />
-            <span
-              style={{ background: "var(--color-amber)", color: "var(--color-amber)" }}
-            />
-            <span
-              style={{ background: "var(--color-route)", color: "var(--color-route)" }}
-            />
-          </div>
+          <ul className="ds-phosphor-row">
+            {(
+              [
+                ["color-phosphor", "Label"],
+                ["color-amber", "Warn"],
+                ["color-route", "Send"],
+              ] as const
+            ).map(([token, label]) => (
+              <li key={token}>
+                <span
+                  style={{ background: `var(--${token})`, color: `var(--${token})` }}
+                />
+                {label}
+              </li>
+            ))}
+          </ul>
         </article>
       </div>
     </Section>
@@ -180,43 +170,24 @@ function Materials() {
 
 function Color() {
   return (
-    <Section
-      id="color"
-      kicker="Foundations"
-      title="Color"
-      lede="Phosphor, signal, and button red are different jobs. Chips show the live token. The value underneath is the approved contract."
-    >
+    <Section id="color" kicker="Foundations" title="Color">
       {colorGroups.map((group) => (
         <div className="ds-group" key={group.id}>
           <h3 className="ds-group-title">{group.title}</h3>
-          <p className="ds-note">{group.note}</p>
           <SwatchGrid swatches={group.swatches} />
         </div>
       ))}
       <div className="ds-group">
         <h3 className="ds-group-title">States</h3>
-        <p className="ds-note">
-          Open stencil, ghost, and grid lines are translucent. The checker shows
-          through.
-        </p>
         <SwatchGrid swatches={stateSwatches} />
       </div>
-      <p className="ds-note">
-        Retired names stay in the contract so old CSS does not invent a new hue. Violet
-        is not the T piece. Lime is gold, not the S piece.
-      </p>
     </Section>
   );
 }
 
 function Pieces() {
   return (
-    <Section
-      id="pieces"
-      kicker="Foundations"
-      title="Pieces"
-      lede="Board and export use the same seven fills. Shape carries the piece. T and J are graphic fills, so small text stays on ivory, amber, or phosphor."
-    >
+    <Section id="pieces" kicker="Foundations" title="Pieces">
       <div className="ds-pieces">
         {pieceSwatches.map((piece) => (
           <article className="ds-piece" key={piece.type}>
@@ -242,9 +213,6 @@ function Pieces() {
       </div>
       <div className="ds-group">
         <h3 className="ds-group-title">Mark quartet</h3>
-        <p className="ds-note">
-          The logo blocks are a separate set from the falling pieces.
-        </p>
         <SwatchGrid swatches={markSwatches} />
       </div>
     </Section>
@@ -253,18 +221,12 @@ function Pieces() {
 
 function TypeSection() {
   return (
-    <Section
-      id="type"
-      kicker="Foundations"
-      title="Type"
-      lede="PP NeueBit is the display face for the name, the title, and the one primary action. Space Mono is every label, metric, and sentence. There is no third family."
-    >
+    <Section id="type" kicker="Foundations" title="Type">
       <p className="ds-type-display type-gold">NAMETRIS</p>
       <div className="ds-type-row">
         <article className="ds-panel">
           <h3>Display</h3>
           <p className="ds-name-sample">MAYA</p>
-          <TokenNameLine token="font-display" />
         </article>
         <article className="ds-panel">
           <h3>UI label</h3>
@@ -272,12 +234,10 @@ function TypeSection() {
             Score
             <strong>12,840</strong>
           </p>
-          <TokenNameLine token="font-ui" />
         </article>
         <article className="ds-panel">
-          <h3>Supporting copy</h3>
-          <p>Clear a full row to earn a name piece. You can hold up to three.</p>
-          <TokenNameLine token="color-muted" />
+          <h3>Copy</h3>
+          <p className="ds-copy-sample">Clear a full row to earn a name piece.</p>
         </article>
       </div>
     </Section>
@@ -287,12 +247,7 @@ function TypeSection() {
 function Space() {
   const widest = 48;
   return (
-    <Section
-      id="space"
-      kicker="Foundations"
-      title="Space"
-      lede="Spacing, the cabinet measures, and the breakpoints the stylesheets repeat as literals. A media query cannot read a custom property."
-    >
+    <Section id="space" kicker="Foundations" title="Space">
       <ul className="ds-scale">
         {spaceSteps.map((token) => {
           const px = Number.parseInt(tokenValue(token), 10);
@@ -308,55 +263,52 @@ function Space() {
           );
         })}
       </ul>
-      <div className="ds-measure-row">
-        {layoutMeasures.map(([token, role]) => (
-          <article className="ds-panel" key={token}>
-            <h3>{role}</h3>
-            <TokenNameLine token={token} />
-          </article>
+      <dl className="ds-measure-row">
+        {[...layoutMeasures, ...breakpoints].map(([token, role]) => (
+          <div key={token}>
+            <dt>{role}</dt>
+            <dd title={token}>{tokenValue(token)}</dd>
+          </div>
         ))}
-        {breakpoints.map(([token, role]) => (
-          <article className="ds-panel" key={token}>
-            <h3>{role}</h3>
-            <TokenNameLine token={token} />
-          </article>
-        ))}
-      </div>
+      </dl>
     </Section>
   );
 }
 
 function Shape() {
   return (
-    <Section
-      id="shape"
-      kicker="Foundations"
-      title="Shape"
-      lede="Radius follows the object. Cells stay nearly square. Buttons and the name field share one radius. The glass uses the bezel radius."
-    >
+    <Section id="shape" kicker="Foundations" title="Shape">
       <div className="ds-radius-row">
         {radii.map(([token, role]) => (
-          <article className="ds-panel" key={token}>
-            <h3>{role}</h3>
+          <figure className="ds-radius" key={token}>
             <div
               className="ds-radius-box"
               style={{ borderRadius: `var(--${token})` }}
             />
-            <TokenNameLine token={token} />
-          </article>
+            <figcaption>
+              <span>{role}</span>
+              <code className="ds-token" title={token}>
+                {tokenValue(token)}
+              </code>
+            </figcaption>
+          </figure>
         ))}
       </div>
       <div className="ds-depth" aria-hidden="true">
-        {(["z-crt", "z-dialog", "z-modal"] as const).map((token, index) => (
+        {(
+          [
+            ["z-crt", "CRT"],
+            ["z-dialog", "Dialog"],
+            ["z-modal", "Modal"],
+          ] as const
+        ).map(([token, label]) => (
           <div
             className="ds-depth-card"
             key={token}
-            style={{
-              zIndex: `var(--${token})`,
-              transform: `translate(${index * 28}px, ${index * 36}px)`,
-            }}
+            style={{ zIndex: `var(--${token})` }}
           >
-            {token} · {tokenValue(token)}
+            <strong>{label}</strong>
+            <span>{tokenValue(token)}</span>
           </div>
         ))}
       </div>
@@ -378,19 +330,20 @@ function Motion() {
   const longest = 1800;
 
   return (
-    <Section
-      id="motion"
-      kicker="Foundations"
-      title="Motion"
-      lede="Durations are short and tied to a cause. Replay runs every bar for its own token. Reduced motion keeps the length and drops the travel."
-    >
-      <button
-        type="button"
-        className="ds-text-button"
-        onClick={() => setRun((value) => value + 1)}
-      >
-        Replay motion
-      </button>
+    <Section id="motion" kicker="Foundations" title="Motion">
+      <div className="ds-toolbar">
+        <p className="ds-meta">
+          Tilt {tokenValue("spring-tilt-stiffness")} /{" "}
+          {tokenValue("spring-tilt-damping")} / {tokenValue("spring-tilt-degrees")}°
+        </p>
+        <button
+          type="button"
+          className="ds-text-button"
+          onClick={() => setRun((value) => value + 1)}
+        >
+          Replay motion
+        </button>
+      </div>
       <ul className="ds-motion" key={run}>
         {motionSteps.map(([token, role]) => {
           const ms = Number.parseInt(tokenValue(token), 10);
@@ -409,40 +362,17 @@ function Motion() {
                 />
               </span>
               <span>{tokenValue(token)}</span>
-              <span>{token}</span>
             </li>
           );
         })}
       </ul>
-      <div className="ds-measure-row">
-        <article className="ds-panel">
-          <h3>Reward tilt</h3>
-          <p>
-            Stiffness {tokenValue("spring-tilt-stiffness")}, damping{" "}
-            {tokenValue("spring-tilt-damping")}, max {tokenValue("spring-tilt-degrees")}
-            °. The board does not idle-animate.
-          </p>
-        </article>
-        <article className="ds-panel">
-          <h3>Eases</h3>
-          <p>
-            Press {tokenValue("ease-press")}. Out {tokenValue("ease-out")}. In{" "}
-            {tokenValue("ease-in")}. Linear {tokenValue("ease-linear")}.
-          </p>
-        </article>
-      </div>
     </Section>
   );
 }
 
 function Focus() {
   return (
-    <Section
-      id="focus"
-      kicker="Foundations"
-      title="Focus"
-      lede="CRT controls use amber. The welcome field uses ivory. Cabinet keys use ink. The rings below are always visible. Tab to the live controls for the real focus style."
-    >
+    <Section id="focus" kicker="Foundations" title="Focus">
       <div className="ds-focus-row">
         <span className="ds-ring ds-ring-crt">CRT amber</span>
         <span className="ds-ring ds-ring-welcome">Welcome ivory</span>
@@ -452,33 +382,17 @@ function Focus() {
         <button type="button" className="secondary-button">
           CRT control
         </button>
-        <form className="welcome-form" onSubmit={(event) => event.preventDefault()}>
-          <label className="sr-only" htmlFor="focus-name">
-            Welcome field
-          </label>
-          <input id="focus-name" defaultValue="MAYA" readOnly />
-        </form>
         <button type="button" className="cabinet-key" aria-label="Cabinet key">
           <span className="cabinet-key-legend">X</span>
         </button>
       </div>
-      <p className="ds-note">
-        Ring width {tokenValue("focus-width")} on the CRT,{" "}
-        {tokenValue("focus-width-field")} on the playfield. Welcome start uses the tight
-        offset, {tokenValue("focus-offset-tight")}.
-      </p>
     </Section>
   );
 }
 
 function Buttons() {
   return (
-    <Section
-      id="buttons"
-      kicker="Components"
-      title="Buttons"
-      lede="One primary action. In-play disabled fades to gray. The welcome start button uses the framed face, and its disabled state keeps the cabinet colors."
-    >
+    <Section id="buttons" kicker="Components" title="Buttons">
       <div className="ds-specimens">
         <Specimen title="Primary">
           <div className="ds-button-well">
@@ -526,12 +440,7 @@ function Buttons() {
 
 function Fields() {
   return (
-    <Section
-      id="field"
-      kicker="Components"
-      title="Name field"
-      lede="The field sits on the CRT. An invalid name keeps the letters and marks the underline in phosphor. The error names the rule."
-    >
+    <Section id="field" kicker="Components" title="Name field">
       <div className="ds-specimens">
         <Specimen title="Ready">
           <form
@@ -568,12 +477,7 @@ function Fields() {
 
 function Keys() {
   return (
-    <Section
-      id="keys"
-      kicker="Components"
-      title="Keys"
-      lede="Cabinet keys are plastic controls. Hints in the help dialog are the smaller CRT key. Shift-ready outlines the send key in amber."
-    >
+    <Section id="keys" kicker="Components" title="Keys">
       <div className="ds-key-row">
         <KeyHint>X</KeyHint>
         <KeyHint wide>SPACE</KeyHint>
@@ -605,12 +509,7 @@ function Keys() {
 
 function Metrics() {
   return (
-    <Section
-      id="metrics"
-      kicker="Components"
-      title="Metrics"
-      lede="A metric is a quiet pair: an uppercase label and one value. The strip holds the numbers that are not the name."
-    >
+    <Section id="metrics" kicker="Components" title="Metrics">
       <div className="metric-strip" style={{ maxWidth: 420 }}>
         <div className="metric">
           <span>Score</span>
@@ -635,13 +534,8 @@ function Metrics() {
 
 function Boards() {
   return (
-    <Section
-      id="boards"
-      kicker="Components"
-      title="Boards"
-      lede="The playfield is a framed well. The route line is the only blue on the board. Stencil legality uses a hatch, not another red."
-    >
-      <div className="ds-specimens">
+    <Section id="boards" kicker="Components" title="Boards">
+      <div className="ds-board-row">
         <MiniBoard />
         <div className="ds-stencil-row">
           {stencilStates.map((state) => (
@@ -662,12 +556,7 @@ function Boards() {
 
 function Help() {
   return (
-    <Section
-      id="dialog"
-      kicker="Components"
-      title="Help"
-      lede="Help is a CRT dialog over the playfield. This specimen is the same markup, kept in the page so it does not take focus on its own."
-    >
+    <Section id="dialog" kicker="Components" title="Help">
       <div className="ds-help">
         <section className="help-dialog" aria-label="Help specimen">
           <p className="panel-kicker">QUICK REFERENCE</p>
@@ -724,12 +613,7 @@ function Help() {
 
 function Reward() {
   return (
-    <Section
-      id="reward"
-      kicker="Components"
-      title="Reward card"
-      lede="The card is the trophy. Pointer movement tilts it. Reduced motion leaves it still. Actions sit outside the card."
-    >
+    <Section id="reward" kicker="Components" title="Reward card">
       <div className="ds-pattern ds-result">
         <div className="result-crt-screen">
           <div className="result-shell">
@@ -743,30 +627,26 @@ function Reward() {
 
 function Mark() {
   return (
-    <Section
-      id="mark"
-      kicker="Components"
-      title="Mark"
-      lede="The four-block mark is the product sign. The welcome logo is the same blocks as a picture, with a blue glow that belongs only to that image."
-    >
+    <Section id="mark" kicker="Components" title="Mark">
       <div className="ds-mark-row">
         <NametrisMark />
         <NametrisMark compact />
-        <img className="ds-logo" src={logoUrl} alt="" width={80} height={80} />
+        <img
+          className="ds-logo"
+          src={logoUrl}
+          alt=""
+          width={80}
+          height={80}
+          title={tokenValue("color-mark-glow")}
+        />
       </div>
-      <p className="ds-note">Mark glow {tokenValue("color-mark-glow")}</p>
     </Section>
   );
 }
 
 function Welcome() {
   return (
-    <Section
-      id="welcome"
-      kicker="Patterns"
-      title="Welcome"
-      lede="Centered on the glass: mark, gold wordmark, premise, name, one start button. The cabinet around it is the real bezel."
-    >
+    <Section id="welcome" kicker="Patterns" title="Welcome">
       <CrtFrame label="Welcome pattern" className="ds-welcome">
         <main className="welcome-screen">
           <section className="welcome-layout">
@@ -798,12 +678,7 @@ function Welcome() {
 
 function Play() {
   return (
-    <Section
-      id="play"
-      kicker="Patterns"
-      title="Play"
-      lede="The board, the route line, the name, and the numbers share one glass. Route blue is the send affordance. The primary action waits until a row is cleared."
-    >
+    <Section id="play" kicker="Patterns" title="Play">
       <CrtFrame label="Play pattern">
         <div className="ds-play">
           <MiniBoard />
@@ -843,12 +718,7 @@ function Play() {
 
 function Result() {
   return (
-    <Section
-      id="result"
-      kicker="Patterns"
-      title="Result"
-      lede="A win names the player, then the card, then the actions. A loss keeps the same shell, states how far the name got, and offers the same two next steps."
-    >
+    <Section id="result" kicker="Patterns" title="Result">
       <div className="ds-pattern ds-result">
         <div className="result-crt-screen">
           <div className="result-shell">
@@ -927,12 +797,7 @@ function Result() {
 
 function Voice() {
   return (
-    <Section
-      id="voice"
-      kicker="Patterns"
-      title="Voice"
-      lede="One primary action per screen. Labels are short. Errors say what to fix. The privacy line stays exact."
-    >
+    <Section id="voice" kicker="Patterns" title="Voice">
       <div className="ds-voice">
         <blockquote>Start building</blockquote>
         <blockquote>Play again</blockquote>
@@ -948,21 +813,18 @@ function Section({
   id,
   kicker,
   title,
-  lede,
   children,
 }: {
   readonly id: string;
   readonly kicker: string;
   readonly title: string;
-  readonly lede: string;
   readonly children: ReactNode;
 }) {
   return (
     <section className="ds-section" id={id} aria-labelledby={`${id}-title`}>
       <header className="ds-section-head">
-        <p className="ds-kicker">{kicker}</p>
         <h2 id={`${id}-title`}>{title}</h2>
-        <p>{lede}</p>
+        <p className="ds-kicker">{kicker}</p>
       </header>
       {children}
     </section>
@@ -986,9 +848,7 @@ function Specimen({
 
 function TokenNameLine({ token }: { readonly token: TokenName }) {
   return (
-    <code className="ds-token">
-      {token}
-      <br />
+    <code className="ds-token" title={token}>
       {tokenValue(token)}
     </code>
   );
@@ -1004,9 +864,7 @@ function SwatchGrid({ swatches }: { readonly swatches: readonly Swatch[] }) {
             style={{ "--ds-swatch": `var(--${swatch.token})` } as CSSProperties}
           />
           <h3>{swatch.role}</h3>
-          <code className="ds-token">
-            {swatch.token}
-            <br />
+          <code className="ds-token" title={swatch.token}>
             {tokenValue(swatch.token)}
           </code>
         </article>
@@ -1109,9 +967,15 @@ function useCurrentSection(ids: readonly string[]) {
   const [current, setCurrent] = useState(ids[0] ?? "");
 
   useEffect(() => {
-    const readingLine = 128;
-
     function updateCurrent() {
+      const header = document.querySelector(".ds-header");
+      const nav = document.querySelector(".ds-nav");
+      const headerHeight = header?.getBoundingClientRect().height ?? 84;
+      const navHeight =
+        window.innerWidth <= 900 && nav !== null
+          ? nav.getBoundingClientRect().height
+          : 0;
+      const readingLine = headerHeight + navHeight + 24;
       const nearBottom =
         window.innerHeight + window.scrollY >=
         document.documentElement.scrollHeight - 8;
@@ -1128,9 +992,11 @@ function useCurrentSection(ids: readonly string[]) {
 
     updateCurrent();
     window.addEventListener("scroll", updateCurrent, { passive: true });
+    window.addEventListener("resize", updateCurrent);
     window.addEventListener("hashchange", updateCurrent);
     return () => {
       window.removeEventListener("scroll", updateCurrent);
+      window.removeEventListener("resize", updateCurrent);
       window.removeEventListener("hashchange", updateCurrent);
     };
   }, [ids]);

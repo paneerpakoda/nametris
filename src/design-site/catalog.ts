@@ -13,7 +13,6 @@ export interface Swatch {
 export interface SwatchGroup {
   readonly id: string;
   readonly title: string;
-  readonly note: string;
   readonly swatches: readonly Swatch[];
 }
 
@@ -59,26 +58,24 @@ export const colorGroups: readonly SwatchGroup[] = [
   {
     id: "ivory",
     title: "Ivory and ink",
-    note: "Plastic, CRT text, and the letters a player types.",
     swatches: [
-      { token: "color-ivory-50", role: "Text on a primary button" },
+      { token: "color-ivory-50", role: "Button text" },
       { token: "color-ivory-100", role: "CRT text" },
       { token: "color-ivory-200", role: "Line-clear sweep" },
       { token: "color-ivory-300", role: "Cabinet edge" },
       { token: "color-ivory-400", role: "Cabinet face" },
       { token: "color-ivory-500", role: "Cabinet shade" },
       { token: "color-cream", role: "Exported name" },
-      { token: "color-muted", role: "Secondary CRT text" },
-      { token: "color-muted-dim", role: "Exported metric labels" },
+      { token: "color-muted", role: "Secondary text" },
+      { token: "color-muted-dim", role: "Export labels" },
       { token: "color-ink", role: "Text on ivory" },
-      { token: "color-plaque-ink", role: "Text on the win plaque" },
+      { token: "color-plaque-ink", role: "Plaque text" },
       { token: "color-name", role: "Typed name" },
     ],
   },
   {
     id: "gold",
     title: "Gold and amber",
-    note: "Titles use the gold gradient. Amber is the warning light.",
     swatches: [
       { token: "color-gold-50", role: "Gradient top" },
       { token: "color-gold-200", role: "Gradient middle" },
@@ -86,48 +83,45 @@ export const colorGroups: readonly SwatchGroup[] = [
       { token: "color-gold-400", role: "Flat gold" },
       { token: "color-amber", role: "Warnings and a full bank" },
       { token: "color-amber-deep", role: "Win plaque" },
-      { token: "color-focus", role: "Focus ring on the CRT" },
-      { token: "color-title", role: "Title on the exported card" },
+      { token: "color-focus", role: "CRT focus" },
+      { token: "color-title", role: "Export title" },
       { token: "color-finish", role: "Finish-prompt copy" },
-      { token: "color-lost", role: "Stencil cells that will not stay" },
+      { token: "color-lost", role: "Lost stencil" },
     ],
   },
   {
     id: "signal",
     title: "Signal reds",
-    note: "Each red has one job. Phosphor is light. The button is paint. Signal frames the card.",
     swatches: [
-      { token: "color-phosphor", role: "CRT text and open stencil" },
-      { token: "color-signal", role: "Reward frame and export" },
+      { token: "color-phosphor", role: "Phosphor" },
+      { token: "color-signal", role: "Reward frame" },
       { token: "color-signal-hot", role: "Gameplay hairlines" },
       { token: "color-button", role: "Primary action" },
       { token: "color-button-hover", role: "Primary hover" },
       { token: "color-danger-solid", role: "Too-high tag" },
       { token: "color-ember", role: "Welcome glow" },
       { token: "color-ember-shadow", role: "Shadow under gold type" },
-      { token: "color-welcome", role: "Welcome supporting copy" },
-      { token: "color-welcome-deep", role: "Name-field underline" },
+      { token: "color-welcome", role: "Welcome copy" },
+      { token: "color-welcome-deep", role: "Field underline" },
       { token: "color-error", role: "Field error" },
-      { token: "color-disabled-label", role: "Disabled welcome label" },
+      { token: "color-disabled-label", role: "Disabled label" },
     ],
   },
   {
     id: "route",
     title: "Route blue",
-    note: "Route blue means send this piece to the name.",
     swatches: [
-      { token: "color-route", role: "Deadline and route prompt" },
+      { token: "color-route", role: "Route line" },
       { token: "color-route-deep", role: "Route label chip" },
       { token: "color-route-ink", role: "Text on the route chip" },
-      { token: "color-mark-glow", role: "Welcome mark glow only" },
+      { token: "color-mark-glow", role: "Mark glow" },
     ],
   },
   {
     id: "surfaces",
     title: "Surfaces",
-    note: "The room, the glass, and the wells controls sit in.",
     swatches: [
-      { token: "color-stage", role: "Page behind the cabinet" },
+      { token: "color-stage", role: "Stage" },
       { token: "color-crt", role: "Screen" },
       { token: "color-screen", role: "Board well" },
       { token: "color-crt-surface", role: "Exported screen" },
@@ -135,16 +129,16 @@ export const colorGroups: readonly SwatchGroup[] = [
       { token: "color-surface-high", role: "Header controls" },
       { token: "color-dialog", role: "Help dialog" },
       { token: "color-field", role: "Name field" },
-      { token: "color-overlay", role: "Pause and help scrim" },
+      { token: "color-overlay", role: "Scrim" },
       { token: "color-void", role: "Block shadow" },
     ],
   },
 ];
 
 export const stateSwatches: readonly Swatch[] = [
-  { token: "color-stencil-open", role: "Open stencil cell" },
-  { token: "color-stencil-open-border", role: "Open stencil edge" },
-  { token: "color-stencil-edge", role: "Filled mino edge" },
+  { token: "color-stencil-open", role: "Open cell" },
+  { token: "color-stencil-open-border", role: "Open edge" },
+  { token: "color-stencil-edge", role: "Filled edge" },
   { token: "color-ghost", role: "Ghost fill" },
   { token: "color-ghost-border", role: "Ghost edge" },
   { token: "color-board-line", role: "Board grid" },
@@ -178,20 +172,20 @@ export const markSwatches: readonly Swatch[] = [
 ];
 
 export const layoutMeasures = [
-  ["chrome", "Playfield chrome"],
-  ["side", "Side column"],
-  ["cell", "Board cell, before a specimen pins it"],
-  ["cabinet-max", "Cabinet width"],
-  ["chrome-compact", "Chrome below 699px"],
-  ["side-compact", "Side column below 699px"],
+  ["chrome", "Chrome"],
+  ["side", "Side"],
+  ["cell", "Board cell"],
+  ["cabinet-max", "Cabinet"],
+  ["chrome-compact", "Compact chrome"],
+  ["side-compact", "Compact side"],
 ] as const satisfies readonly (readonly [TokenName, string])[];
 
 export const breakpoints = [
-  ["breakpoint-compact", "Cabinet chrome drops"],
-  ["breakpoint-console", "Control deck tightens"],
-  ["breakpoint-short", "Short cabinet"],
-  ["breakpoint-design-width", "Designed width"],
-  ["breakpoint-design-height", "Designed height"],
+  ["breakpoint-compact", "Compact"],
+  ["breakpoint-console", "Console"],
+  ["breakpoint-short", "Short"],
+  ["breakpoint-design-width", "Width"],
+  ["breakpoint-design-height", "Height"],
 ] as const satisfies readonly (readonly [TokenName, string])[];
 
 export const spaceSteps = [
@@ -206,15 +200,15 @@ export const spaceSteps = [
 ] as const satisfies readonly TokenName[];
 
 export const radii = [
-  ["radius-cell", "Minos and the mark"],
-  ["radius-hint", "Hints and metrics"],
-  ["radius-control", "Help dialog"],
-  ["radius-medium", "Cabinet keys"],
-  ["radius-button", "Buttons and the name field"],
-  ["radius-card", "Reward card"],
-  ["radius-large", "Larger panels"],
-  ["radius-bezel", "Glass and bezel"],
-  ["radius-console", "Control deck"],
+  ["radius-cell", "Cell"],
+  ["radius-hint", "Hint"],
+  ["radius-control", "Control"],
+  ["radius-medium", "Key"],
+  ["radius-button", "Button"],
+  ["radius-card", "Card"],
+  ["radius-large", "Panel"],
+  ["radius-bezel", "Bezel"],
+  ["radius-console", "Deck"],
 ] as const satisfies readonly (readonly [TokenName, string])[];
 
 export const motionSteps = [
